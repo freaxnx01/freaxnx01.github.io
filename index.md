@@ -1,5 +1,7 @@
 Hello World!?!
 
-https://freaxnx01.github.io/github-pages-example
+[github-pages-example](https://freaxnx01.github.io/github-pages-example)
 
-https://jekyllrb.com/docs/
+[Jekyll Doc](https://jekyllrb.com/docs/)
+
+[md](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
