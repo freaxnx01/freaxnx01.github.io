@@ -39,6 +39,78 @@ ICON_SIZE = 256
 
 ASSETS_DIR = Path(__file__).resolve().parent.parent / "games" / "assets"
 
+# Per-game "action recipes": drive the game out of its title/menu into live
+# gameplay before the shot. Each step is a (verb, arg) tuple:
+#   ("click",   fraction (x, y))   -- mouse click at viewport fraction (focus / start)
+#   ("select",  css selector)      -- click a specific DOM element (menu buttons)
+#   ("press",   key)               -- tap a key
+#   ("down",    key)               -- hold a key (auto-released at the end)
+#   ("up",      key)               -- release a held key
+#   ("wait",    milliseconds)      -- let the frame evolve
+# Keys use Playwright names ("Space", "Enter", "ArrowRight", "KeyA", ...).
+# Games without a recipe are shot as-is (their title screen is fine).
+CENTER = (0.5, 0.6)
+ACTIONS = {
+    "game-space-invaders": [
+        ("click", CENTER), ("press", "Space"), ("wait", 500),
+        ("down", "ArrowRight"),
+        ("press", "Space"), ("wait", 220), ("press", "Space"), ("wait", 220),
+        ("press", "Space"), ("wait", 220), ("up", "ArrowRight"),
+        ("press", "Space"), ("wait", 200),
+    ],
+    "game-bmx-beach-jam": [
+        ("click", CENTER), ("press", "Space"), ("wait", 300),
+        ("down", "ArrowRight"), ("wait", 1600),
+        ("press", "Space"), ("wait", 360),          # bunny hop -> airborne trick
+        ("down", "ArrowLeft"), ("wait", 240),       # flip in the air
+        ("up", "ArrowLeft"),
+    ],
+    "game-beach-buggy-racer": [
+        ("click", CENTER), ("press", "Space"), ("wait", 300),
+        ("down", "ArrowUp"), ("wait", 1050),        # accelerate straight; stay on track
+    ],
+    "game-splashdown": [
+        ("select", "#pickPenguin"), ("wait", 900),  # pick a character -> start
+        ("down", "ArrowUp"), ("wait", 2600),        # paddle down the river
+        ("down", "ArrowRight"), ("wait", 650),
+    ],
+    "game-stack-duel": [
+        ("click", CENTER), ("press", "Enter"), ("wait", 3500),  # start + let 3-2-1 finish
+        # build up both stacks: P1 hard-drop = Space, P2 hard-drop = Enter
+        ("press", "KeyA"), ("press", "Space"), ("press", "ArrowRight"), ("press", "Enter"), ("wait", 260),
+        ("press", "KeyD"), ("press", "Space"), ("press", "ArrowLeft"), ("press", "Enter"), ("wait", 260),
+        ("press", "Space"), ("press", "Enter"), ("wait", 260),
+        ("press", "KeyD"), ("press", "Space"), ("press", "ArrowRight"), ("press", "Enter"), ("wait", 260),
+        ("press", "KeyA"), ("press", "Space"), ("press", "ArrowLeft"), ("press", "Enter"), ("wait", 300),
+    ],
+}
+
+
+def run_actions(page, steps) -> None:
+    """Execute an action recipe, tracking held keys so they're always released."""
+    held = []
+    try:
+        for verb, arg in steps:
+            if verb == "wait":
+                page.wait_for_timeout(arg)
+            elif verb == "click":
+                page.mouse.click(int(VIEWPORT["width"] * arg[0]),
+                                 int(VIEWPORT["height"] * arg[1]))
+            elif verb == "select":
+                page.click(arg, timeout=5000)
+            elif verb == "press":
+                page.keyboard.press(arg)
+            elif verb == "down":
+                page.keyboard.down(arg)
+                held.append(arg)
+            elif verb == "up":
+                page.keyboard.up(arg)
+                if arg in held:
+                    held.remove(arg)
+    finally:
+        for key in held:
+            page.keyboard.up(key)
+
 
 def make_icon(full_png: Path, icon_png: Path) -> None:
     """Center-crop the full screenshot to a square, then resize to 256x256."""
@@ -70,6 +142,8 @@ def main() -> int:
                 page = browser.new_page(viewport=VIEWPORT)
                 page.goto(url, wait_until="networkidle", timeout=30000)
                 page.wait_for_timeout(RENDER_DELAY_MS)
+                if repo in ACTIONS:
+                    run_actions(page, ACTIONS[repo])
                 page.screenshot(path=str(full_png))
                 page.close()
                 make_icon(full_png, icon_png)
