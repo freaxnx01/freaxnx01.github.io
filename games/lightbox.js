@@ -17,13 +17,20 @@
 
   function close() {
     overlay.classList.remove("is-open");
-    img.src = "";
+    img.removeAttribute("src");
   }
 
   // Any element carrying data-full opens the lightbox.
   document.querySelectorAll("[data-full]").forEach(function (el) {
-    el.addEventListener("click", function () {
+    function activate() {
       open(el.getAttribute("data-full"), el.getAttribute("data-title") || "");
+    }
+    el.addEventListener("click", activate);
+    el.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        activate();
+      }
     });
   });
 
