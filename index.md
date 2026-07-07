@@ -7,3 +7,5 @@
 [Jekyll Doc](https://jekyllrb.com/docs/)
 
 [md](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
+
+[🎮 Browser Games Hub](/games/)
