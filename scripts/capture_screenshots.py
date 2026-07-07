@@ -26,6 +26,11 @@ REPOS = [
     "game-gorillazz",
     "game-esel-running",
     "game-n-s-clone",
+    "game-bmx-beach-jam",
+    "game-beach-buggy-racer",
+    "game-space-invaders",
+    "game-splashdown",
+    "game-stack-duel",
 ]
 BASE_URL = "https://github.freaxnx01.ch/{repo}/"
 VIEWPORT = {"width": 1280, "height": 800}
@@ -51,10 +56,12 @@ def make_icon(full_png: Path, icon_png: Path) -> None:
 def main() -> int:
     ASSETS_DIR.mkdir(parents=True, exist_ok=True)
     skipped = []
+    # Optional CLI args capture only the named repos (default: all in REPOS).
+    repos = sys.argv[1:] or REPOS
 
     with sync_playwright() as p:
         browser = p.chromium.launch()
-        for repo in REPOS:
+        for repo in repos:
             url = BASE_URL.format(repo=repo)
             full_png = ASSETS_DIR / f"{repo}.png"
             icon_png = ASSETS_DIR / f"{repo}-icon.png"
