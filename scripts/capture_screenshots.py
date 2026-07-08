@@ -31,6 +31,7 @@ REPOS = [
     "game-space-invaders",
     "game-splashdown",
     "game-stack-duel",
+    "game-fruit-frenzy",
 ]
 BASE_URL = "https://github.freaxnx01.ch/{repo}/"
 VIEWPORT = {"width": 1280, "height": 800}
@@ -82,6 +83,19 @@ ACTIONS = {
         ("press", "Space"), ("press", "Enter"), ("wait", 260),
         ("press", "KeyD"), ("press", "Space"), ("press", "ArrowRight"), ("press", "Enter"), ("wait", 260),
         ("press", "KeyA"), ("press", "Space"), ("press", "ArrowLeft"), ("press", "Enter"), ("wait", 300),
+    ],
+    "game-fruit-frenzy": [
+        # Drop a run of fruit near the top-centre so the board shows a real,
+        # partly-merged pile (with a live score) instead of an empty box.
+        # Drop cooldown is 480ms, so keep waits above that.
+        ("click", (0.50, 0.30)), ("wait", 560),
+        ("click", (0.50, 0.30)), ("wait", 640),   # same spot -> a merge
+        ("click", (0.42, 0.30)), ("wait", 560),
+        ("click", (0.58, 0.30)), ("wait", 560),
+        ("click", (0.46, 0.30)), ("wait", 560),
+        ("click", (0.54, 0.30)), ("wait", 560),
+        ("click", (0.50, 0.30)), ("wait", 560),
+        ("click", (0.45, 0.30)), ("wait", 900),    # let everything settle
     ],
 }
 
