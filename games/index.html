@@ -18,9 +18,23 @@
       <p>A handful of finished browser games — card games, tank battles, physics shooters and retro clones. Click a screenshot to enlarge, or hit Play to jump straight in.</p>
     </header>
 
+    <div class="hub__filters" data-filters>
+      <div class="filter-row" role="group" aria-label="Filter games by mode">
+        <button type="button" class="filter-btn is-active" data-filter="all" aria-pressed="true">All</button>
+        <button type="button" class="filter-btn" data-filter="solo" aria-pressed="false">Single player</button>
+        <button type="button" class="filter-btn" data-filter="mp" aria-pressed="false" aria-expanded="false" aria-controls="filter-sub">Multiplayer</button>
+      </div>
+      <div class="filter-row filter-row--sub" id="filter-sub" role="group" aria-label="Filter multiplayer by connection" hidden>
+        <button type="button" class="filter-btn is-active" data-sub="all" aria-pressed="true">Local &amp; Peer2Peer</button>
+        <button type="button" class="filter-btn" data-sub="local" aria-pressed="false">Local</button>
+        <button type="button" class="filter-btn" data-sub="p2p" aria-pressed="false">Peer2Peer</button>
+      </div>
+      <p class="hub__count" role="status" aria-live="polite"></p>
+    </div>
+
     <section class="hub__grid">
 
-      <article class="card">
+      <article class="card" data-modes="solo">
         <img class="card__thumb" src="assets/game-barrel-shooter-icon.png" alt="Barrel Blast screenshot"
              data-full="assets/game-barrel-shooter.png" data-title="Barrel Blast" tabindex="0" role="button" aria-label="Enlarge Barrel Blast screenshot">
         <div class="card__body">
@@ -33,7 +47,7 @@
         </div>
       </article>
 
-      <article class="card">
+      <article class="card" data-modes="solo">
         <img class="card__thumb" src="assets/game-beach-buggy-racer-icon.png" alt="Beach Buggy Racer screenshot"
              data-full="assets/game-beach-buggy-racer.png" data-title="Beach Buggy Racer" tabindex="0" role="button" aria-label="Enlarge Beach Buggy Racer screenshot">
         <div class="card__body">
@@ -46,7 +60,7 @@
         </div>
       </article>
 
-      <article class="card">
+      <article class="card" data-modes="solo">
         <img class="card__thumb" src="assets/game-bmx-beach-jam-icon.png" alt="BMX Beach Jam screenshot"
              data-full="assets/game-bmx-beach-jam.png" data-title="BMX Beach Jam" tabindex="0" role="button" aria-label="Enlarge BMX Beach Jam screenshot">
         <div class="card__body">
@@ -59,7 +73,7 @@
         </div>
       </article>
 
-      <article class="card">
+      <article class="card" data-modes="local">
         <img class="card__thumb" src="assets/game-esel-running-icon.png" alt="Esel vs. Karotte screenshot"
              data-full="assets/game-esel-running.png" data-title="Esel vs. Karotte" tabindex="0" role="button" aria-label="Enlarge Esel vs. Karotte screenshot">
         <div class="card__body">
@@ -72,7 +86,7 @@
         </div>
       </article>
 
-      <article class="card">
+      <article class="card" data-modes="solo">
         <img class="card__thumb" src="assets/game-fruit-frenzy-icon.png" alt="Fruit Frenzy screenshot"
              data-full="assets/game-fruit-frenzy.png" data-title="Fruit Frenzy" tabindex="0" role="button" aria-label="Enlarge Fruit Frenzy screenshot">
         <div class="card__body">
@@ -85,7 +99,7 @@
         </div>
       </article>
 
-      <article class="card">
+      <article class="card" data-modes="local">
         <img class="card__thumb" src="assets/game-gorillazz-icon.png" alt="Gorillazz screenshot"
              data-full="assets/game-gorillazz.png" data-title="Gorillazz" tabindex="0" role="button" aria-label="Enlarge Gorillazz screenshot">
         <div class="card__body">
@@ -98,7 +112,7 @@
         </div>
       </article>
 
-      <article class="card">
+      <article class="card" data-modes="solo">
         <img class="card__thumb" src="assets/game-n-s-clone-icon.png" alt="North &amp; South Clone screenshot"
              data-full="assets/game-n-s-clone.png" data-title="North &amp; South Clone" tabindex="0" role="button" aria-label="Enlarge North &amp; South Clone screenshot">
         <div class="card__body">
@@ -111,7 +125,7 @@
         </div>
       </article>
 
-      <article class="card">
+      <article class="card" data-modes="solo">
         <img class="card__thumb" src="assets/game-space-invaders-icon.png" alt="Space Invaders screenshot"
              data-full="assets/game-space-invaders.png" data-title="Space Invaders" tabindex="0" role="button" aria-label="Enlarge Space Invaders screenshot">
         <div class="card__body">
@@ -124,7 +138,7 @@
         </div>
       </article>
 
-      <article class="card">
+      <article class="card" data-modes="solo">
         <img class="card__thumb" src="assets/game-splashdown-icon.png" alt="Splashdown screenshot"
              data-full="assets/game-splashdown.png" data-title="Splashdown" tabindex="0" role="button" aria-label="Enlarge Splashdown screenshot">
         <div class="card__body">
@@ -137,7 +151,7 @@
         </div>
       </article>
 
-      <article class="card">
+      <article class="card" data-modes="local p2p">
         <img class="card__thumb" src="assets/game-stack-duel-icon.png" alt="Stack Duel screenshot"
              data-full="assets/game-stack-duel.png" data-title="Stack Duel" tabindex="0" role="button" aria-label="Enlarge Stack Duel screenshot">
         <div class="card__body">
@@ -151,7 +165,7 @@
         </div>
       </article>
 
-      <article class="card">
+      <article class="card" data-modes="local p2p">
         <img class="card__thumb" src="assets/game-tank-toys-icon.png" alt="Tank Toys screenshot"
              data-full="assets/game-tank-toys.png" data-title="Tank Toys" tabindex="0" role="button" aria-label="Enlarge Tank Toys screenshot">
         <div class="card__body">
@@ -165,7 +179,7 @@
         </div>
       </article>
 
-      <article class="card">
+      <article class="card" data-modes="solo p2p">
         <img class="card__thumb" src="assets/game-tschau-sepp-icon.png" alt="Tschau Sepp screenshot"
              data-full="assets/game-tschau-sepp.png" data-title="Tschau Sepp" tabindex="0" role="button" aria-label="Enlarge Tschau Sepp screenshot">
         <div class="card__body">
@@ -189,5 +203,6 @@
   </div>
 
   <script src="lightbox.js"></script>
+  <script src="filter.js"></script>
 </body>
 </html>
