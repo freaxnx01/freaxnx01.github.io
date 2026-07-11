@@ -32,6 +32,7 @@ REPOS = [
     "game-splashdown",
     "game-stack-duel",
     "game-fruit-frenzy",
+    "game-kick-fury",
 ]
 BASE_URL = "https://github.freaxnx01.ch/{repo}/"
 VIEWPORT = {"width": 1280, "height": 800}
@@ -96,6 +97,16 @@ ACTIONS = {
         ("click", (0.54, 0.30)), ("wait", 560),
         ("click", (0.50, 0.30)), ("wait", 560),
         ("click", (0.45, 0.30)), ("wait", 900),    # let everything settle
+    ],
+    "game-kick-fury": [
+        # Title screen -> [1] starts a 1P vs CPU fight; close in and strike so
+        # the shot catches a live exchange (leg mid-kick) rather than the menu.
+        ("click", CENTER), ("press", "Digit1"), ("wait", 1800),  # start + round intro
+        ("down", "KeyD"), ("wait", 500), ("up", "KeyD"),          # close the distance
+        ("press", "KeyF"), ("wait", 220),                        # punch
+        ("press", "KeyG"), ("wait", 220),                        # kick
+        ("down", "KeyD"), ("wait", 180), ("up", "KeyD"),
+        ("press", "KeyG"), ("wait", 160),                        # kick — leg extended
     ],
 }
 
