@@ -35,6 +35,7 @@ REPOS = [
     "game-kick-fury",
     "game-dustline",
     "game-moon-lander",
+    "game-plod",
 ]
 BASE_URL = "https://github.freaxnx01.ch/{repo}/"
 VIEWPORT = {"width": 1280, "height": 800}
@@ -127,6 +128,11 @@ ACTIONS = {
         ("press", "ArrowLeft"), ("wait", 350),                   # RCS rotate
         ("down", "ArrowUp"), ("wait", 450), ("up", "ArrowUp"),   # burn again, mid-fall
         ("wait", 250),
+    ],
+    "game-plod": [
+        # Lemmings-style: dismiss the start modal via its PLAY button, then let
+        # the plodders spawn from the hatch and march the destructible terrain.
+        ("click", (0.50, 0.665)), ("wait", 4200),  # PLAY -> plodders march out
     ],
 }
 
