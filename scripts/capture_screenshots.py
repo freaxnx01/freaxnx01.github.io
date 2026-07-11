@@ -34,6 +34,7 @@ REPOS = [
     "game-fruit-frenzy",
     "game-kick-fury",
     "game-dustline",
+    "game-moon-lander",
 ]
 BASE_URL = "https://github.freaxnx01.ch/{repo}/"
 VIEWPORT = {"width": 1280, "height": 800}
@@ -117,6 +118,15 @@ ACTIONS = {
         ("press", "Space"), ("wait", 250),                       # homing rocket
         ("down", "ArrowRight"), ("wait", 380), ("up", "ArrowRight"),
         ("press", "Space"), ("wait", 320), ("up", "ArrowUp"),
+    ],
+    "game-moon-lander": [
+        # Any key starts; catch the lander mid-descent over the pads with the
+        # engine burning and the live telemetry HUD, not the pre-start screen.
+        ("click", CENTER), ("press", "Space"), ("wait", 800),    # focus + start
+        ("down", "ArrowUp"), ("wait", 450), ("up", "ArrowUp"),   # main-engine burn
+        ("press", "ArrowLeft"), ("wait", 350),                   # RCS rotate
+        ("down", "ArrowUp"), ("wait", 450), ("up", "ArrowUp"),   # burn again, mid-fall
+        ("wait", 250),
     ],
 }
 
