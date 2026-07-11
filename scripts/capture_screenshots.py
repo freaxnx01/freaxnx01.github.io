@@ -33,6 +33,7 @@ REPOS = [
     "game-stack-duel",
     "game-fruit-frenzy",
     "game-kick-fury",
+    "game-dustline",
 ]
 BASE_URL = "https://github.freaxnx01.ch/{repo}/"
 VIEWPORT = {"width": 1280, "height": 800}
@@ -107,6 +108,15 @@ ACTIONS = {
         ("press", "KeyG"), ("wait", 220),                        # kick
         ("down", "KeyD"), ("wait", 180), ("up", "KeyD"),
         ("press", "KeyG"), ("wait", 160),                        # kick — leg extended
+    ],
+    "game-dustline": [
+        # Enter launches; guns auto-fire. Advance up the desert and fire a
+        # rocket so the shot catches tracers/explosions, not the title card.
+        ("click", CENTER), ("press", "Enter"), ("wait", 2600),   # launch + first wave
+        ("down", "ArrowUp"), ("wait", 900),                      # push up the battlefield
+        ("press", "Space"), ("wait", 250),                       # homing rocket
+        ("down", "ArrowRight"), ("wait", 380), ("up", "ArrowRight"),
+        ("press", "Space"), ("wait", 320), ("up", "ArrowUp"),
     ],
 }
 
