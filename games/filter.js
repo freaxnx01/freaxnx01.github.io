@@ -84,6 +84,17 @@
     btn.addEventListener("click", function () {
       sub = btn.getAttribute("data-sub");
       setPressed(subBtns, btn);
+      // Choosing a connection sub-mode implies Multiplayer: keep the first
+      // row in sync so the parent button reflects the active filter.
+      if (primary !== "mp") {
+        primary = "mp";
+        var mpBtn = panel.querySelector('[data-filter="mp"]');
+        setPressed(primaryBtns, mpBtn);
+        if (subRow) {
+          subRow.hidden = false;
+          if (mpBtn) mpBtn.setAttribute("aria-expanded", "true");
+        }
+      }
       apply();
     });
   });

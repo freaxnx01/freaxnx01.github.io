@@ -74,6 +74,8 @@ body {
   padding-left: 0.85rem;
   border-left: 2px solid var(--border);
 }
+/* [hidden] alone loses to .filter-row's display:flex, so hide explicitly. */
+.filter-row[hidden] { display: none; }
 
 .filter-btn {
   font-family: var(--mono);
