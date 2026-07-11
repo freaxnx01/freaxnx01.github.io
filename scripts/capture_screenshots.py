@@ -36,6 +36,7 @@ REPOS = [
     "game-dustline",
     "game-moon-lander",
     "game-plod",
+    "game-voxel-sandbox",
 ]
 BASE_URL = "https://github.freaxnx01.ch/{repo}/"
 VIEWPORT = {"width": 1280, "height": 800}
@@ -134,6 +135,18 @@ ACTIONS = {
         # the plodders spawn from the hatch and march the destructible terrain.
         ("click", (0.50, 0.665)), ("wait", 4200),  # PLAY -> plodders march out
     ],
+    "game-voxel-sandbox": [
+        # "CLICK TO PLAY" drops into a first-person pointer-lock world. It starts
+        # facing the sky, so pitch the camera down (~35 deg) with a slight yaw to
+        # frame the terrain/trees, then step forward for depth.
+        ("click", (0.50, 0.69)), ("wait", 1200),   # enter the world
+        ("look", (16, 44)), ("wait", 45), ("look", (16, 44)), ("wait", 45),
+        ("look", (16, 44)), ("wait", 45), ("look", (16, 44)), ("wait", 45),
+        ("look", (16, 44)), ("wait", 45), ("look", (16, 44)), ("wait", 45),
+        ("look", (16, 44)), ("wait", 60),
+        ("down", "KeyW"), ("wait", 500), ("up", "KeyW"),
+        ("wait", 500),
+    ],
 }
 
 
@@ -158,6 +171,14 @@ def run_actions(page, steps) -> None:
                 page.keyboard.up(arg)
                 if arg in held:
                     held.remove(arg)
+            elif verb == "look":
+                # Pointer-lock mouse-look: dispatch a synthetic mousemove so
+                # first-person games (which read movementX/Y) pan/pitch the camera.
+                page.evaluate(
+                    "([dx, dy]) => document.dispatchEvent("
+                    "new MouseEvent('mousemove', {movementX: dx, movementY: dy, bubbles: true}))",
+                    [arg[0], arg[1]],
+                )
     finally:
         for key in held:
             page.keyboard.up(key)
