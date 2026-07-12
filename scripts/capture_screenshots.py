@@ -38,6 +38,7 @@ REPOS = [
     "game-plod",
     "game-voxel-sandbox",
     "game-battleship-toys",
+    "game-sky-fury",
 ]
 BASE_URL = "https://github.freaxnx01.ch/{repo}/"
 VIEWPORT = {"width": 1280, "height": 800}
@@ -158,6 +159,16 @@ ACTIONS = {
         ("look", (16, 44)), ("wait", 60),
         ("down", "KeyW"), ("wait", 500), ("up", "KeyW"),
         ("wait", 500),
+    ],
+    "game-sky-fury": [
+        # First Enter: menu -> playing (parked on deck, "rearming"). It needs
+        # ~2.6s on deck before a second Enter is accepted to start the
+        # takeoff roll; that finishes airborne in well under a second.
+        ("click", CENTER), ("press", "Enter"), ("wait", 2900),
+        ("press", "Enter"), ("wait", 900),
+        ("down", "ArrowUp"), ("wait", 260), ("up", "ArrowUp"),  # nose up off the deck
+        ("down", "ArrowRight"), ("wait", 400), ("up", "ArrowRight"),
+        ("press", "Space"), ("wait", 200), ("press", "Space"), ("wait", 200),
     ],
 }
 
