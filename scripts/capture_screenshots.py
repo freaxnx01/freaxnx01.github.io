@@ -37,6 +37,7 @@ REPOS = [
     "game-moon-lander",
     "game-plod",
     "game-voxel-sandbox",
+    "game-battleship-toys",
 ]
 BASE_URL = "https://github.freaxnx01.ch/{repo}/"
 VIEWPORT = {"width": 1280, "height": 800}
@@ -134,6 +135,17 @@ ACTIONS = {
         # Lemmings-style: dismiss the start modal via its PLAY button, then let
         # the plodders spawn from the hatch and march the destructible terrain.
         ("click", (0.50, 0.665)), ("wait", 4200),  # PLAY -> plodders march out
+    ],
+    "game-battleship-toys": [
+        # Menu -> "Play the computer" (#b-ai) starts a match immediately. Sail the
+        # Red ship (WASD) toward the action and fire so the shot catches the
+        # isometric sea, both fleets and a cannon splash, not the title card.
+        ("select", "#b-ai"), ("wait", 1600),        # start vs computer
+        ("down", "KeyD"), ("wait", 650), ("up", "KeyD"),   # sail east
+        ("press", "Space"), ("wait", 220),          # cannon
+        ("down", "KeyS"), ("wait", 380), ("up", "KeyS"),
+        ("press", "KeyE"), ("wait", 220),           # torpedo
+        ("press", "Space"), ("wait", 320),          # another salvo
     ],
     "game-voxel-sandbox": [
         # "CLICK TO PLAY" drops into a first-person pointer-lock world. It starts
