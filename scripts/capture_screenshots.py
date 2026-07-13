@@ -40,6 +40,7 @@ REPOS = [
     "game-battleship-toys",
     "game-sky-fury",
     "game-geography-quiz",
+    "game-cluck-and-load",
 ]
 BASE_URL = "https://github.freaxnx01.ch/{repo}/"
 VIEWPORT = {"width": 1280, "height": 800}
@@ -170,6 +171,15 @@ ACTIONS = {
         ("down", "ArrowUp"), ("wait", 260), ("up", "ArrowUp"),  # nose up off the deck
         ("down", "ArrowRight"), ("wait", 400), ("up", "ArrowRight"),
         ("press", "Space"), ("wait", 200), ("press", "Space"), ("wait", 200),
+    ],
+    "game-cluck-and-load": [
+        # Click on the menu starts a round; fire a few shots at birds crossing
+        # mid-screen so the shot catches live gameplay (feathers/HUD), not the
+        # title card.
+        ("click", CENTER), ("wait", 900),
+        ("click", (0.35, 0.45)), ("wait", 250),
+        ("click", (0.60, 0.55)), ("wait", 250),
+        ("click", (0.50, 0.35)), ("wait", 400),
     ],
 }
 
