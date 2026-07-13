@@ -1,13 +1,16 @@
-Resume the Acronym Quiz brainstorming (superpowers:brainstorming skill, still mid-design,
-not yet approved). Read the full artifact first:
-`docs/superpowers/specs/2026-07-13-acronym-quiz-design.md`
+The "Game card feedback & star" design/build phase is fully complete and pushed
+(commits e6075e0..174562f on master): design spec, snippet template, rollout
+checklist, and the plan itself are all committed. Nothing is in-flight.
 
-Current phase: brainstorming/design. Section 1 (Modes & navigation) was presented but
-the session was interrupted before the user approved it.
+The next phase — not yet started — is the rollout: applying the snippet
+template to each of the 12 known `game-<name>` repos. Its artifact is:
+`docs/superpowers/specs/2026-07-13-game-card-feedback-star-rollout.md`
+(self-contained: lists all 12 repos as unchecked boxes, with exact per-repo
+steps referencing the snippet at
+`docs/superpowers/specs/2026-07-13-game-card-feedback-star-snippet.html`).
 
-Next step: re-confirm Section 1 with the user, then present Sections 2–5 (data model;
-screens & visual design per mode; mechanics recap & edge cases incl. the open
-Glücksrad reveal-target question; tech/localization/persistence) one at a time per the
-brainstorming skill flow, get approval on each, write the finalized spec, self-review,
-get user spec review, then invoke `superpowers:writing-plans` for the implementation
-plan. Use `superpowers:subagent-driven-development` for any implementation.
+Next step: pick the checklist's first unchecked repo, clone it (or open its
+worktree), and apply the snippet per the checklist's per-repo steps. Each repo
+is independent, so use `superpowers:subagent-driven-development` to dispatch
+rollout work — but note this touches OTHER repos (`game-<name>`), not this hub
+repo, so each dispatched task needs its own clone/worktree setup first.
