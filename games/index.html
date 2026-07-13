@@ -29,7 +29,29 @@
         <button type="button" class="filter-btn" data-sub="local" aria-pressed="false">Local</button>
         <button type="button" class="filter-btn" data-sub="p2p" aria-pressed="false">Peer2Peer</button>
       </div>
-      <p class="hub__count" role="status" aria-live="polite"></p>
+      <div class="filter-row filter-row--category" role="group" aria-label="Filter games by category">
+        <button type="button" class="filter-btn is-active" data-category="all" aria-pressed="true">All genres</button>
+        <button type="button" class="filter-btn" data-category="shooter" aria-pressed="false">Shooter</button>
+        <button type="button" class="filter-btn" data-category="action" aria-pressed="false">Action</button>
+        <button type="button" class="filter-btn" data-category="strategy" aria-pressed="false">Strategy</button>
+        <button type="button" class="filter-btn" data-category="racing" aria-pressed="false">Racing</button>
+        <button type="button" class="filter-btn" data-category="sports" aria-pressed="false">Sports</button>
+        <button type="button" class="filter-btn" data-category="puzzle" aria-pressed="false">Puzzle</button>
+        <button type="button" class="filter-btn" data-category="card" aria-pressed="false">Card</button>
+        <button type="button" class="filter-btn" data-category="sandbox" aria-pressed="false">Sandbox</button>
+        <button type="button" class="filter-btn" data-category="arcade" aria-pressed="false">Arcade</button>
+        <button type="button" class="filter-btn" data-category="quiz" aria-pressed="false">Quiz</button>
+      </div>
+      <div class="hub__toolbar">
+        <p class="hub__count" role="status" aria-live="polite"></p>
+        <label class="hub__sort">
+          Sort:
+          <select id="sort-select">
+            <option value="az" selected>A&ndash;Z</option>
+            <option value="newest">Newest first</option>
+          </select>
+        </label>
+      </div>
     </div>
 
     <section class="hub__grid">
