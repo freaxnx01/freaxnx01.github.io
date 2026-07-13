@@ -34,26 +34,26 @@ For each repo `game-<name>` below:
 
 ## Repos
 
-- [ ] game-barrel-shooter
-- [ ] game-battleship-toys
-- [ ] game-stack-duel
-- [ ] game-tank-toys
-- [ ] game-plod
-- [ ] game-moon-lander
-- [ ] game-dustline
-- [ ] game-bmx-beach-jam
-- [ ] game-beach-buggy-racer
-- [ ] game-space-invaders
-- [ ] game-splashdown
-- [ ] game-tschau-sepp
-- [ ] game-esel-running
-- [ ] game-fruit-frenzy
-- [ ] game-geography-quiz
-- [ ] game-gorillazz
-- [ ] game-kick-fury
-- [ ] game-n-s-clone
-- [ ] game-sky-fury
-- [ ] game-voxel-sandbox
+- [x] game-barrel-shooter
+- [x] game-battleship-toys
+- [x] game-stack-duel
+- [x] game-tank-toys
+- [x] game-plod
+- [x] game-moon-lander
+- [x] game-dustline
+- [x] game-bmx-beach-jam
+- [x] game-beach-buggy-racer
+- [x] game-space-invaders
+- [x] game-splashdown
+- [x] game-tschau-sepp
+- [x] game-esel-running
+- [x] game-fruit-frenzy
+- [x] game-geography-quiz
+- [x] game-gorillazz
+- [x] game-kick-fury
+- [x] game-n-s-clone
+- [x] game-sky-fury
+- [x] game-voxel-sandbox
 
 Before starting, cross-check this list against the current `games/index.html`
 in this hub repo — new games may have been added to the hub since this
