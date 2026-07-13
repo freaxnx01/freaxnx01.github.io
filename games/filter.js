@@ -9,14 +9,16 @@
   var primaryBtns = Array.prototype.slice.call(panel.querySelectorAll("[data-filter]"));
   var subRow = panel.querySelector(".filter-row--sub");
   var subBtns = Array.prototype.slice.call(panel.querySelectorAll("[data-sub]"));
+  var categoryBtns = Array.prototype.slice.call(panel.querySelectorAll("[data-category]"));
   var count = panel.querySelector(".hub__count");
 
   // Current selection. primary: all | solo | mp. sub applies only when primary === "mp".
   var primary = "all";
   var sub = "all";
+  var category = "all";
 
-  // Does a card's mode list satisfy the active filter?
-  function matches(modes) {
+  // Does a card's mode list satisfy the active mode filter?
+  function matchesMode(modes) {
     if (primary === "all") return true;
     if (primary === "solo") return modes.indexOf("solo") !== -1;
     // primary === "mp"
@@ -26,11 +28,21 @@
     return modes.indexOf("local") !== -1 || modes.indexOf("p2p") !== -1;
   }
 
+  // Does a card's category satisfy the active category filter?
+  function matchesCategory(cardCategory) {
+    return category === "all" || cardCategory === category;
+  }
+
+  function matches(modes, cardCategory) {
+    return matchesMode(modes) && matchesCategory(cardCategory);
+  }
+
   function apply() {
     var visible = 0;
     cards.forEach(function (card) {
       var modes = (card.getAttribute("data-modes") || "").split(/\s+/);
-      var show = matches(modes);
+      var cardCategory = card.getAttribute("data-category") || "";
+      var show = matches(modes, cardCategory);
       if (show) {
         visible++;
         card.classList.remove("card--hidden");
@@ -95,6 +107,14 @@
           if (mpBtn) mpBtn.setAttribute("aria-expanded", "true");
         }
       }
+      apply();
+    });
+  });
+
+  categoryBtns.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      category = btn.getAttribute("data-category");
+      setPressed(categoryBtns, btn);
       apply();
     });
   });
