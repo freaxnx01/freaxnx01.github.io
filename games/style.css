@@ -219,6 +219,7 @@ body {
 .badge--solo  { color: var(--accent);   border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
 .badge--p2p   { color: #8fb4ff;         border-color: color-mix(in srgb, #8fb4ff 45%, transparent); }
 .badge--local { color: var(--accent-2); border-color: color-mix(in srgb, var(--accent-2) 45%, transparent); }
+.badge--new   { color: var(--bg); background: var(--accent); border-color: var(--accent); font-weight: 700; }
 
 .card__play {
   margin-top: 0.4rem;

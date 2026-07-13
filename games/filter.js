@@ -119,5 +119,26 @@
     });
   });
 
+  // Mark cards added within the last 14 days as NEW. Computed once at load;
+  // does not change as filters/sort are toggled.
+  var NEW_WINDOW_DAYS = 14;
+  function markNewBadges() {
+    var now = Date.now();
+    cards.forEach(function (card) {
+      var added = card.getAttribute("data-added");
+      if (!added) return;
+      var addedTime = new Date(added + "T00:00:00Z").getTime();
+      var ageDays = (now - addedTime) / (1000 * 60 * 60 * 24);
+      if (ageDays > NEW_WINDOW_DAYS) return;
+      var badges = card.querySelector(".card__badges");
+      if (!badges || badges.querySelector(".badge--new")) return;
+      var badge = document.createElement("span");
+      badge.className = "badge badge--new";
+      badge.textContent = "NEW";
+      badges.insertBefore(badge, badges.firstChild);
+    });
+  }
+  markNewBadges();
+
   apply();
 })();
