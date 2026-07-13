@@ -156,6 +156,7 @@
       var added = card.getAttribute("data-added");
       if (!added) return;
       var addedTime = new Date(added + "T00:00:00Z").getTime();
+      if (isNaN(addedTime)) return;
       var ageDays = (now - addedTime) / (1000 * 60 * 60 * 24);
       if (ageDays > NEW_WINDOW_DAYS) return;
       var badges = card.querySelector(".card__badges");
