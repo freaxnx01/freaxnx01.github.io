@@ -39,6 +39,7 @@ REPOS = [
     "game-voxel-sandbox",
     "game-battleship-toys",
     "game-sky-fury",
+    "game-geography-quiz",
 ]
 BASE_URL = "https://github.freaxnx01.ch/{repo}/"
 VIEWPORT = {"width": 1280, "height": 800}
