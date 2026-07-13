@@ -119,6 +119,34 @@
     });
   });
 
+  // Sort control: A-Z (document order, cached once) vs newest-added-first.
+  var sortSelect = document.getElementById("sort-select");
+  var originalOrder = cards.slice();
+
+  function sortCards(mode) {
+    var ordered;
+    if (mode === "newest") {
+      ordered = cards.slice().sort(function (a, b) {
+        var da = a.getAttribute("data-added") || "";
+        var db = b.getAttribute("data-added") || "";
+        if (da === db) return 0;
+        return da < db ? 1 : -1; // descending: newest first
+      });
+    } else {
+      ordered = originalOrder;
+    }
+    ordered.forEach(function (card) {
+      grid.appendChild(card);
+    });
+  }
+
+  if (sortSelect) {
+    sortSelect.addEventListener("change", function () {
+      sortCards(sortSelect.value);
+      apply(); // reapply hidden state + re-trigger enter animation in new order
+    });
+  }
+
   // Mark cards added within the last 14 days as NEW. Computed once at load;
   // does not change as filters/sort are toggled.
   var NEW_WINDOW_DAYS = 14;
