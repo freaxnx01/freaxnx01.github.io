@@ -145,6 +145,16 @@
       sortCards(sortSelect.value);
       apply(); // reapply hidden state + re-trigger enter animation in new order
     });
+    // Browsers restore a <select>'s value from history on back/forward
+    // navigation without firing "change" — and they do it after
+    // DOMContentLoaded, via "pageshow", so the dropdown can end up showing
+    // "Newest first" while the grid is still in its default order. Re-sync
+    // whenever the page becomes visible (covers both bfcache restores and
+    // plain reloads where the browser reapplies the remembered value).
+    window.addEventListener("pageshow", function () {
+      sortCards(sortSelect.value);
+      apply();
+    });
   }
 
   // Mark cards added within the last 14 days as NEW. Computed once at load;
