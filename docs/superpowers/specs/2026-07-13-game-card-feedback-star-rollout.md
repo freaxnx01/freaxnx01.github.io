@@ -46,10 +46,22 @@ For each repo `game-<name>` below:
 - [ ] game-space-invaders
 - [ ] game-splashdown
 - [ ] game-tschau-sepp
+- [ ] game-esel-running
+- [ ] game-fruit-frenzy
+- [ ] game-geography-quiz
+- [ ] game-gorillazz
+- [ ] game-kick-fury
+- [ ] game-n-s-clone
+- [ ] game-sky-fury
+- [ ] game-voxel-sandbox
 
 Before starting, cross-check this list against the current `games/index.html`
 in this hub repo — new games may have been added to the hub since this
 checklist was written, and those repos need the same rollout.
+
+`game-cluck-and-load` shipped after this checklist was written and already has
+the full 4-item nav from the start (per "New games going forward" below) — no
+rollout needed for it.
 
 ## New games going forward
 
