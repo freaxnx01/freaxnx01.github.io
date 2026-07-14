@@ -169,12 +169,11 @@
       if (isNaN(addedTime)) return;
       var ageDays = (now - addedTime) / (1000 * 60 * 60 * 24);
       if (ageDays > NEW_WINDOW_DAYS) return;
-      var badges = card.querySelector(".card__badges");
-      if (!badges || badges.querySelector(".badge--new")) return;
+      if (card.querySelector(".badge--new")) return;
       var badge = document.createElement("span");
       badge.className = "badge badge--new";
       badge.textContent = "NEW";
-      badges.insertBefore(badge, badges.firstChild);
+      card.insertBefore(badge, card.firstChild);
     });
   }
   markNewBadges();

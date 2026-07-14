@@ -154,6 +154,7 @@ body {
 }
 
 .card {
+  position: relative;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -219,7 +220,20 @@ body {
 .badge--solo  { color: var(--accent);   border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
 .badge--p2p   { color: #8fb4ff;         border-color: color-mix(in srgb, #8fb4ff 45%, transparent); }
 .badge--local { color: var(--accent-2); border-color: color-mix(in srgb, var(--accent-2) 45%, transparent); }
-.badge--new   { color: var(--bg); background: var(--accent); border-color: var(--accent); font-weight: 700; }
+.badge--new {
+  color: var(--bg);
+  background: var(--accent);
+  border-color: var(--accent);
+  font-weight: 700;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  font-size: 0.78rem;
+  padding: 0.3rem 0.65rem;
+  transform: rotate(-7deg);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+}
 
 .card__play {
   margin-top: 0.4rem;
