@@ -117,13 +117,14 @@ ACTIONS = {
         ("press", "KeyG"), ("wait", 160),                        # kick — leg extended
     ],
     "game-dustline": [
-        # Enter launches; guns auto-fire. Advance up the desert and fire a
-        # rocket so the shot catches tracers/explosions, not the title card.
-        ("click", CENTER), ("press", "Enter"), ("wait", 2600),   # launch + first wave
-        ("down", "ArrowUp"), ("wait", 900),                      # push up the battlefield
-        ("press", "Space"), ("wait", 250),                       # homing rocket
-        ("down", "ArrowRight"), ("wait", 380), ("up", "ArrowRight"),
-        ("press", "Space"), ("wait", 320), ("up", "ArrowUp"),
+        # Enter launches; guns auto-fire. The chopper is screen-locked near
+        # its spawn point and ArrowUp drives it toward the top HUD, so don't
+        # hold it — stay put (or nudge sideways only) to keep WOLF-1 centered
+        # and clear of the wave banner. Wait out enough scroll for a jeep/tank
+        # to scroll into frame, then fire a rocket for tracers + a live shot.
+        ("click", CENTER), ("press", "Enter"), ("wait", 5500),   # launch + let a target scroll in
+        ("down", "ArrowLeft"), ("wait", 150), ("up", "ArrowLeft"),  # slight bank, stays centered
+        ("press", "Space"), ("wait", 300),                       # homing rocket
     ],
     "game-moon-lander": [
         # Any key starts; catch the lander mid-descent over the pads with the
