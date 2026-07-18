@@ -44,6 +44,8 @@ REPOS = [
     "game-geography-quiz",
     "game-cluck-and-load",
     "game-marquee-quiz",
+    "game-nibbles",
+    "game-maze-muncher",
 ]
 BASE_URL = "https://github.freaxnx01.ch/{repo}/"
 VIEWPORT = {"width": 1280, "height": 800}
@@ -184,6 +186,28 @@ ACTIONS = {
         ("click", (0.35, 0.45)), ("wait", 250),
         ("click", (0.60, 0.55)), ("wait", 250),
         ("click", (0.50, 0.35)), ("wait", 400),
+    ],
+    "game-nibbles": [
+        # Title -> Space enters setup, Space starts (ready dialog), Space
+        # confirms into live play. Snake starts as a tiny 3-cell stub, so
+        # give it real travel time (and a couple of eaten numbers) before
+        # the shot, rather than freezing right at spawn.
+        ("click", CENTER), ("press", "Space"), ("wait", 500),   # title -> setup
+        ("press", "Space"), ("wait", 500),                      # setup -> ready
+        ("press", "Space"), ("wait", 800),                      # ready -> play
+        ("down", "ArrowRight"), ("wait", 1600), ("up", "ArrowRight"),
+        ("down", "ArrowDown"), ("wait", 900), ("up", "ArrowDown"),
+        ("down", "ArrowRight"), ("wait", 700), ("up", "ArrowRight"),
+        ("wait", 300),
+    ],
+    "game-maze-muncher": [
+        # Attract screen -> Space starts, ~1.8s ready countdown, then play.
+        # Steer the muncher through the maze so pellets, a ghost and the
+        # HUD are all visible in frame.
+        ("click", CENTER), ("press", "Space"), ("wait", 2200),  # start + ready
+        ("down", "ArrowRight"), ("wait", 900), ("up", "ArrowRight"),
+        ("down", "ArrowDown"), ("wait", 500), ("up", "ArrowDown"),
+        ("wait", 300),
     ],
 }
 
