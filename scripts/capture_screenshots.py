@@ -20,6 +20,8 @@ from PIL import Image
 from playwright.sync_api import sync_playwright
 
 REPOS = [
+    "game-wortduell",
+    "game-gem-cascade",
     "game-tschau-sepp",
     "game-tank-toys",
     "game-barrel-shooter",
