@@ -41,6 +41,7 @@ REPOS = [
     "game-sky-fury",
     "game-geography-quiz",
     "game-cluck-and-load",
+    "game-marquee-quiz",
 ]
 BASE_URL = "https://github.freaxnx01.ch/{repo}/"
 VIEWPORT = {"width": 1280, "height": 800}
