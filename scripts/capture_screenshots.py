@@ -46,6 +46,8 @@ REPOS = [
     "game-marquee-quiz",
     "game-nibbles",
     "game-maze-muncher",
+    "game-zen-sudoku",
+    "game-neon-pong",
 ]
 BASE_URL = "https://github.freaxnx01.ch/{repo}/"
 VIEWPORT = {"width": 1280, "height": 800}
@@ -207,6 +209,25 @@ ACTIONS = {
         ("click", CENTER), ("press", "Space"), ("wait", 2200),  # start + ready
         ("down", "ArrowRight"), ("wait", 900), ("up", "ArrowRight"),
         ("down", "ArrowDown"), ("wait", 500), ("up", "ArrowDown"),
+        ("wait", 300),
+    ],
+    "game-zen-sudoku": [
+        # No title screen — it opens straight into a live puzzle, so just
+        # select a couple of cells and place digits for a shot that shows
+        # off the peer/selection highlighting, not just a static grid.
+        ("click", (0.30, 0.40)), ("wait", 150),
+        ("press", "7"), ("wait", 150),
+        ("click", (0.36, 0.52)), ("wait", 150),
+        ("press", "3"), ("wait", 150),
+        ("click", (0.42, 0.46)), ("wait", 300),
+    ],
+    "game-neon-pong": [
+        # Menu -> LOCAL 2P starts an immediate match. Nudge both paddles so
+        # the shot catches a live rally (ball + both paddles in frame) and
+        # not the serve-start moment.
+        ("click", (0.50, 0.33)), ("wait", 1300),
+        ("down", "KeyW"), ("wait", 350), ("up", "KeyW"),
+        ("down", "ArrowUp"), ("wait", 350), ("up", "ArrowUp"),
         ("wait", 300),
     ],
 }
