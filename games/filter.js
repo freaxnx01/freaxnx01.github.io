@@ -11,11 +11,15 @@
   var subBtns = Array.prototype.slice.call(panel.querySelectorAll("[data-sub]"));
   var categoryBtns = Array.prototype.slice.call(panel.querySelectorAll("[data-category]"));
   var count = panel.querySelector(".hub__count");
+  var searchInput = document.getElementById("game-search");
+  var kidsToggle = document.getElementById("kids-toggle");
 
   // Current selection. primary: all | solo | mp. sub applies only when primary === "mp".
   var primary = "all";
   var sub = "all";
   var category = "all";
+  var search = "";
+  var kidsOnly = false;
 
   // Does a card's mode list satisfy the active mode filter?
   function matchesMode(modes) {
@@ -33,8 +37,18 @@
     return category === "all" || cardCategory === category;
   }
 
-  function matches(modes, cardCategory) {
-    return matchesMode(modes) && matchesCategory(cardCategory);
+  // Does a card's title satisfy the active search text (case-insensitive substring)?
+  function matchesSearch(title) {
+    return search === "" || title.toLowerCase().indexOf(search) !== -1;
+  }
+
+  // Does a card satisfy the active Kids-only filter?
+  function matchesKids(cardKids) {
+    return !kidsOnly || cardKids === true;
+  }
+
+  function matches(modes, cardCategory, title, cardKids) {
+    return matchesMode(modes) && matchesCategory(cardCategory) && matchesSearch(title) && matchesKids(cardKids);
   }
 
   function apply() {
@@ -42,7 +56,10 @@
     cards.forEach(function (card) {
       var modes = (card.getAttribute("data-modes") || "").split(/\s+/);
       var cardCategory = card.getAttribute("data-category") || "";
-      var show = matches(modes, cardCategory);
+      var titleEl = card.querySelector(".card__title");
+      var title = titleEl ? titleEl.textContent : "";
+      var cardKids = card.hasAttribute("data-kids");
+      var show = matches(modes, cardCategory, title, cardKids);
       if (show) {
         visible++;
         card.classList.remove("card--hidden");
@@ -118,6 +135,22 @@
       apply();
     });
   });
+
+  if (searchInput) {
+    searchInput.addEventListener("input", function () {
+      search = searchInput.value.trim().toLowerCase();
+      apply();
+    });
+  }
+
+  if (kidsToggle) {
+    kidsToggle.addEventListener("click", function () {
+      kidsOnly = !kidsOnly;
+      kidsToggle.classList.toggle("is-active", kidsOnly);
+      kidsToggle.setAttribute("aria-pressed", kidsOnly ? "true" : "false");
+      apply();
+    });
+  }
 
   // Sort control: A-Z (document order, cached once) vs newest-added-first.
   var sortSelect = document.getElementById("sort-select");

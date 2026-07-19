@@ -19,6 +19,10 @@
     </header>
 
     <div class="hub__filters" data-filters>
+      <div class="filter-row filter-row--search">
+        <input type="search" id="game-search" class="search-input" placeholder="Search games…" aria-label="Search games by name">
+        <button type="button" class="filter-btn" id="kids-toggle" aria-pressed="false">🧒 Kids only</button>
+      </div>
       <div class="filter-row" role="group" aria-label="Filter games by mode">
         <button type="button" class="filter-btn is-active" data-filter="all" aria-pressed="true">All</button>
         <button type="button" class="filter-btn" data-filter="solo" aria-pressed="false">Single player</button>
@@ -47,8 +51,8 @@
         <label class="hub__sort">
           Sort:
           <select id="sort-select">
-            <option value="az" selected>A&ndash;Z</option>
-            <option value="newest">Newest first</option>
+            <option value="az">A&ndash;Z</option>
+            <option value="newest" selected>Newest first</option>
           </select>
         </label>
       </div>
@@ -56,7 +60,46 @@
 
     <section class="hub__grid">
 
-      <article class="card" data-modes="solo local p2p" data-category="arcade" data-added="2026-07-18">
+      <article class="card" data-modes="solo" data-category="puzzle" data-added="2026-07-19" data-kids="true">
+        <img class="card__thumb" src="assets/game-photo-puzzler-icon.png" alt="Photo Puzzler screenshot"
+             data-full="assets/game-photo-puzzler.png" data-title="Photo Puzzler" tabindex="0" role="button" aria-label="Enlarge Photo Puzzler screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Photo Puzzler</h2>
+          <p class="card__desc">Turn any photo into a sliding 15-puzzle or a drag-and-snap jigsaw — pick a preset or upload your own, race the clock and beat your best time.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://github.freaxnx01.ch/game-photo-puzzler/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="puzzle" data-added="2026-07-19" data-kids="true">
+        <img class="card__thumb" src="assets/game-criss-cross-icon.png" alt="Criss Cross screenshot"
+             data-full="assets/game-criss-cross.png" data-title="Criss Cross" tabindex="0" role="button" aria-label="Enlarge Criss Cross screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Criss Cross</h2>
+          <p class="card__desc">Paste a word list or generate one from a topic, build an interlocking crossword, then share it with a link — solve, check, and reveal as you go.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://github.freaxnx01.ch/game-criss-cross/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="quiz" data-added="2026-07-19" data-kids="true">
+        <img class="card__thumb" src="assets/game-millionenfrage-icon.png" alt="Die Millionenfrage screenshot"
+             data-full="assets/game-millionenfrage.png" data-title="Die Millionenfrage" tabindex="0" role="button" aria-label="Enlarge Die Millionenfrage screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Die Millionenfrage</h2>
+          <p class="card__desc">German TV-style money quiz — 15 questions to a million, safety checkpoints, and four Joker lifelines.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://github.freaxnx01.ch/game-millionenfrage/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo local p2p" data-category="arcade" data-added="2026-07-18" data-kids="true">
         <img class="card__thumb" src="assets/game-neon-pong-icon.png" alt="Neon Pong screenshot"
              data-full="assets/game-neon-pong.png" data-title="Neon Pong" tabindex="0" role="button" aria-label="Enlarge Neon Pong screenshot">
         <div class="card__body">
@@ -71,7 +114,7 @@
         </div>
       </article>
 
-      <article class="card" data-modes="solo" data-category="puzzle" data-added="2026-07-18">
+      <article class="card" data-modes="solo" data-category="puzzle" data-added="2026-07-18" data-kids="true">
         <img class="card__thumb" src="assets/game-zen-sudoku-icon.png" alt="Zen Sudoku screenshot"
              data-full="assets/game-zen-sudoku.png" data-title="Zen Sudoku" tabindex="0" role="button" aria-label="Enlarge Zen Sudoku screenshot">
         <div class="card__body">
@@ -84,7 +127,7 @@
         </div>
       </article>
 
-      <article class="card" data-modes="solo local p2p" data-category="puzzle" data-added="2026-07-18">
+      <article class="card" data-modes="solo local p2p" data-category="puzzle" data-added="2026-07-18" data-kids="true">
         <img class="card__thumb" src="assets/game-wortduell-icon.png" alt="WORTDUELL screenshot"
              data-full="assets/game-wortduell.png" data-title="WORTDUELL" tabindex="0" role="button" aria-label="Enlarge WORTDUELL screenshot">
         <div class="card__body">
@@ -99,7 +142,7 @@
         </div>
       </article>
 
-      <article class="card" data-modes="solo" data-category="puzzle" data-added="2026-07-18">
+      <article class="card" data-modes="solo" data-category="puzzle" data-added="2026-07-18" data-kids="true">
         <img class="card__thumb" src="assets/game-gem-cascade-icon.png" alt="Gem Cascade screenshot"
              data-full="assets/game-gem-cascade.png" data-title="Gem Cascade" tabindex="0" role="button" aria-label="Enlarge Gem Cascade screenshot">
         <div class="card__body">
@@ -112,7 +155,7 @@
         </div>
       </article>
 
-      <article class="card" data-modes="solo" data-category="arcade" data-added="2026-07-18">
+      <article class="card" data-modes="solo" data-category="arcade" data-added="2026-07-18" data-kids="true">
         <img class="card__thumb" src="assets/game-maze-muncher-icon.png" alt="Maze Muncher screenshot"
              data-full="assets/game-maze-muncher.png" data-title="Maze Muncher" tabindex="0" role="button" aria-label="Enlarge Maze Muncher screenshot">
         <div class="card__body">
@@ -125,7 +168,7 @@
         </div>
       </article>
 
-      <article class="card" data-modes="solo local" data-category="arcade" data-added="2026-07-18">
+      <article class="card" data-modes="solo local" data-category="arcade" data-added="2026-07-18" data-kids="true">
         <img class="card__thumb" src="assets/game-nibbles-icon.png" alt="Nibbles screenshot"
              data-full="assets/game-nibbles.png" data-title="Nibbles" tabindex="0" role="button" aria-label="Enlarge Nibbles screenshot">
         <div class="card__body">
@@ -139,7 +182,7 @@
         </div>
       </article>
 
-      <article class="card" data-modes="solo" data-category="quiz" data-added="2026-07-18">
+      <article class="card" data-modes="solo" data-category="quiz" data-added="2026-07-18" data-kids="true">
         <img class="card__thumb" src="assets/game-marquee-quiz-icon.png" alt="The Marquee screenshot"
              data-full="assets/game-marquee-quiz.png" data-title="The Marquee" tabindex="0" role="button" aria-label="Enlarge The Marquee screenshot">
         <div class="card__body">
@@ -152,7 +195,7 @@
         </div>
       </article>
 
-      <article class="card" data-modes="solo" data-category="quiz" data-added="2026-07-16">
+      <article class="card" data-modes="solo" data-category="quiz" data-added="2026-07-16" data-kids="true">
         <img class="card__thumb" src="assets/game-acronym-quiz-icon.png" alt="Acronym Quiz screenshot"
              data-full="assets/game-acronym-quiz.png" data-title="Acronym Quiz" tabindex="0" role="button" aria-label="Enlarge Acronym Quiz screenshot">
         <div class="card__body">
@@ -178,7 +221,7 @@
         </div>
       </article>
 
-      <article class="card" data-modes="solo local p2p" data-category="strategy" data-added="2026-07-12">
+      <article class="card" data-modes="solo local p2p" data-category="strategy" data-added="2026-07-12" data-kids="true">
         <img class="card__thumb" src="assets/game-battleship-toys-icon.png" alt="Battleship Toys screenshot"
              data-full="assets/game-battleship-toys.png" data-title="Battleship Toys" tabindex="0" role="button" aria-label="Enlarge Battleship Toys screenshot">
         <div class="card__body">
@@ -193,7 +236,7 @@
         </div>
       </article>
 
-      <article class="card" data-modes="solo" data-category="racing" data-added="2026-07-07">
+      <article class="card" data-modes="solo" data-category="racing" data-added="2026-07-07" data-kids="true">
         <img class="card__thumb" src="assets/game-beach-buggy-racer-icon.png" alt="Beach Buggy Racer screenshot"
              data-full="assets/game-beach-buggy-racer.png" data-title="Beach Buggy Racer" tabindex="0" role="button" aria-label="Enlarge Beach Buggy Racer screenshot">
         <div class="card__body">
@@ -206,7 +249,7 @@
         </div>
       </article>
 
-      <article class="card" data-modes="solo" data-category="sports" data-added="2026-07-07">
+      <article class="card" data-modes="solo" data-category="sports" data-added="2026-07-07" data-kids="true">
         <img class="card__thumb" src="assets/game-bmx-beach-jam-icon.png" alt="BMX Beach Jam screenshot"
              data-full="assets/game-bmx-beach-jam.png" data-title="BMX Beach Jam" tabindex="0" role="button" aria-label="Enlarge BMX Beach Jam screenshot">
         <div class="card__body">
@@ -232,7 +275,7 @@
         </div>
       </article>
 
-      <article class="card" data-modes="local" data-category="racing" data-added="2026-07-07">
+      <article class="card" data-modes="local" data-category="racing" data-added="2026-07-07" data-kids="true">
         <img class="card__thumb" src="assets/game-esel-running-icon.png" alt="Esel vs. Karotte screenshot"
              data-full="assets/game-esel-running.png" data-title="Esel vs. Karotte" tabindex="0" role="button" aria-label="Enlarge Esel vs. Karotte screenshot">
         <div class="card__body">
@@ -245,7 +288,7 @@
         </div>
       </article>
 
-      <article class="card" data-modes="solo local p2p" data-category="puzzle" data-added="2026-07-08">
+      <article class="card" data-modes="solo local p2p" data-category="puzzle" data-added="2026-07-08" data-kids="true">
         <img class="card__thumb" src="assets/game-fruit-frenzy-icon.png" alt="Fruit Frenzy screenshot"
              data-full="assets/game-fruit-frenzy.png" data-title="Fruit Frenzy" tabindex="0" role="button" aria-label="Enlarge Fruit Frenzy screenshot">
         <div class="card__body">
@@ -260,7 +303,7 @@
         </div>
       </article>
 
-      <article class="card" data-modes="solo" data-category="quiz" data-added="2026-07-13">
+      <article class="card" data-modes="solo" data-category="quiz" data-added="2026-07-13" data-kids="true">
         <img class="card__thumb" src="assets/game-geography-quiz-icon.png" alt="Geography Quiz screenshot"
              data-full="assets/game-geography-quiz.png" data-title="Geography Quiz" tabindex="0" role="button" aria-label="Enlarge Geography Quiz screenshot">
         <div class="card__body">
@@ -273,7 +316,7 @@
         </div>
       </article>
 
-      <article class="card" data-modes="solo" data-category="shooter" data-added="2026-07-13">
+      <article class="card" data-modes="solo" data-category="shooter" data-added="2026-07-13" data-kids="true">
         <img class="card__thumb" src="assets/game-cluck-and-load-icon.png" alt="Cluck &amp; Load screenshot"
              data-full="assets/game-cluck-and-load.png" data-title="Cluck &amp; Load" tabindex="0" role="button" aria-label="Enlarge Cluck &amp; Load screenshot">
         <div class="card__body">
@@ -286,7 +329,7 @@
         </div>
       </article>
 
-      <article class="card" data-modes="local p2p" data-category="action" data-added="2026-07-07">
+      <article class="card" data-modes="local p2p" data-category="action" data-added="2026-07-07" data-kids="true">
         <img class="card__thumb" src="assets/game-gorillazz-icon.png" alt="Gorillazz screenshot"
              data-full="assets/game-gorillazz.png" data-title="Gorillazz" tabindex="0" role="button" aria-label="Enlarge Gorillazz screenshot">
         <div class="card__body">
@@ -315,7 +358,7 @@
         </div>
       </article>
 
-      <article class="card" data-modes="solo" data-category="arcade" data-added="2026-07-12">
+      <article class="card" data-modes="solo" data-category="arcade" data-added="2026-07-12" data-kids="true">
         <img class="card__thumb" src="assets/game-moon-lander-icon.png" alt="Moon Lander screenshot"
              data-full="assets/game-moon-lander.png" data-title="Moon Lander" tabindex="0" role="button" aria-label="Enlarge Moon Lander screenshot">
         <div class="card__body">
@@ -343,7 +386,7 @@
         </div>
       </article>
 
-      <article class="card" data-modes="solo" data-category="puzzle" data-added="2026-07-12">
+      <article class="card" data-modes="solo" data-category="puzzle" data-added="2026-07-12" data-kids="true">
         <img class="card__thumb" src="assets/game-plod-icon.png" alt="PLOD screenshot"
              data-full="assets/game-plod.png" data-title="PLOD" tabindex="0" role="button" aria-label="Enlarge PLOD screenshot">
         <div class="card__body">
@@ -369,7 +412,7 @@
         </div>
       </article>
 
-      <article class="card" data-modes="solo" data-category="shooter" data-added="2026-07-07">
+      <article class="card" data-modes="solo" data-category="shooter" data-added="2026-07-07" data-kids="true">
         <img class="card__thumb" src="assets/game-space-invaders-icon.png" alt="Space Invaders screenshot"
              data-full="assets/game-space-invaders.png" data-title="Space Invaders" tabindex="0" role="button" aria-label="Enlarge Space Invaders screenshot">
         <div class="card__body">
@@ -382,7 +425,7 @@
         </div>
       </article>
 
-      <article class="card" data-modes="solo" data-category="racing" data-added="2026-07-07">
+      <article class="card" data-modes="solo" data-category="racing" data-added="2026-07-07" data-kids="true">
         <img class="card__thumb" src="assets/game-splashdown-icon.png" alt="Splashdown screenshot"
              data-full="assets/game-splashdown.png" data-title="Splashdown" tabindex="0" role="button" aria-label="Enlarge Splashdown screenshot">
         <div class="card__body">
@@ -395,7 +438,7 @@
         </div>
       </article>
 
-      <article class="card" data-modes="local p2p" data-category="puzzle" data-added="2026-07-07">
+      <article class="card" data-modes="local p2p" data-category="puzzle" data-added="2026-07-07" data-kids="true">
         <img class="card__thumb" src="assets/game-stack-duel-icon.png" alt="Stack Duel screenshot"
              data-full="assets/game-stack-duel.png" data-title="Stack Duel" tabindex="0" role="button" aria-label="Enlarge Stack Duel screenshot">
         <div class="card__body">
@@ -409,7 +452,7 @@
         </div>
       </article>
 
-      <article class="card" data-modes="local p2p" data-category="action" data-added="2026-07-07">
+      <article class="card" data-modes="local p2p" data-category="action" data-added="2026-07-07" data-kids="true">
         <img class="card__thumb" src="assets/game-tank-toys-icon.png" alt="Tank Toys screenshot"
              data-full="assets/game-tank-toys.png" data-title="Tank Toys" tabindex="0" role="button" aria-label="Enlarge Tank Toys screenshot">
         <div class="card__body">
@@ -423,7 +466,7 @@
         </div>
       </article>
 
-      <article class="card" data-modes="solo p2p" data-category="card" data-added="2026-07-07">
+      <article class="card" data-modes="solo p2p" data-category="card" data-added="2026-07-07" data-kids="true">
         <img class="card__thumb" src="assets/game-tschau-sepp-icon.png" alt="Tschau Sepp screenshot"
              data-full="assets/game-tschau-sepp.png" data-title="Tschau Sepp" tabindex="0" role="button" aria-label="Enlarge Tschau Sepp screenshot">
         <div class="card__body">
@@ -437,7 +480,7 @@
         </div>
       </article>
 
-      <article class="card" data-modes="solo" data-category="sandbox" data-added="2026-07-12">
+      <article class="card" data-modes="solo" data-category="sandbox" data-added="2026-07-12" data-kids="true">
         <img class="card__thumb" src="assets/game-voxel-sandbox-icon.png" alt="Voxel Sandbox screenshot"
              data-full="assets/game-voxel-sandbox.png" data-title="Voxel Sandbox" tabindex="0" role="button" aria-label="Enlarge Voxel Sandbox screenshot">
         <div class="card__body">
