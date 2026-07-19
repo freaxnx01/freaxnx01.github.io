@@ -3,7 +3,7 @@
 
 For each live game it saves:
   games/assets/<repo>.png       — full viewport screenshot
-  games/assets/<repo>-icon.png  — 256x256 center-cropped thumbnail
+  games/assets/<repo>-icon.png  — 400x250 (16:10) center-cropped thumbnail
 
 Load failures are logged and skipped (the run continues); skipped games are
 listed at the end so a placeholder can be dropped in by hand.
@@ -55,7 +55,15 @@ REPOS = [
 BASE_URL = "https://github.freaxnx01.ch/{repo}/"
 VIEWPORT = {"width": 1280, "height": 800}
 RENDER_DELAY_MS = 2000  # let canvas games paint a real frame
-ICON_SIZE = 256
+# Matches .card__thumb's CSS `aspect-ratio: 16/10` (object-fit: cover). The
+# viewport is itself 16:10, so cropping the icon to this ratio (instead of a
+# square, as before) crops nothing beyond what the CSS box would already
+# discard -- the previous square crop discarded the full image width first,
+# then the CSS cropped the square again vertically, compounding into content
+# (e.g. Neon Pong's side paddles) being cut that the card box had room for.
+ICON_ASPECT = 16 / 10
+ICON_WIDTH = 400
+ICON_HEIGHT = round(ICON_WIDTH / ICON_ASPECT)
 
 ASSETS_DIR = Path(__file__).resolve().parent.parent / "games" / "assets"
 
@@ -130,20 +138,31 @@ ACTIONS = {
         # Enter launches; guns auto-fire. The chopper is screen-locked near
         # its spawn point and ArrowUp drives it toward the top HUD, so don't
         # hold it — stay put (or nudge sideways only) to keep WOLF-1 centered
-        # and clear of the wave banner. Wait out enough scroll for a jeep/tank
-        # to scroll into frame, then fire a rocket for tracers + a live shot.
-        ("click", CENTER), ("press", "Enter"), ("wait", 5500),   # launch + let a target scroll in
+        # and clear of the wave banner. The green enemy-unit sprites only
+        # scroll into frame gradually; at the previous ~5.8s total wait only
+        # one was ever in frame (often clipped at the edge). Verified live
+        # against https://github.freaxnx01.ch/game-dustline/: at ~10s
+        # post-launch two full enemy units are on screen at once alongside
+        # WOLF-1, tracers, and an explosion flash, without yet losing the
+        # chopper to enemy fire.
+        ("click", CENTER), ("press", "Enter"), ("wait", 9700),   # launch + let 2 targets scroll in
         ("down", "ArrowLeft"), ("wait", 150), ("up", "ArrowLeft"),  # slight bank, stays centered
-        ("press", "Space"), ("wait", 300),                       # homing rocket
+        ("wait", 150),
     ],
     "game-moon-lander": [
-        # Any key starts; catch the lander mid-descent over the pads with the
-        # engine burning and the live telemetry HUD, not the pre-start screen.
+        # Any key starts; catch the lander mid-descent, clear of both side HUD
+        # panels and drifted toward the horizontal center, with the live
+        # telemetry readable. The lander spawns top-left and drifts right at
+        # a fixed initial H/S no single RCS tap changes -- so getting it away
+        # from the FUEL panel (which it starts almost on top of) just takes
+        # waiting out that drift, capped before V/S gets fast enough to risk
+        # hitting terrain. Verified live against
+        # https://github.freaxnx01.ch/game-moon-lander/: at ~7s post-launch
+        # the lander is clear of both panels, well into the left-of-center
+        # open sky, and still ~130m AGL (safely above the ridge line).
         ("click", CENTER), ("press", "Space"), ("wait", 800),    # focus + start
-        ("down", "ArrowUp"), ("wait", 450), ("up", "ArrowUp"),   # main-engine burn
-        ("press", "ArrowLeft"), ("wait", 350),                   # RCS rotate
-        ("down", "ArrowUp"), ("wait", 450), ("up", "ArrowUp"),   # burn again, mid-fall
-        ("wait", 250),
+        ("down", "ArrowUp"), ("wait", 300), ("up", "ArrowUp"),   # main-engine burn
+        ("wait", 6000),
     ],
     "game-plod": [
         # Lemmings-style: dismiss the start modal via its PLAY button, then let
@@ -184,13 +203,12 @@ ACTIONS = {
         ("press", "Space"), ("wait", 200), ("press", "Space"), ("wait", 200),
     ],
     "game-cluck-and-load": [
-        # Click on the menu starts a round; fire a few shots at birds crossing
-        # mid-screen so the shot catches live gameplay (feathers/HUD), not the
-        # title card.
-        ("click", CENTER), ("wait", 900),
-        ("click", (0.35, 0.45)), ("wait", 250),
-        ("click", (0.60, 0.55)), ("wait", 250),
-        ("click", (0.50, 0.35)), ("wait", 400),
+        # Click on the menu starts a round. Just wait -- clicking again fires
+        # the shotgun (crosshair follows the mouse), which scares off/removes
+        # the very birds we want in frame. Letting the round run ~5.4s without
+        # firing lets 3 birds accumulate on screen instead of 1 (verified live
+        # against https://github.freaxnx01.ch/game-cluck-and-load/).
+        ("click", CENTER), ("wait", 5400),
     ],
     # game-nibbles intentionally has no recipe: the play field is huge
     # relative to the snake, so even a successfully-grown snake reads as a
@@ -265,16 +283,20 @@ def run_actions(page, steps) -> None:
 
 
 def make_icon(full_png: Path, icon_png: Path) -> None:
-    """Center-crop the full screenshot to a square, then resize to 256x256."""
+    """Center-crop the full screenshot to the card's 16:10 aspect, then resize."""
     with Image.open(full_png) as img:
         img = img.convert("RGB")
         w, h = img.size
-        side = min(w, h)
-        left = (w - side) // 2
-        top = (h - side) // 2
-        square = img.crop((left, top, left + side, top + side))
-        square = square.resize((ICON_SIZE, ICON_SIZE), Image.LANCZOS)
-        square.save(icon_png, "PNG")
+        target_h = w / ICON_ASPECT
+        if target_h <= h:
+            new_w, new_h = w, target_h
+        else:
+            new_w, new_h = h * ICON_ASPECT, h
+        left = (w - new_w) / 2
+        top = (h - new_h) / 2
+        cropped = img.crop((int(left), int(top), int(left + new_w), int(top + new_h)))
+        cropped = cropped.resize((ICON_WIDTH, ICON_HEIGHT), Image.LANCZOS)
+        cropped.save(icon_png, "PNG")
 
 
 def main() -> int:
