@@ -1,8 +1,30 @@
-<!-- game-nav: copy-paste template. Replace the repo placeholder with the target
-     repo name (e.g. game-stack-duel) before pasting into a game's index.html,
-     just before </body>. See docs/superpowers/specs/2026-07-13-game-card-feedback-star-design.md
-     for design rationale. -->
+<!-- ============================================================================
+     Standard hub-nav overlay (+ version badge) — copy-paste template.
+
+     Before pasting, replace {{REPO}} with the game repo (e.g. game-stack-duel)
+     and {{BRANCH}} with its default branch (usually `main`; `master` for
+     game-n-s-clone). Paste just before </body>. Design rationale:
+     docs/superpowers/specs/2026-07-13-game-card-feedback-star-design.md
+
+     PREREQUISITE: the repo carries the browser-game stack files —
+       version.js  → window.GAME_VERSION = "X.Y.Z"  (mirror of the git tag)
+       CHANGELOG.md + cliff.toml
+     The nav's first item is a version badge that links to CHANGELOG.md.
+
+     TWO VARIANTS below — pick ONE:
+       A) STATIC — for normal games (plain index.html).
+       B) SELF-HEALING — for dc-bundled games whose bootstrapper does
+          document.documentElement.replaceWith() on unpack (it wipes any static
+          DOM, so the nav must be re-asserted). Tell them apart: grep the served
+          index.html for `documentElement.replaceWith` — if present, use B.
+     ============================================================================ -->
+
+
+<!-- ===== VARIANT A — STATIC (normal games) ===== -->
+<script src="./version.js"></script>
 <nav id="game-nav" aria-label="Game navigation" style="position:fixed;right:10px;bottom:8px;z-index:2147483647;display:flex;gap:12px;align-items:center;font:600 13px/1.4 system-ui,-apple-system,sans-serif;padding:6px 11px;border-radius:8px;background:rgba(15,17,26,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);opacity:.55;transition:opacity .2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.55">
+  <span id="version-badge" title="Version" style="color:#5a6072"></span>
+  <span style="color:#5a6072" aria-hidden="true">·</span>
   <a href="https://github.freaxnx01.ch/games/" style="color:#8fd8e8;text-decoration:none">More Games…</a>
   <span style="color:#5a6072" aria-hidden="true">·</span>
   <a href="https://github.com/freaxnx01/{{REPO}}" target="_blank" rel="noopener" style="color:#8fd8e8;text-decoration:none">Source</a>
@@ -11,4 +33,74 @@
   <span style="color:#5a6072" aria-hidden="true">·</span>
   <a class="github-button" href="https://github.com/freaxnx01/{{REPO}}" data-icon="octicon-star" data-size="small" data-show-count="true" aria-label="Star freaxnx01/{{REPO}} on GitHub">Star</a>
 </nav>
+<script>
+  // Version badge → CHANGELOG. Text comes only from window.GAME_VERSION so
+  // version.js stays the single source (never hardcode the literal here).
+  (function () {
+    var el = document.getElementById('version-badge');
+    if (!el) return;
+    var a = document.createElement('a');
+    a.href = 'https://github.com/freaxnx01/{{REPO}}/blob/{{BRANCH}}/CHANGELOG.md';
+    a.target = '_blank'; a.rel = 'noopener'; a.title = 'Changelog';
+    a.textContent = 'v' + (window.GAME_VERSION || '0.0.0');
+    a.style.color = 'inherit'; a.style.textDecoration = 'none';
+    el.appendChild(a);
+  })();
+</script>
 <script async defer crossorigin="anonymous" src="https://buttons.github.io/buttons.js"></script>
+
+
+<!-- ===== VARIANT B — SELF-HEALING (dc games that replaceWith() the DOM) =====
+     Use INSTEAD of Variant A. version.js must still be loaded before it
+     (<script src="./version.js"></script> right after <body>). This closure's
+     interval/listeners live on window/document, so they survive the unpack and
+     re-create the whole nav (links + badge) after each replaceWith. -->
+<script src="./version.js"></script>
+<script>
+(function () {
+  var REPO = "{{REPO}}", BRANCH = "{{BRANCH}}";
+  var GH = "https://github.com/freaxnx01/" + REPO;
+  function sep() { var s = document.createElement("span"); s.setAttribute("aria-hidden", "true"); s.style.cssText = "color:#5a6072"; s.textContent = "·"; return s; }
+  function extLink(href, text) { var a = document.createElement("a"); a.href = href; a.target = "_blank"; a.rel = "noopener"; a.style.cssText = "color:#8fd8e8;text-decoration:none"; a.textContent = text; return a; }
+  function ensure() {
+    if (!document.body || document.getElementById("game-nav")) return;
+    var nav = document.createElement("nav");
+    nav.id = "game-nav";
+    nav.setAttribute("aria-label", "Game navigation");
+    nav.style.cssText = "position:fixed;right:10px;bottom:8px;z-index:2147483647;display:flex;gap:12px;align-items:center;font:600 13px/1.4 system-ui,-apple-system,sans-serif;padding:6px 11px;border-radius:8px;background:rgba(15,17,26,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);opacity:.55;transition:opacity .2s";
+    nav.onmouseover = function () { this.style.opacity = 1; };
+    nav.onmouseout = function () { this.style.opacity = 0.55; };
+    var badge = document.createElement("span");
+    badge.id = "version-badge"; badge.title = "Version"; badge.style.cssText = "color:#5a6072";
+    var vlink = document.createElement("a");
+    vlink.href = GH + "/blob/" + BRANCH + "/CHANGELOG.md";
+    vlink.target = "_blank"; vlink.rel = "noopener"; vlink.title = "Changelog";
+    vlink.style.cssText = "color:inherit;text-decoration:none";
+    vlink.textContent = "v" + (window.GAME_VERSION || "0.0.0");
+    badge.appendChild(vlink);
+    nav.appendChild(badge);
+    nav.appendChild(sep());
+    nav.appendChild(extLink("https://github.freaxnx01.ch/games/", "More Games…"));
+    nav.appendChild(sep());
+    nav.appendChild(extLink(GH, "Source"));
+    nav.appendChild(sep());
+    nav.appendChild(extLink(GH + "/issues/new?title=%5BFeedback%5D%20" + REPO + "&labels=feedback", "Feedback"));
+    nav.appendChild(sep());
+    var star = extLink(GH, "Star");
+    star.className = "github-button";
+    star.setAttribute("data-icon", "octicon-star");
+    star.setAttribute("data-size", "small");
+    star.setAttribute("data-show-count", "true");
+    star.setAttribute("aria-label", "Star freaxnx01/" + REPO + " on GitHub");
+    nav.appendChild(star);
+    document.body.appendChild(nav);
+    var bs = document.createElement("script");
+    bs.src = "https://buttons.github.io/buttons.js";
+    bs.async = true; bs.defer = true; bs.crossOrigin = "anonymous";
+    document.body.appendChild(bs);
+  }
+  var n = 0, iv = setInterval(function () { ensure(); if (++n > 40) clearInterval(iv); }, 250);
+  document.addEventListener("DOMContentLoaded", ensure);
+  window.addEventListener("load", ensure);
+})();
+</script>
