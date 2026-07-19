@@ -50,6 +50,7 @@ REPOS = [
     "game-neon-pong",
     "game-photo-puzzler",
     "game-criss-cross",
+    "game-millionenfrage",
 ]
 BASE_URL = "https://github.freaxnx01.ch/{repo}/"
 VIEWPORT = {"width": 1280, "height": 800}
