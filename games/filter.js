@@ -11,11 +11,13 @@
   var subBtns = Array.prototype.slice.call(panel.querySelectorAll("[data-sub]"));
   var categoryBtns = Array.prototype.slice.call(panel.querySelectorAll("[data-category]"));
   var count = panel.querySelector(".hub__count");
+  var searchInput = document.getElementById("game-search");
 
   // Current selection. primary: all | solo | mp. sub applies only when primary === "mp".
   var primary = "all";
   var sub = "all";
   var category = "all";
+  var search = "";
 
   // Does a card's mode list satisfy the active mode filter?
   function matchesMode(modes) {
@@ -33,8 +35,13 @@
     return category === "all" || cardCategory === category;
   }
 
-  function matches(modes, cardCategory) {
-    return matchesMode(modes) && matchesCategory(cardCategory);
+  // Does a card's title satisfy the active search text (case-insensitive substring)?
+  function matchesSearch(title) {
+    return search === "" || title.toLowerCase().indexOf(search) !== -1;
+  }
+
+  function matches(modes, cardCategory, title) {
+    return matchesMode(modes) && matchesCategory(cardCategory) && matchesSearch(title);
   }
 
   function apply() {
@@ -42,7 +49,9 @@
     cards.forEach(function (card) {
       var modes = (card.getAttribute("data-modes") || "").split(/\s+/);
       var cardCategory = card.getAttribute("data-category") || "";
-      var show = matches(modes, cardCategory);
+      var titleEl = card.querySelector(".card__title");
+      var title = titleEl ? titleEl.textContent : "";
+      var show = matches(modes, cardCategory, title);
       if (show) {
         visible++;
         card.classList.remove("card--hidden");
@@ -118,6 +127,13 @@
       apply();
     });
   });
+
+  if (searchInput) {
+    searchInput.addEventListener("input", function () {
+      search = searchInput.value.trim().toLowerCase();
+      apply();
+    });
+  }
 
   // Sort control: A-Z (document order, cached once) vs newest-added-first.
   var sortSelect = document.getElementById("sort-select");
