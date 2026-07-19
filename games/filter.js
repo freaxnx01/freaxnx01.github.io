@@ -12,12 +12,14 @@
   var categoryBtns = Array.prototype.slice.call(panel.querySelectorAll("[data-category]"));
   var count = panel.querySelector(".hub__count");
   var searchInput = document.getElementById("game-search");
+  var kidsToggle = document.getElementById("kids-toggle");
 
   // Current selection. primary: all | solo | mp. sub applies only when primary === "mp".
   var primary = "all";
   var sub = "all";
   var category = "all";
   var search = "";
+  var kidsOnly = false;
 
   // Does a card's mode list satisfy the active mode filter?
   function matchesMode(modes) {
@@ -40,8 +42,13 @@
     return search === "" || title.toLowerCase().indexOf(search) !== -1;
   }
 
-  function matches(modes, cardCategory, title) {
-    return matchesMode(modes) && matchesCategory(cardCategory) && matchesSearch(title);
+  // Does a card satisfy the active Kids-only filter?
+  function matchesKids(cardKids) {
+    return !kidsOnly || cardKids === true;
+  }
+
+  function matches(modes, cardCategory, title, cardKids) {
+    return matchesMode(modes) && matchesCategory(cardCategory) && matchesSearch(title) && matchesKids(cardKids);
   }
 
   function apply() {
@@ -51,7 +58,8 @@
       var cardCategory = card.getAttribute("data-category") || "";
       var titleEl = card.querySelector(".card__title");
       var title = titleEl ? titleEl.textContent : "";
-      var show = matches(modes, cardCategory, title);
+      var cardKids = card.hasAttribute("data-kids");
+      var show = matches(modes, cardCategory, title, cardKids);
       if (show) {
         visible++;
         card.classList.remove("card--hidden");
@@ -131,6 +139,15 @@
   if (searchInput) {
     searchInput.addEventListener("input", function () {
       search = searchInput.value.trim().toLowerCase();
+      apply();
+    });
+  }
+
+  if (kidsToggle) {
+    kidsToggle.addEventListener("click", function () {
+      kidsOnly = !kidsOnly;
+      kidsToggle.classList.toggle("is-active", kidsOnly);
+      kidsToggle.setAttribute("aria-pressed", kidsOnly ? "true" : "false");
       apply();
     });
   }
