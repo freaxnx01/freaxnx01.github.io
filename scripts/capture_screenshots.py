@@ -245,6 +245,15 @@ ACTIONS = {
         ("down", "ArrowUp"), ("wait", 350), ("up", "ArrowUp"),
         ("wait", 300),
     ],
+    "game-wortduell": [
+        # "Gegen den Computer" (vs Computer, Mittel difficulty preselected)
+        # -> Spiel starten drops straight into a live board: the crossword
+        # grid, both racks/scores, and the compact WORTDUELL tile-logo in
+        # the header (the menu's big tile banner isn't shown once in-game,
+        # so this is the only in-game shot that still carries the logo).
+        ("click", CENTER), ("wait", 800),
+        ("select", "text=Spiel starten"), ("wait", 2000),
+    ],
 }
 
 
