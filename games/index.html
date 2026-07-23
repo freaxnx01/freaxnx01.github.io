@@ -27,6 +27,7 @@
         <button type="button" class="filter-btn is-active" data-filter="all" aria-pressed="true">All</button>
         <button type="button" class="filter-btn" data-filter="solo" aria-pressed="false">Single player</button>
         <button type="button" class="filter-btn" data-filter="mp" aria-pressed="false" aria-expanded="false" aria-controls="filter-sub">Multiplayer</button>
+        <button type="button" class="filter-btn" data-filter="wip" aria-pressed="false">🚧 Under construction</button>
       </div>
       <div class="filter-row filter-row--sub" id="filter-sub" role="group" aria-label="Filter multiplayer by connection" hidden>
         <button type="button" class="filter-btn is-active" data-sub="all" aria-pressed="true">Local &amp; Peer2Peer</button>
@@ -275,13 +276,14 @@
         </div>
       </article>
 
-      <article class="card" data-modes="local" data-category="racing" data-added="2026-07-07" data-kids="true">
+      <article class="card" data-modes="local" data-category="racing" data-added="2026-07-07" data-kids="true" data-wip="true">
         <img class="card__thumb" src="assets/game-esel-running-icon.png" alt="Esel vs. Karotte screenshot"
              data-full="assets/game-esel-running.png" data-title="Esel vs. Karotte" tabindex="0" role="button" aria-label="Enlarge Esel vs. Karotte screenshot">
         <div class="card__body">
           <h2 class="card__title">Esel vs. Karotte</h2>
           <p class="card__desc">Donkey race (German) — local 2-player.</p>
           <div class="card__badges">
+            <span class="badge badge--wip">🚧 Under construction</span>
             <span class="badge badge--local">Multiplayer · Local</span>
           </div>
           <a class="card__play" href="https://github.freaxnx01.ch/game-esel-running/" target="_blank" rel="noopener">▶ Play</a>

@@ -47,7 +47,11 @@
     return !kidsOnly || cardKids === true;
   }
 
-  function matches(modes, cardCategory, title, cardKids) {
+  // WIP games are hidden under every other primary mode and shown only
+  // when "Under construction" itself is the active filter.
+  function matches(modes, cardCategory, title, cardKids, cardWip) {
+    if (primary === "wip") return cardWip && matchesCategory(cardCategory) && matchesSearch(title) && matchesKids(cardKids);
+    if (cardWip) return false;
     return matchesMode(modes) && matchesCategory(cardCategory) && matchesSearch(title) && matchesKids(cardKids);
   }
 
@@ -59,7 +63,8 @@
       var titleEl = card.querySelector(".card__title");
       var title = titleEl ? titleEl.textContent : "";
       var cardKids = card.hasAttribute("data-kids");
-      var show = matches(modes, cardCategory, title, cardKids);
+      var cardWip = card.hasAttribute("data-wip");
+      var show = matches(modes, cardCategory, title, cardKids, cardWip);
       if (show) {
         visible++;
         card.classList.remove("card--hidden");
