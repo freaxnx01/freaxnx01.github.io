@@ -51,8 +51,14 @@ REPOS = [
     "game-photo-puzzler",
     "game-criss-cross",
     "game-millionenfrage",
+    "dogwash",
 ]
 BASE_URL = "https://github.freaxnx01.ch/{repo}/"
+# Games hosted outside the freaxnx01/game-<name> convention (e.g. a kid's own
+# repo/account) -- keyed by REPOS entry, overrides BASE_URL.format(repo=...).
+URL_OVERRIDES = {
+    "dogwash": "https://julia-hase.github.io/dogwash/",
+}
 VIEWPORT = {"width": 1280, "height": 800}
 RENDER_DELAY_MS = 2000  # let canvas games paint a real frame
 # Matches .card__thumb's CSS `aspect-ratio: 16/10` (object-fit: cover). The
@@ -317,7 +323,7 @@ def main() -> int:
     with sync_playwright() as p:
         browser = p.chromium.launch()
         for repo in repos:
-            url = BASE_URL.format(repo=repo)
+            url = URL_OVERRIDES.get(repo, BASE_URL.format(repo=repo))
             full_png = ASSETS_DIR / f"{repo}.png"
             icon_png = ASSETS_DIR / f"{repo}-icon.png"
             print(f"→ {repo}: {url}")
