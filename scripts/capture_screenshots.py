@@ -245,6 +245,13 @@ ACTIONS = {
         ("down", "ArrowUp"), ("wait", 350), ("up", "ArrowUp"),
         ("wait", 300),
     ],
+    "game-photo-puzzler": [
+        # No title screen -- opens straight into a live board with the photo
+        # tiles as CSS background-images. Those can still be mid-decode at
+        # the default 2s RENDER_DELAY_MS, producing a blank/grey-tile shot;
+        # a longer settle wait avoids that race.
+        ("wait", 2000),
+    ],
     "game-wortduell": [
         # "Gegen den Computer" (vs Computer, Mittel difficulty preselected)
         # -> Spiel starten drops straight into a live board: the crossword
