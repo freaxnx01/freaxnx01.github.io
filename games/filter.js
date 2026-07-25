@@ -13,6 +13,7 @@
   var count = panel.querySelector(".hub__count");
   var searchInput = document.getElementById("game-search");
   var kidsToggle = document.getElementById("kids-toggle");
+  var retroToggle = document.getElementById("retro-toggle");
 
   // Current selection. primary: all | solo | mp. sub applies only when primary === "mp".
   var primary = "all";
@@ -20,6 +21,7 @@
   var category = "all";
   var search = "";
   var kidsOnly = false;
+  var retroOnly = false;
 
   // Does a card's mode list satisfy the active mode filter?
   function matchesMode(modes) {
@@ -47,12 +49,17 @@
     return !kidsOnly || cardKids === true;
   }
 
+  // Does a card satisfy the active Retro/Clones-only filter?
+  function matchesRetro(cardRetro) {
+    return !retroOnly || cardRetro === true;
+  }
+
   // WIP games are hidden under every other primary mode and shown only
   // when "Under construction" itself is the active filter.
-  function matches(modes, cardCategory, title, cardKids, cardWip) {
-    if (primary === "wip") return cardWip && matchesCategory(cardCategory) && matchesSearch(title) && matchesKids(cardKids);
+  function matches(modes, cardCategory, title, cardKids, cardWip, cardRetro) {
+    if (primary === "wip") return cardWip && matchesCategory(cardCategory) && matchesSearch(title) && matchesKids(cardKids) && matchesRetro(cardRetro);
     if (cardWip) return false;
-    return matchesMode(modes) && matchesCategory(cardCategory) && matchesSearch(title) && matchesKids(cardKids);
+    return matchesMode(modes) && matchesCategory(cardCategory) && matchesSearch(title) && matchesKids(cardKids) && matchesRetro(cardRetro);
   }
 
   function apply() {
@@ -64,7 +71,8 @@
       var title = titleEl ? titleEl.textContent : "";
       var cardKids = card.hasAttribute("data-kids");
       var cardWip = card.hasAttribute("data-wip");
-      var show = matches(modes, cardCategory, title, cardKids, cardWip);
+      var cardRetro = card.hasAttribute("data-retro");
+      var show = matches(modes, cardCategory, title, cardKids, cardWip, cardRetro);
       if (show) {
         visible++;
         card.classList.remove("card--hidden");
@@ -153,6 +161,15 @@
       kidsOnly = !kidsOnly;
       kidsToggle.classList.toggle("is-active", kidsOnly);
       kidsToggle.setAttribute("aria-pressed", kidsOnly ? "true" : "false");
+      apply();
+    });
+  }
+
+  if (retroToggle) {
+    retroToggle.addEventListener("click", function () {
+      retroOnly = !retroOnly;
+      retroToggle.classList.toggle("is-active", retroOnly);
+      retroToggle.setAttribute("aria-pressed", retroOnly ? "true" : "false");
       apply();
     });
   }
