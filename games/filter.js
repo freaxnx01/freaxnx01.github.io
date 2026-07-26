@@ -14,6 +14,7 @@
   var searchInput = document.getElementById("game-search");
   var kidsToggle = document.getElementById("kids-toggle");
   var retroToggle = document.getElementById("retro-toggle");
+  var randomBtn = document.getElementById("random-game-btn");
 
   // Current selection. primary: all | solo | mp. sub applies only when primary === "mp".
   var primary = "all";
@@ -90,6 +91,9 @@
         visible === cards.length
           ? "Showing all " + cards.length + " games"
           : "Showing " + visible + " of " + cards.length + " games";
+    }
+    if (randomBtn) {
+      randomBtn.disabled = visible === 0;
     }
   }
 
@@ -171,6 +175,19 @@
       retroToggle.classList.toggle("is-active", retroOnly);
       retroToggle.setAttribute("aria-pressed", retroOnly ? "true" : "false");
       apply();
+    });
+  }
+
+  if (randomBtn) {
+    randomBtn.addEventListener("click", function () {
+      var visibleCards = cards.filter(function (c) {
+        return !c.classList.contains("card--hidden");
+      });
+      if (visibleCards.length === 0) return;
+      var pick = visibleCards[Math.floor(Math.random() * visibleCards.length)];
+      var playLink = pick.querySelector(".card__play");
+      if (!playLink) return;
+      window.open(playLink.getAttribute("href"), "_blank", "noopener");
     });
   }
 
