@@ -10,4 +10,4 @@
 
 [🎮 Browser Games Hub](/games/)
 
-[Contributing](/CONTRIBUTING.md)
+[Contributing](/CONTRIBUTING.html)
