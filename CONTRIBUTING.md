@@ -1,3 +1,8 @@
+---
+layout: default
+title: Contributing
+---
+
 # Contributing
 
 This repo is a personal [GitHub Pages](https://pages.github.com/) site, built
