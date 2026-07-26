@@ -250,5 +250,23 @@
   }
   markNewBadges();
 
+  if (searchInput) {
+    document.addEventListener("keydown", function (e) {
+      var tag = e.target.tagName;
+      var isInput = tag === "INPUT" || tag === "TEXTAREA" || e.target.hasAttribute("contenteditable");
+      if (e.key === "/") {
+        if (!isInput && !e.ctrlKey && !e.metaKey && !e.altKey) {
+          e.preventDefault();
+          searchInput.focus();
+        }
+      } else if (e.key === "Escape" && searchInput === document.activeElement) {
+        searchInput.value = "";
+        search = "";
+        searchInput.blur();
+        apply();
+      }
+    });
+  }
+
   apply();
 })();
