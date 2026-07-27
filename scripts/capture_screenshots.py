@@ -20,6 +20,10 @@ from PIL import Image
 from playwright.sync_api import sync_playwright
 
 REPOS = [
+    "game-aerodrome-apex",
+    "game-brickfall",
+    "game-rockfall",
+    "game-oil-fever-89",
     "game-wortduell",
     "game-gem-cascade",
     "game-tschau-sepp",
