@@ -20,6 +20,7 @@ from PIL import Image
 from playwright.sync_api import sync_playwright
 
 REPOS = [
+    "game-iron-valhalla",
     "game-aerodrome-apex",
     "game-brickfall",
     "game-rockfall",
