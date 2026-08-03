@@ -7,10 +7,6 @@
       never smoke-tested — per `agent-workflow`'s `CONSUMER-SETUP.md` §3,
       label a trivial issue `ai-implement` there to confirm the pipeline
       actually works before trusting it with real work.
-- [ ] [game-gorillazz#10](https://github.com/freaxnx01/game-gorillazz/issues/10)
-      — needs a favicon via its own approach (no root `index.html`, so it was
-      excluded from PR #18's hub-wide rollout). `needs-enrichment`, not yet
-      spec'd/planned.
 
 ## Games Hub
 
