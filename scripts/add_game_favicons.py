@@ -166,3 +166,54 @@ def process_repo(game: dict, clones_root: Path, dry_run: bool = False) -> str:
         return f"failed: commit/push error: {e.stderr.strip()[:200]}"
 
     return "succeeded"
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--dry-run", action="store_true",
+        help="Report what would change without writing, committing, or pushing.",
+    )
+    parser.add_argument(
+        "--only", default=None,
+        help="Comma-separated list of repo names to process (default: all).",
+    )
+    args = parser.parse_args()
+
+    hub_root = Path(__file__).resolve().parent.parent
+    clones_root = hub_root.parent
+
+    games = discover_games(hub_root)
+    if args.only:
+        wanted = set(args.only.split(","))
+        games = [g for g in games if g["repo"] in wanted]
+        missing = wanted - {g["repo"] for g in games}
+        if missing:
+            print(f"warning: not found in games/index.html: {sorted(missing)}", file=sys.stderr)
+
+    results = []
+    for game in games:
+        status = process_repo(game, clones_root, dry_run=args.dry_run)
+        results.append((game["repo"], status))
+        print(f"{game['repo']}: {status}")
+
+    succeeded = [r for r in results if r[1] == "succeeded"]
+    skipped = [r for r in results if r[1].startswith("skipped")]
+    dry_run_would = [r for r in results if r[1].startswith("would update")]
+    failed = [r for r in results if r[1].startswith("failed")]
+
+    print("\nSummary:")
+    print(f"  total:     {len(results)}")
+    print(f"  succeeded: {len(succeeded)}")
+    print(f"  skipped:   {len(skipped)}")
+    if dry_run_would:
+        print(f"  would update (dry-run): {len(dry_run_would)}")
+    print(f"  failed:    {len(failed)}")
+    if failed:
+        print("\nFailures:")
+        for repo, status in failed:
+            print(f"  {repo}: {status}")
+
+
+if __name__ == "__main__":
+    main()
