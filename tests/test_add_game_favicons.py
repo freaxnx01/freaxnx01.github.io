@@ -65,3 +65,41 @@ def test_generate_favicon_bytes():
     img = Image.open(io.BytesIO(favicon_bytes))
     assert img.size == (32, 32), f"Expected (32, 32), got {img.size}"
     assert img.format == "PNG", f"Expected PNG format, got {img.format}"
+
+
+def test_ensure_favicon_link_plain_head_no_icon():
+    """Test inserting favicon link into plain <head> with no existing icon."""
+    from add_game_favicons import ensure_favicon_link
+
+    # Test case 1: html with a plain <head> (no attrs), no existing icon link
+    html1 = '<!DOCTYPE html>\n<html>\n<head>\n<meta charset="utf-8">\n</head>\n<body></body></html>'
+    new1, changed1 = ensure_favicon_link(html1)
+
+    assert changed1 is True, "Expected changed=True when inserting link"
+    assert '<link rel="icon"' in new1, "Expected link tag to be present in output"
+    assert '<head>\n<link rel="icon"' in new1, "Expected link tag right after <head>"
+
+
+def test_ensure_favicon_link_head_with_attrs_existing_icon():
+    """Test idempotency when icon link already exists."""
+    from add_game_favicons import ensure_favicon_link
+
+    # Test case 2: html with <head lang="en"> that already has a <link rel="icon">
+    html2 = '<html>\n<head lang="en">\n<link rel="icon" href="x.png">\n</head>\n<body></body></html>'
+    new2, changed2 = ensure_favicon_link(html2)
+
+    assert changed2 is False, "Expected changed=False when icon already exists"
+    assert new2 == html2, "Expected html to be unchanged when icon already exists"
+
+
+def test_ensure_favicon_link_no_head_tag_raises():
+    """Test that ValueError is raised when no <head> tag exists."""
+    from add_game_favicons import ensure_favicon_link
+
+    # Test case 3: html with no <head> tag
+    html3 = '<html>\n<body>Hello</body>\n</html>'
+
+    with pytest.raises(ValueError) as exc_info:
+        ensure_favicon_link(html3)
+
+    assert str(exc_info.value) == "no <head> tag found in index.html"

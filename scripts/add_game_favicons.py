@@ -69,3 +69,31 @@ def generate_favicon_bytes(icon_path: Path) -> bytes:
         buf = io.BytesIO()
         resized.save(buf, format="PNG")
         return buf.getvalue()
+
+
+def ensure_favicon_link(html: str) -> tuple[str, bool]:
+    """Idempotently insert a favicon link tag into HTML.
+
+    Checks if a rel="icon" link already exists in the HTML (case-insensitive).
+    If it does, returns the HTML unchanged with changed=False.
+    If not, inserts a link tag right after the opening <head> tag.
+
+    Args:
+        html: HTML content as a string
+
+    Returns:
+        A tuple of (new_html, changed) where:
+        - new_html: The HTML with favicon link inserted (or unchanged if already present)
+        - changed: False if a rel="icon" link already existed, True if it was inserted
+
+    Raises:
+        ValueError: If no <head> tag is found in the HTML
+    """
+    if re.search(r'rel="icon"', html, re.IGNORECASE):
+        return html, False
+    new_html, count = HEAD_OPEN_RE.subn(
+        lambda m: f"{m.group(1)}\n{LINK_TAG}", html, count=1
+    )
+    if count == 0:
+        raise ValueError("no <head> tag found in index.html")
+    return new_html, True
