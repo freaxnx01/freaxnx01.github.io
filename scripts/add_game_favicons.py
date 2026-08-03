@@ -15,6 +15,7 @@ Usage:
 """
 import argparse
 import io
+import os
 import re
 import subprocess
 import sys
@@ -29,6 +30,9 @@ PLAY_RE = re.compile(r'href="https://github\.freaxnx01\.ch/([^/]+)/"')
 FAVICON_SIZE = (32, 32)
 LINK_TAG = '<link rel="icon" href="favicon.png" sizes="32x32" type="image/png">'
 HEAD_OPEN_RE = re.compile(r'(<head(?:\s[^>]*)?>)')
+
+# Fail fast instead of hanging if git tries to prompt for HTTPS credentials.
+GIT_ENV = {**os.environ, "GIT_TERMINAL_PROMPT": "0"}
 
 
 def discover_games(hub_root: Path) -> list[dict]:
@@ -99,29 +103,51 @@ def ensure_favicon_link(html: str) -> tuple[str, bool]:
     return new_html, True
 
 
-def ensure_local_clone(repo: str, clones_root: Path) -> Path:
+def default_branch(repo_path: Path) -> str:
+    """Resolve the repo's default branch (e.g. "main" or "master").
+
+    Reads refs/remotes/origin/HEAD, which `git clone` sets automatically to
+    point at the remote's default branch. Falls back to "main" if the ref
+    can't be resolved (e.g. detached HEAD, missing ref) — callers already
+    handle a failed checkout/pull/push on a wrong branch name gracefully.
+    """
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(repo_path), "symbolic-ref", "refs/remotes/origin/HEAD"],
+            check=True, capture_output=True, text=True, env=GIT_ENV,
+        )
+        ref = result.stdout.strip()  # e.g. "refs/remotes/origin/main"
+        branch = ref.rsplit("/", 1)[-1]
+        return branch or "main"
+    except subprocess.CalledProcessError:
+        return "main"
+
+
+def ensure_local_clone(repo: str, clones_root: Path) -> tuple[Path, str]:
     repo_path = clones_root / repo
     if repo_path.exists():
+        branch = default_branch(repo_path)
         subprocess.run(
-            ["git", "-C", str(repo_path), "checkout", "main"],
-            check=True, capture_output=True, text=True,
+            ["git", "-C", str(repo_path), "checkout", branch],
+            check=True, capture_output=True, text=True, env=GIT_ENV,
         )
         subprocess.run(
-            ["git", "-C", str(repo_path), "pull", "--ff-only", "origin", "main"],
-            check=True, capture_output=True, text=True,
+            ["git", "-C", str(repo_path), "pull", "--ff-only", "origin", branch],
+            check=True, capture_output=True, text=True, env=GIT_ENV,
         )
     else:
         subprocess.run(
             ["git", "clone", f"https://github.com/freaxnx01/{repo}.git", str(repo_path)],
-            check=True, capture_output=True, text=True,
+            check=True, capture_output=True, text=True, env=GIT_ENV,
         )
-    return repo_path
+        branch = default_branch(repo_path)
+    return repo_path, branch
 
 
 def process_repo(game: dict, clones_root: Path, dry_run: bool = False) -> str:
     repo = game["repo"]
     try:
-        repo_path = ensure_local_clone(repo, clones_root)
+        repo_path, branch = ensure_local_clone(repo, clones_root)
     except subprocess.CalledProcessError as e:
         return f"failed: clone/pull error: {e.stderr.strip()[:200]}"
 
@@ -139,7 +165,34 @@ def process_repo(game: dict, clones_root: Path, dry_run: bool = False) -> str:
         return f"failed: {e}"
 
     if not favicon_changed and not link_changed:
-        return "skipped (already done)"
+        # Local working tree already matches what we'd produce, but a prior
+        # run may have committed locally and then failed to push (auth,
+        # branch protection, network). Check whether the local branch is
+        # still ahead of origin before declaring victory.
+        try:
+            result = subprocess.run(
+                ["git", "-C", str(repo_path), "rev-list", "--count", f"origin/{branch}..{branch}"],
+                check=True, capture_output=True, text=True, env=GIT_ENV,
+            )
+            ahead = int(result.stdout.strip() or "0")
+        except subprocess.CalledProcessError as e:
+            return f"failed: commit/push error: {e.stderr.strip()[:200]}"
+
+        if ahead == 0:
+            return "skipped (already done)"
+
+        if dry_run:
+            return "would push (dry-run)"
+
+        try:
+            subprocess.run(
+                ["git", "-C", str(repo_path), "push", "origin", branch],
+                check=True, capture_output=True, text=True, env=GIT_ENV,
+            )
+        except subprocess.CalledProcessError as e:
+            return f"failed: commit/push error: {e.stderr.strip()[:200]}"
+
+        return "succeeded"
 
     if dry_run:
         return "would update (dry-run)"
@@ -152,15 +205,15 @@ def process_repo(game: dict, clones_root: Path, dry_run: bool = False) -> str:
     try:
         subprocess.run(
             ["git", "-C", str(repo_path), "add", "favicon.png", "index.html"],
-            check=True, capture_output=True, text=True,
+            check=True, capture_output=True, text=True, env=GIT_ENV,
         )
         subprocess.run(
             ["git", "-C", str(repo_path), "commit", "-m", "feat: add favicon"],
-            check=True, capture_output=True, text=True,
+            check=True, capture_output=True, text=True, env=GIT_ENV,
         )
         subprocess.run(
-            ["git", "-C", str(repo_path), "push", "origin", "main"],
-            check=True, capture_output=True, text=True,
+            ["git", "-C", str(repo_path), "push", "origin", branch],
+            check=True, capture_output=True, text=True, env=GIT_ENV,
         )
     except subprocess.CalledProcessError as e:
         return f"failed: commit/push error: {e.stderr.strip()[:200]}"
@@ -185,7 +238,7 @@ def main():
 
     games = discover_games(hub_root)
     if args.only:
-        wanted = set(args.only.split(","))
+        wanted = {r.strip() for r in args.only.split(",")}
         games = [g for g in games if g["repo"] in wanted]
         missing = wanted - {g["repo"] for g in games}
         if missing:
@@ -193,13 +246,16 @@ def main():
 
     results = []
     for game in games:
-        status = process_repo(game, clones_root, dry_run=args.dry_run)
+        try:
+            status = process_repo(game, clones_root, dry_run=args.dry_run)
+        except Exception as e:
+            status = f"failed: {type(e).__name__}: {e}"
         results.append((game["repo"], status))
         print(f"{game['repo']}: {status}")
 
     succeeded = [r for r in results if r[1] == "succeeded"]
     skipped = [r for r in results if r[1].startswith("skipped")]
-    dry_run_would = [r for r in results if r[1].startswith("would update")]
+    dry_run_would = [r for r in results if r[1].startswith("would")]
     failed = [r for r in results if r[1].startswith("failed")]
 
     print("\nSummary:")
@@ -213,6 +269,8 @@ def main():
         print("\nFailures:")
         for repo, status in failed:
             print(f"  {repo}: {status}")
+
+    sys.exit(1 if failed else 0)
 
 
 if __name__ == "__main__":
