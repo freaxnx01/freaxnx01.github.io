@@ -47,3 +47,21 @@ def test_discover_games_returns_dicts_with_repo_and_icon_path():
         assert "icon_path" in game, "Game dict should have 'icon_path' key"
         assert isinstance(game["repo"], str), "repo should be a string"
         assert isinstance(game["icon_path"], Path), "icon_path should be a Path"
+
+
+def test_generate_favicon_bytes():
+    """Test that generate_favicon_bytes returns a 32x32 PNG image."""
+    import io
+    from PIL import Image
+    from add_game_favicons import generate_favicon_bytes
+
+    # Use the game-nibbles-icon.png as test input (400x250)
+    icon_path = Path("games/assets/game-nibbles-icon.png")
+
+    # Generate favicon bytes
+    favicon_bytes = generate_favicon_bytes(icon_path)
+
+    # Verify it's valid PNG bytes that decode to 32x32
+    img = Image.open(io.BytesIO(favicon_bytes))
+    assert img.size == (32, 32), f"Expected (32, 32), got {img.size}"
+    assert img.format == "PNG", f"Expected PNG format, got {img.format}"

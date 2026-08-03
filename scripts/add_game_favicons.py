@@ -44,3 +44,28 @@ def discover_games(hub_root: Path) -> list[dict]:
             "icon_path": hub_root / "games" / "assets" / icon_m.group(1),
         })
     return games
+
+
+def generate_favicon_bytes(icon_path: Path) -> bytes:
+    """Generate a 32x32 PNG favicon from a game's card icon.
+
+    Takes a card icon (typically 400x250), center-crops to a square,
+    resizes to 32x32, and returns PNG-encoded bytes.
+
+    Args:
+        icon_path: Path to the card icon image (e.g. games/assets/game-nibbles-icon.png)
+
+    Returns:
+        PNG-encoded bytes of the 32x32 favicon.
+    """
+    with Image.open(icon_path) as img:
+        img = img.convert("RGB")
+        width, height = img.size
+        side = min(width, height)
+        left = (width - side) // 2
+        top = (height - side) // 2
+        cropped = img.crop((left, top, left + side, top + side))
+        resized = cropped.resize(FAVICON_SIZE, Image.LANCZOS)
+        buf = io.BytesIO()
+        resized.save(buf, format="PNG")
+        return buf.getvalue()
