@@ -97,3 +97,72 @@ def ensure_favicon_link(html: str) -> tuple[str, bool]:
     if count == 0:
         raise ValueError("no <head> tag found in index.html")
     return new_html, True
+
+
+def ensure_local_clone(repo: str, clones_root: Path) -> Path:
+    repo_path = clones_root / repo
+    if repo_path.exists():
+        subprocess.run(
+            ["git", "-C", str(repo_path), "checkout", "main"],
+            check=True, capture_output=True, text=True,
+        )
+        subprocess.run(
+            ["git", "-C", str(repo_path), "pull", "--ff-only", "origin", "main"],
+            check=True, capture_output=True, text=True,
+        )
+    else:
+        subprocess.run(
+            ["git", "clone", f"https://github.com/freaxnx01/{repo}.git", str(repo_path)],
+            check=True, capture_output=True, text=True,
+        )
+    return repo_path
+
+
+def process_repo(game: dict, clones_root: Path, dry_run: bool = False) -> str:
+    repo = game["repo"]
+    try:
+        repo_path = ensure_local_clone(repo, clones_root)
+    except subprocess.CalledProcessError as e:
+        return f"failed: clone/pull error: {e.stderr.strip()[:200]}"
+
+    favicon_bytes = generate_favicon_bytes(game["icon_path"])
+    favicon_path = repo_path / "favicon.png"
+    favicon_changed = (
+        not favicon_path.exists() or favicon_path.read_bytes() != favicon_bytes
+    )
+
+    index_path = repo_path / "index.html"
+    html = index_path.read_text()
+    try:
+        new_html, link_changed = ensure_favicon_link(html)
+    except ValueError as e:
+        return f"failed: {e}"
+
+    if not favicon_changed and not link_changed:
+        return "skipped (already done)"
+
+    if dry_run:
+        return "would update (dry-run)"
+
+    if favicon_changed:
+        favicon_path.write_bytes(favicon_bytes)
+    if link_changed:
+        index_path.write_text(new_html)
+
+    try:
+        subprocess.run(
+            ["git", "-C", str(repo_path), "add", "favicon.png", "index.html"],
+            check=True, capture_output=True, text=True,
+        )
+        subprocess.run(
+            ["git", "-C", str(repo_path), "commit", "-m", "feat: add favicon"],
+            check=True, capture_output=True, text=True,
+        )
+        subprocess.run(
+            ["git", "-C", str(repo_path), "push", "origin", "main"],
+            check=True, capture_output=True, text=True,
+        )
+    except subprocess.CalledProcessError as e:
+        return f"failed: commit/push error: {e.stderr.strip()[:200]}"
+
+    return "succeeded"
