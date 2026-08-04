@@ -230,6 +230,22 @@ body {
   flex: 1;
 }
 
+.card__inspired {
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  font-style: italic;
+  margin: 0;
+}
+
+.card__inspired a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.card__inspired a:hover {
+  text-decoration: underline;
+}
+
 .card__badges {
   display: flex;
   flex-wrap: wrap;
