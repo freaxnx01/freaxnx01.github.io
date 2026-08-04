@@ -12,6 +12,7 @@
   document.querySelectorAll(".card[data-original-title]").forEach(function (card) {
     var title = card.getAttribute("data-original-title");
     var url = card.getAttribute("data-original-url");
+    var screenshot = card.getAttribute("data-original-screenshot");
     var body = card.querySelector(".card__body");
     if (!title || !body) return;
 
@@ -27,7 +28,18 @@
       a.textContent = title;
       p.appendChild(a);
     } else {
-      p.textContent = "Inspired by " + title;
+      p.appendChild(document.createTextNode("Inspired by " + title));
+    }
+
+    if (screenshot) {
+      p.appendChild(document.createTextNode(" ("));
+      var s = document.createElement("a");
+      s.href = screenshot;
+      s.target = "_blank";
+      s.rel = "noopener";
+      s.textContent = "screenshot";
+      p.appendChild(s);
+      p.appendChild(document.createTextNode(")"));
     }
 
     var badges = body.querySelector(".card__badges");

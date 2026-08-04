@@ -37,6 +37,28 @@ also getting `data-original-url` today, but the rendering must support the
 title-only case (see below) since future retro cards may not have a Wikipedia
 article.
 
+### Extension: non-retro cards + `data-original-screenshot`
+
+The rendering script keys off `data-original-title` alone (see below), not off
+`data-retro="true"` — so cards that aren't tagged retro can carry the same
+attributes and still show an "Inspired by …" line. Five such cards were added:
+
+| Card | `data-original-title` | `data-original-url` | `data-original-screenshot` |
+|---|---|---|---|
+| Dustline | AirStrike 3D: Operation W.A.T. | `https://www.myabandonware.com/game/airstrike-3d-operation-w-a-t-duf` | same (page shows screenshots inline) |
+| Kick Fury | Panza Kick Boxing | `https://en.wikipedia.org/wiki/Panza_Kick_Boxing` | `https://en.wikipedia.org/wiki/File:PanzaKickBoxing_cover.png` |
+| PLOD | Lemmings | `https://en.wikipedia.org/wiki/Lemmings_(video_game)` | `https://en.wikipedia.org/wiki/File:Amiga_Lemmings.png` |
+| Sky Fury | Wings of Fury | `https://en.wikipedia.org/wiki/Wings_of_Fury` | `https://en.wikipedia.org/wiki/File:Wings_of_Fury_Coverart.png` |
+| Stack Duel | Tetris for Windows | `https://www.apfeltalk.de/magazin/news/microsoft-tetris-fuer-windows-3-11-direkt-im-browser-spielen/` | `https://classicreload.com/win3x-tetris-for-windows.html` |
+
+A new optional `data-original-screenshot` attribute was also backfilled onto
+all 14 original retro cards (see the implementation plan for the per-card
+mapping). When present, it renders as a second, separate link — `(screenshot)`
+— appended after the title link inside the same `card__inspired` line. Most
+Wikipedia images used are cover art / arcade flyers rather than true gameplay
+captures (Wikipedia rarely hosts the latter); this is a known limitation, not
+a bug.
+
 ### Rendering: JS-injected `card__inspired` line
 
 A small script (added to `lightbox.js`, since it already runs a
