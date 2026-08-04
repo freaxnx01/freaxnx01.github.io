@@ -18,17 +18,17 @@ in `games/index.html`:
 |---|---|---|
 | Iron Valhalla — Battlechess | Battle Chess | `https://en.wikipedia.org/wiki/Battle_Chess` |
 | Brickfall | Arkanoid | `https://en.wikipedia.org/wiki/Arkanoid` |
-| Rockfall | Boulder Dash | `https://en.wikipedia.org/wiki/Boulder_Dash` |
+| Rockfall | Boulder Dash | `https://en.wikipedia.org/wiki/Boulder_Dash_(video_game)` |
 | Oil Fever '89 | Oil Imperium | `https://en.wikipedia.org/wiki/Oil_Imperium` |
 | Neon Pong | Pong | `https://en.wikipedia.org/wiki/Pong` |
-| Gem Cascade | Bejeweled | `https://en.wikipedia.org/wiki/Bejeweled` |
+| Gem Cascade | Bejeweled | `https://en.wikipedia.org/wiki/Bejeweled_(video_game)` |
 | Maze Muncher | Pac-Man | `https://en.wikipedia.org/wiki/Pac-Man` |
 | Nibbles | Nibbles (QBasic) | `https://en.wikipedia.org/wiki/Nibbles_(video_game)` |
 | BMX Beach Jam | California Games | `https://en.wikipedia.org/wiki/California_Games` |
 | Cluck & Load | Moorhuhn | `https://en.wikipedia.org/wiki/Moorhuhn` |
 | Gorillazz | Gorillas (QBasic) | `https://en.wikipedia.org/wiki/Gorillas_(video_game)` |
 | Moon Lander | Lunar Lander (1979) | `https://en.wikipedia.org/wiki/Lunar_Lander_(1979_video_game)` |
-| North & South Clone | The North & South | `https://en.wikipedia.org/wiki/The_North_%26_South_(video_game)` |
+| North & South Clone | The North & South | `https://en.wikipedia.org/wiki/North_%26_South_(video_game)` |
 | Space Invaders | Space Invaders | `https://en.wikipedia.org/wiki/Space_Invaders` |
 
 All 14 currently-tagged `data-retro="true"` cards get both attributes — every
