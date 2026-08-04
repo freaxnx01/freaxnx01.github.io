@@ -14,6 +14,7 @@
   var searchInput = document.getElementById("game-search");
   var kidsToggle = document.getElementById("kids-toggle");
   var retroToggle = document.getElementById("retro-toggle");
+  var inspiredToggle = document.getElementById("inspired-toggle");
   var randomBtn = document.getElementById("random-game-btn");
 
   // Current selection. primary: all | solo | mp. sub applies only when primary === "mp".
@@ -23,6 +24,7 @@
   var search = "";
   var kidsOnly = false;
   var retroOnly = false;
+  var inspiredOnly = false;
 
   // Does a card's mode list satisfy the active mode filter?
   function matchesMode(modes) {
@@ -55,12 +57,17 @@
     return !retroOnly || cardRetro === true;
   }
 
+  // Does a card satisfy the active Inspired-by-only filter?
+  function matchesInspired(cardInspired) {
+    return !inspiredOnly || cardInspired === true;
+  }
+
   // WIP games are hidden under every other primary mode and shown only
   // when "Under construction" itself is the active filter.
-  function matches(modes, cardCategory, title, cardKids, cardWip, cardRetro) {
-    if (primary === "wip") return cardWip && matchesCategory(cardCategory) && matchesSearch(title) && matchesKids(cardKids) && matchesRetro(cardRetro);
+  function matches(modes, cardCategory, title, cardKids, cardWip, cardRetro, cardInspired) {
+    if (primary === "wip") return cardWip && matchesCategory(cardCategory) && matchesSearch(title) && matchesKids(cardKids) && matchesRetro(cardRetro) && matchesInspired(cardInspired);
     if (cardWip) return false;
-    return matchesMode(modes) && matchesCategory(cardCategory) && matchesSearch(title) && matchesKids(cardKids) && matchesRetro(cardRetro);
+    return matchesMode(modes) && matchesCategory(cardCategory) && matchesSearch(title) && matchesKids(cardKids) && matchesRetro(cardRetro) && matchesInspired(cardInspired);
   }
 
   function apply() {
@@ -73,7 +80,8 @@
       var cardKids = card.hasAttribute("data-kids");
       var cardWip = card.hasAttribute("data-wip");
       var cardRetro = card.hasAttribute("data-retro");
-      var show = matches(modes, cardCategory, title, cardKids, cardWip, cardRetro);
+      var cardInspired = card.hasAttribute("data-original-title");
+      var show = matches(modes, cardCategory, title, cardKids, cardWip, cardRetro, cardInspired);
       if (show) {
         visible++;
         card.classList.remove("card--hidden");
@@ -174,6 +182,15 @@
       retroOnly = !retroOnly;
       retroToggle.classList.toggle("is-active", retroOnly);
       retroToggle.setAttribute("aria-pressed", retroOnly ? "true" : "false");
+      apply();
+    });
+  }
+
+  if (inspiredToggle) {
+    inspiredToggle.addEventListener("click", function () {
+      inspiredOnly = !inspiredOnly;
+      inspiredToggle.classList.toggle("is-active", inspiredOnly);
+      inspiredToggle.setAttribute("aria-pressed", inspiredOnly ? "true" : "false");
       apply();
     });
   }
