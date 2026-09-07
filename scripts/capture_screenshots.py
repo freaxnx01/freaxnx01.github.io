@@ -56,6 +56,7 @@ REPOS = [
     "game-photo-puzzler",
     "game-criss-cross",
     "game-millionenfrage",
+    "game-trip-muncher",
     "dogwash",
 ]
 BASE_URL = "https://github.freaxnx01.ch/{repo}/"
@@ -90,6 +91,18 @@ ASSETS_DIR = Path(__file__).resolve().parent.parent / "games" / "assets"
 # Games without a recipe are shot as-is (their title screen is fine).
 CENTER = (0.5, 0.6)
 ACTIONS = {
+    "game-trip-muncher": [
+        # The title screen (blue US map + full route + banner) is the best shot,
+        # but it is not what the default 2s RENDER_DELAY_MS catches: the dc
+        # runtime pulls React off the CDN, so hydration -- and therefore the
+        # ~1.5s OKTA-80 boot teletype that runs before the title -- only starts
+        # *after* networkidle fires. Verified live against
+        # https://github.freaxnx01.ch/game-trip-muncher/: at 2s the shot is the
+        # black boot screen mid-`]LOAD "VACATION"`; a further 3s lands on the
+        # title. Don't press Space to skip the boot -- once the title is up the
+        # same key starts the run and the map is gone.
+        ("wait", 3000),
+    ],
     "game-space-invaders": [
         ("click", CENTER), ("press", "Space"), ("wait", 500),
         ("down", "ArrowRight"),
