@@ -57,6 +57,7 @@ REPOS = [
     "game-criss-cross",
     "game-millionenfrage",
     "game-trip-muncher",
+    "game-huusli-jagd",
     "dogwash",
 ]
 BASE_URL = "https://github.freaxnx01.ch/{repo}/"
@@ -91,6 +92,11 @@ ASSETS_DIR = Path(__file__).resolve().parent.parent / "games" / "assets"
 # Games without a recipe are shot as-is (their title screen is fine).
 CENTER = (0.5, 0.6)
 ACTIONS = {
+    "game-huusli-jagd": [
+        # Menu defaults (Zürich, solo vs 3 CPUs) are fine; start so the shot shows
+        # the isometric board instead of the menu form.
+        ("select", "form button[type=submit]"), ("wait", 2500),
+    ],
     "game-trip-muncher": [
         # The title screen (blue US map + full route + banner) is the best shot,
         # but it is not what the default 2s RENDER_DELAY_MS catches: the dc
