@@ -58,6 +58,7 @@ REPOS = [
     "game-millionenfrage",
     "game-trip-muncher",
     "game-huusli-jagd",
+    "game-stylestar",
     "dogwash",
 ]
 BASE_URL = "https://github.freaxnx01.ch/{repo}/"
