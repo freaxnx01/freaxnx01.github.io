@@ -59,6 +59,7 @@ REPOS = [
     "game-trip-muncher",
     "game-huusli-jagd",
     "game-stylestar",
+    "game-wipfelkratzer",
     "dogwash",
 ]
 BASE_URL = "https://github.freaxnx01.ch/{repo}/"
@@ -93,6 +94,18 @@ ASSETS_DIR = Path(__file__).resolve().parent.parent / "games" / "assets"
 # Games without a recipe are shot as-is (their title screen is fine).
 CENTER = (0.5, 0.6)
 ACTIONS = {
+    "game-wipfelkratzer": [
+        # The intro overlay covers the whole scene, and a fresh localStorage means
+        # zero floors -- so dismiss the overlay and build a few storeys, otherwise
+        # the shot is an empty platform behind a text panel. The build animation is
+        # ~0.7s per floor plus a camera lift, hence the 1.2s waits.
+        ("select", "#btn-start"), ("wait", 1500),
+        ("select", "#btn-build"), ("wait", 1200),
+        ("select", "#btn-build"), ("wait", 1200),
+        ("select", "#btn-build"), ("wait", 1200),
+        ("select", "#btn-build"), ("wait", 1200),
+        ("select", "#btn-build"), ("wait", 1800),
+    ],
     "game-huusli-jagd": [
         # Menu defaults (Zürich, solo vs 3 CPUs) are fine; start so the shot shows
         # the isometric board instead of the menu form.
@@ -306,7 +319,11 @@ def run_actions(page, steps) -> None:
                 page.mouse.click(int(VIEWPORT["width"] * arg[0]),
                                  int(VIEWPORT["height"] * arg[1]))
             elif verb == "select":
-                page.click(arg, timeout=5000)
+                # 15s, not 5s: Playwright's actionability check runs on the page's
+                # rAF loop, so a heavy WebGL game under software rendering (headless
+                # has no GPU) can take >5s just to scroll the element into view --
+                # game-wipfelkratzer measured 7.2s for a plainly visible button.
+                page.click(arg, timeout=15000)
             elif verb == "press":
                 page.keyboard.press(arg)
             elif verb == "down":
