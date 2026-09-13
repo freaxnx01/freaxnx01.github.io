@@ -105,6 +105,10 @@ ACTIONS = {
         ("select", "#btn-build"), ("wait", 1200),
         ("select", "#btn-build"), ("wait", 1200),
         ("select", "#btn-build"), ("wait", 1800),
+        # Since v0.5.0 toasts stay up until dismissed (game-wipfelkratzer#10), so
+        # five builds leave five stacked messages covering the tower. "Alle
+        # schliessen" appears from the second toast onwards and clears them.
+        ("select", "#toast-clear-all"), ("wait", 500),
     ],
     "game-huusli-jagd": [
         # Menu defaults (Zürich, solo vs 3 CPUs) are fine; start so the shot shows
