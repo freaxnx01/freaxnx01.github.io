@@ -237,3 +237,10 @@ def test_no_version_js_commits_without_release(remote):
     status = process_repo("game-demo", remote["clones"], remote_base=remote["base"])
     assert status == "succeeded (no release: no version.js)"
     assert git(remote["bare"], "log", "--format=%s", "-1", "main").strip() == "feat(nav): add fullscreen toggle"
+
+
+TEMPLATE = Path(__file__).parent.parent / "docs" / "superpowers" / "specs" / "2026-07-13-game-card-feedback-star-snippet.html"
+
+
+def test_canonical_template_contains_snippet_verbatim():
+    assert load_snippet() in TEMPLATE.read_text()
