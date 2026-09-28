@@ -103,3 +103,137 @@ def test_bump_minor_rejects_garbage():
 def test_served_file():
     assert served_file("game-gorillazz") == "docs/index.html"
     assert served_file("game-nibbles") == "index.html"
+
+
+import shutil
+import subprocess
+
+from add_fullscreen_toggle import process_repo  # noqa: E402
+
+needs_cliff = pytest.mark.skipif(shutil.which("git-cliff") is None, reason="git-cliff not installed")
+
+CLIFF_TOML = '''[changelog]
+header = "# Changelog\\n"
+body = """
+{% if version %}## [{{ version | trim_start_matches(pat="v") }}]{% else %}## [Unreleased]{% endif %}
+{% for commit in commits %}- {{ commit.message | split(pat="\\n") | first }}
+{% endfor %}"""
+trim = true
+
+[git]
+conventional_commits = true
+filter_unconventional = false
+tag_pattern = "v[0-9].*"
+'''
+
+GAME_HTML = """<!doctype html><html><body>
+<nav id="game-nav"><span id="version-badge"></span></nav>
+</body></html>
+"""
+
+
+@pytest.fixture
+def git_identity(monkeypatch):
+    for k, v in {
+        "GIT_AUTHOR_NAME": "Test", "GIT_AUTHOR_EMAIL": "test@example.com",
+        "GIT_COMMITTER_NAME": "Test", "GIT_COMMITTER_EMAIL": "test@example.com",
+    }.items():
+        monkeypatch.setenv(k, v)
+
+
+def git(cwd, *args):
+    return subprocess.run(["git", "-C", str(cwd), *args], check=True, capture_output=True, text=True).stdout
+
+
+@pytest.fixture
+def remote(tmp_path, git_identity):
+    """A bare remote game-demo.git seeded with a game at v0.3.1."""
+    base = tmp_path / "remotes"
+    bare = base / "game-demo.git"
+    git(tmp_path, "init", "-q", "--bare", "-b", "main", str(bare))
+    seed = tmp_path / "seed"
+    git(tmp_path, "clone", "-q", str(bare), str(seed))
+    (seed / "index.html").write_text(GAME_HTML)
+    (seed / "version.js").write_text('window.GAME_VERSION = "0.3.1";\n')
+    (seed / "cliff.toml").write_text(CLIFF_TOML)
+    (seed / "CHANGELOG.md").write_text("# Changelog\n")
+    git(seed, "add", ".")
+    git(seed, "commit", "-q", "-m", "chore(release): v0.3.1")
+    git(seed, "tag", "v0.3.1")
+    git(seed, "push", "-q", "--follow-tags", "origin", "main")
+    return {"base": f"file://{base}", "bare": bare, "clones": tmp_path / "clones", "tmp": tmp_path}
+
+
+def remote_file(remote, path, ref="main"):
+    return git(remote["bare"], "show", f"{ref}:{path}")
+
+
+@needs_cliff
+def test_process_repo_injects_releases_and_pushes(remote):
+    status = process_repo("game-demo", remote["clones"], remote_base=remote["base"])
+    assert status.startswith("succeeded"), status
+    assert "v0.4.0" in status
+    assert "game-nav-fullscreen:start" in remote_file(remote, "index.html")
+    assert '"0.4.0"' in remote_file(remote, "version.js")
+    assert "0.4.0" in remote_file(remote, "CHANGELOG.md")
+    assert "v0.4.0" in git(remote["bare"], "tag", "--list")
+    log = git(remote["bare"], "log", "--format=%s", "-2", "main").splitlines()
+    assert log == ["chore(release): v0.4.0", "feat(nav): add fullscreen toggle"]
+
+
+@needs_cliff
+def test_process_repo_rerun_is_noop(remote):
+    process_repo("game-demo", remote["clones"], remote_base=remote["base"])
+    head = git(remote["bare"], "rev-parse", "main")
+    status = process_repo("game-demo", remote["clones"], remote_base=remote["base"])
+    assert status == "skipped: up to date"
+    assert git(remote["bare"], "rev-parse", "main") == head
+
+
+@needs_cliff
+def test_stale_local_tag_from_failed_push_does_not_block(remote):
+    # A previous run tagged locally, then the push failed.
+    clone = remote["clones"] / "game-demo"
+    git(remote["tmp"], "clone", "-q", f"{remote['base']}/game-demo.git", str(clone))
+    git(clone, "tag", "v0.4.0")
+    status = process_repo("game-demo", remote["clones"], remote_base=remote["base"])
+    assert status.startswith("succeeded"), status
+    assert "v0.4.0" in git(remote["bare"], "tag", "--list")
+
+
+def test_existing_remote_tag_fails_without_pushing(remote):
+    seed = remote["tmp"] / "seed"
+    git(seed, "tag", "v0.4.0")
+    git(seed, "push", "-q", "origin", "v0.4.0")
+    head = git(remote["bare"], "rev-parse", "main")
+    status = process_repo("game-demo", remote["clones"], remote_base=remote["base"])
+    assert status.startswith("failed"), status
+    assert "v0.4.0" in status and "exists" in status
+    assert git(remote["bare"], "rev-parse", "main") == head
+
+
+def test_dry_run_touches_nothing(remote):
+    head = git(remote["bare"], "rev-parse", "main")
+    status = process_repo("game-demo", remote["clones"], remote_base=remote["base"], dry_run=True)
+    assert status == "would update → v0.4.0 (dry-run)"
+    assert git(remote["bare"], "rev-parse", "main") == head
+    assert "game-nav-fullscreen" not in (remote["clones"] / "game-demo" / "index.html").read_text()
+
+
+def test_page_without_nav_is_skipped(remote):
+    seed = remote["tmp"] / "seed"
+    (seed / "index.html").write_text("<html><body>no nav</body></html>")
+    git(seed, "commit", "-q", "-am", "chore: drop nav")
+    git(seed, "push", "-q", "origin", "main")
+    status = process_repo("game-demo", remote["clones"], remote_base=remote["base"])
+    assert status == "skipped: no game-nav"
+
+
+def test_no_version_js_commits_without_release(remote):
+    seed = remote["tmp"] / "seed"
+    git(seed, "rm", "-q", "version.js")
+    git(seed, "commit", "-q", "-m", "chore: drop version")
+    git(seed, "push", "-q", "origin", "main")
+    status = process_repo("game-demo", remote["clones"], remote_base=remote["base"])
+    assert status == "succeeded (no release: no version.js)"
+    assert git(remote["bare"], "log", "--format=%s", "-1", "main").strip() == "feat(nav): add fullscreen toggle"
