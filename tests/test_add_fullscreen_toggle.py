@@ -168,7 +168,6 @@ def remote_file(remote, path, ref="main"):
     return git(remote["bare"], "show", f"{ref}:{path}")
 
 
-@needs_cliff
 def test_process_repo_injects_releases_and_pushes(remote):
     status = process_repo("game-demo", remote["clones"], remote_base=remote["base"])
     assert status.startswith("succeeded"), status
@@ -181,7 +180,6 @@ def test_process_repo_injects_releases_and_pushes(remote):
     assert log == ["chore(release): v0.4.0", "feat(nav): add fullscreen toggle"]
 
 
-@needs_cliff
 def test_process_repo_rerun_is_noop(remote):
     process_repo("game-demo", remote["clones"], remote_base=remote["base"])
     head = git(remote["bare"], "rev-parse", "main")
@@ -190,7 +188,6 @@ def test_process_repo_rerun_is_noop(remote):
     assert git(remote["bare"], "rev-parse", "main") == head
 
 
-@needs_cliff
 def test_stale_local_tag_from_failed_push_does_not_block(remote):
     # A previous run tagged locally, then the push failed.
     clone = remote["clones"] / "game-demo"
@@ -244,3 +241,81 @@ TEMPLATE = Path(__file__).parent.parent / "docs" / "superpowers" / "specs" / "20
 
 def test_canonical_template_contains_snippet_verbatim():
     assert load_snippet() in TEMPLATE.read_text()
+
+
+# --- changelog release section (replaces git-cliff regeneration, which
+# --- rewrote hand-curated changelogs) and version.js location -------------
+
+from add_fullscreen_toggle import CHANGELOG_LINE, release_changelog, version_file  # noqa: E402
+
+HEADER = "# Changelog\n\nAll notable changes.\n\n"
+
+
+def test_version_file_sits_next_to_served_page():
+    assert version_file("game-gorillazz") == "docs/version.js"
+    assert version_file("game-nibbles") == "version.js"
+
+
+def test_release_empty_unreleased_keeps_it_on_top():
+    text = HEADER + "## [Unreleased]\n\n## [0.1.0] - 2026-07-27\n\n### Added\n- Old\n"
+    out = release_changelog(text, "0.2.0", "2026-09-29")
+    assert out == (
+        HEADER + "## [Unreleased]\n\n"
+        "## [0.2.0] - 2026-09-29\n\n### Added\n- " + CHANGELOG_LINE + "\n\n"
+        "## [0.1.0] - 2026-07-27\n\n### Added\n- Old\n"
+    )
+
+
+def test_release_moves_curated_unreleased_entries_into_version():
+    text = HEADER + (
+        "## [Unreleased]\n\n### Added\n- Feature A\n\n### Fixed\n- Bug B\n\n"
+        "## [0.1.0] - 2026-07-27\n\n- Old\n"
+    )
+    out = release_changelog(text, "0.2.0", "2026-09-29")
+    assert out == HEADER + (
+        "## [Unreleased]\n\n"
+        "## [0.2.0] - 2026-09-29\n\n### Added\n- Feature A\n- " + CHANGELOG_LINE + "\n\n### Fixed\n- Bug B\n\n"
+        "## [0.1.0] - 2026-07-27\n\n- Old\n"
+    )
+
+
+def test_release_adds_added_subsection_when_missing():
+    text = HEADER + "## [Unreleased]\n\n### Fixed\n- Bug B\n\n## [0.1.0] - 2026-07-27\n"
+    out = release_changelog(text, "0.2.0", "2026-09-29")
+    assert "## [0.2.0] - 2026-09-29\n\n### Added\n- " + CHANGELOG_LINE + "\n\n### Fixed\n- Bug B\n\n## [0.1.0]" in out
+
+
+def test_release_without_unreleased_goes_above_newest_version():
+    text = HEADER + "## [0.2.0] - 2026-08-18\n\n- Old\n"
+    out = release_changelog(text, "0.3.0", "2026-09-29")
+    assert out == HEADER + (
+        "## [0.3.0] - 2026-09-29\n\n### Added\n- " + CHANGELOG_LINE + "\n\n"
+        "## [0.2.0] - 2026-08-18\n\n- Old\n"
+    )
+
+
+def test_release_on_header_only_changelog_appends():
+    out = release_changelog("# Changelog\n", "0.4.0", "2026-09-29")
+    assert out == "# Changelog\n\n## [0.4.0] - 2026-09-29\n\n### Added\n- " + CHANGELOG_LINE + "\n"
+
+
+def test_release_never_drops_existing_lines():
+    text = HEADER + "## [Unreleased]\n\n### Added\n- A\n\n## [0.1.0] - 2026-07-27\n\n- Old\n"
+    out = release_changelog(text, "0.2.0", "2026-09-29")
+    for line in text.splitlines():
+        assert line in out.splitlines()
+
+
+def test_release_updates_link_references():
+    base = "https://github.com/freaxnx01/game-x"
+    text = HEADER + (
+        "## [Unreleased]\n\n## [0.1.0] - 2026-07-27\n\n- Old\n\n"
+        f"[Unreleased]: {base}/compare/v0.1.0...HEAD\n"
+        f"[0.1.0]: {base}/releases/tag/v0.1.0\n"
+    )
+    out = release_changelog(text, "0.2.0", "2026-09-29")
+    assert out.endswith(
+        f"[Unreleased]: {base}/compare/v0.2.0...HEAD\n"
+        f"[0.2.0]: {base}/releases/tag/v0.2.0\n"
+        f"[0.1.0]: {base}/releases/tag/v0.1.0\n"
+    )

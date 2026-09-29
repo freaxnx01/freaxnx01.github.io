@@ -3,7 +3,7 @@
 
 For each game listed in games/index.html, injects scripts/fullscreen_snippet.html
 before </body> of the repo's served page, commits it, releases the game as a
-minor version (version.js + git-cliff CHANGELOG + tag), and pushes.
+minor version (version.js + a new CHANGELOG section + tag), and pushes.
 
 Works on script-owned clean clones in ~/.cache/game-rollout/ — never on the
 sibling working copies, which may carry in-progress branches.
@@ -17,11 +17,12 @@ Usage:
 Design: docs/superpowers/specs/2026-09-28-game-nav-fullscreen-design.md (#25)
 """
 import argparse
+import datetime
 import os
 import re
 import subprocess
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from add_game_favicons import default_branch, discover_games
 
@@ -39,6 +40,12 @@ SERVED_FILE = {"game-gorillazz": "docs/index.html"}
 REMOTE_BASE = "https://github.com/freaxnx01"
 DEFAULT_CLONES_ROOT = Path.home() / ".cache" / "game-rollout"
 FEAT_MSG = "feat(nav): add fullscreen toggle"
+CHANGELOG_LINE = "Fullscreen toggle (\u26f6) in the game navigation"
+
+UNRELEASED_RE = re.compile(r"^## \[Unreleased\][^\n]*\n", re.MULTILINE)
+VERSION_HEADING_RE = re.compile(r"^## \[", re.MULTILINE)
+LINKREF_RE = re.compile(r"^\[[^\]]+\]: ", re.MULTILINE)
+UNRELEASED_LINK_RE = re.compile(r"^\[Unreleased\]: (\S+)/compare/v\S+?\.\.\.HEAD$", re.MULTILINE)
 
 
 def load_snippet() -> str:
@@ -84,6 +91,61 @@ def bump_minor(version: str) -> str:
 
 def served_file(repo: str) -> str:
     return SERVED_FILE.get(repo, "index.html")
+
+
+def version_file(repo: str) -> str:
+    """version.js is loaded by the served page, so it sits next to it."""
+    return str(PurePosixPath(served_file(repo)).parent / "version.js")
+
+
+def _with_added_line(body: str) -> str:
+    """A section body with CHANGELOG_LINE appended under its ### Added list."""
+    lines = body.strip("\n").split("\n") if body.strip() else []
+    if "### Added" not in lines:
+        return "\n".join(["### Added", f"- {CHANGELOG_LINE}"] + ([""] + lines if lines else [])) + "\n"
+    head = lines.index("### Added")
+    i = head + 1
+    while i < len(lines) and not lines[i].strip():
+        i += 1
+    start = i
+    while i < len(lines) and lines[i].strip() and not lines[i].startswith("### "):
+        i += 1
+    lines.insert(i if i > start else head + 1, f"- {CHANGELOG_LINE}")
+    return "\n".join(lines) + "\n"
+
+
+def release_changelog(text: str, version: str, date: str) -> str:
+    """Add a `## [version] - date` section without touching existing entries.
+
+    Replaces `git cliff -o`, which regenerated the whole file from history and
+    so rewrote hand-curated changelogs. Keep a Changelog layout is kept: an
+    `## [Unreleased]` heading stays on top (emptied — its curated entries move
+    into the new version, which is what the tag now ships), and an
+    `[Unreleased]: …/compare/vX...HEAD` link reference is advanced.
+    """
+    section_head = f"## [{version}] - {date}\n\n"
+    m = UNRELEASED_RE.search(text)
+    if m:
+        nxt = VERSION_HEADING_RE.search(text, m.end()) or LINKREF_RE.search(text, m.end())
+        end = nxt.start() if nxt else len(text)
+        section = section_head + _with_added_line(text[m.end():end])
+        out = text[:m.end()] + "\n" + section + ("\n" + text[end:] if nxt else "")
+    else:
+        section = section_head + _with_added_line("")
+        nxt = VERSION_HEADING_RE.search(text)
+        if nxt:
+            out = text[:nxt.start()] + section + "\n" + text[nxt.start():]
+        else:
+            out = text.rstrip("\n") + "\n\n" + section
+
+    link = UNRELEASED_LINK_RE.search(out)
+    if link:
+        base = link.group(1)
+        out = (out[:link.start()]
+               + f"[Unreleased]: {base}/compare/v{version}...HEAD\n"
+               + f"[{version}]: {base}/releases/tag/v{version}"
+               + out[link.end():])
+    return out
 
 
 def _git(repo_path: Path, *args: str) -> str:
@@ -134,7 +196,8 @@ def process_repo(repo: str, clones_root: Path, remote_base: str = REMOTE_BASE, d
     if not changed:
         return "skipped: up to date"
 
-    version_path = repo_path / "version.js"
+    version_rel = version_file(repo)
+    version_path = repo_path / version_rel
     version_js = version_path.read_text() if version_path.exists() else ""
     current = read_version(version_js)
     new_version = bump_minor(current) if current else None
@@ -156,11 +219,10 @@ def process_repo(repo: str, clones_root: Path, remote_base: str = REMOTE_BASE, d
         _git(repo_path, "commit", "-q", "-m", FEAT_MSG)
         if tag:
             version_path.write_text(write_version(version_js, new_version))
-            subprocess.run(
-                ["git-cliff", "--tag", tag, "-o", "CHANGELOG.md"],
-                cwd=repo_path, check=True, capture_output=True, text=True,
-            )
-            _git(repo_path, "add", "version.js", "CHANGELOG.md")
+            changelog = repo_path / "CHANGELOG.md"
+            current_log = changelog.read_text() if changelog.exists() else "# Changelog\n"
+            changelog.write_text(release_changelog(current_log, new_version, datetime.date.today().isoformat()))
+            _git(repo_path, "add", version_rel, "CHANGELOG.md")
             _git(repo_path, "commit", "-q", "-m", f"chore(release): {tag}")
             # Annotated: `push --follow-tags` below pushes annotated tags only,
             # so a lightweight tag would stay local and never reach origin.
