@@ -20,6 +20,7 @@ from PIL import Image
 from playwright.sync_api import sync_playwright
 
 REPOS = [
+    "game-rhyflitzer",
     "game-iron-valhalla",
     "game-aerodrome-apex",
     "game-brickfall",
@@ -94,6 +95,14 @@ ASSETS_DIR = Path(__file__).resolve().parent.parent / "games" / "assets"
 # Games without a recipe are shot as-is (their title screen is fine).
 CENTER = (0.5, 0.6)
 ACTIONS = {
+    "game-rhyflitzer": [
+        # The start dialog covers the town; start the race so the shot shows the
+        # car on the Hochrhein roads. A coordinate click, not ("select",
+        # "#startbtn"): under software GL the render loop never lets Playwright's
+        # actionability check see the button as "stable" (15s timeout, measured).
+        # (0.33, 0.66) is the Start button at the 1280x800 VIEWPORT.
+        ("click", (0.33, 0.66)), ("wait", 3000),
+    ],
     "game-wipfelkratzer": [
         # The intro overlay covers the whole scene, and a fresh localStorage means
         # zero floors -- so dismiss the overlay and build a few storeys, otherwise
