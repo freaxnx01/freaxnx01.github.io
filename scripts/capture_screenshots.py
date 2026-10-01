@@ -101,7 +101,11 @@ ACTIONS = {
         # "#startbtn"): under software GL the render loop never lets Playwright's
         # actionability check see the button as "stable" (15s timeout, measured).
         # (0.33, 0.66) is the Start button at the 1280x800 VIEWPORT.
-        ("click", (0.33, 0.66)), ("wait", 3000),
+        # Right after Start a large dark box is drawn in the WebGL canvas over the
+        # upper two-thirds (game-rhyflitzer#3); it is gone once the car moves, so
+        # drive forward briefly before the shot.
+        ("click", (0.33, 0.66)), ("wait", 1500),
+        ("down", "ArrowUp"), ("wait", 2500), ("up", "ArrowUp"), ("wait", 800),
     ],
     "game-wipfelkratzer": [
         # The intro overlay covers the whole scene, and a fresh localStorage means
