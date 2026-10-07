@@ -11,6 +11,24 @@ Each game lives in its own `game-<name>` repo (GitHub Pages, root `index.html`),
 is served at `https://github.freaxnx01.ch/<repo>/`, and gets a card in
 `games/index.html`.
 
+## Analytics (Umami)
+
+Games get Umami analytics (umami.is), self-hosted on VPS DE. Tschau Sepp is the
+first game to get it. Every game that gets the integration must name **Umami**
+and the **server location (Germany)** in its privacy notice. If the game has no
+privacy notice yet, add one as part of the integration. In dc games, put both
+the snippet and the notice in the `.dc.html` source, not the generated
+`index.html`.
+
+Each game gets its own Umami website, created through the Umami API with the
+Passbolt login „Umami admin stats.freaxnx01.ch". The tracker is the renamed
+`https://stats.freaxnx01.ch/g.js` with `data-domains="github.freaxnx01.ch"`.
+Use the custom domain here: `freaxnx01.github.io` redirects to it, so it never
+appears as the hostname. game-tschau-sepp PR #44 is the reference
+implementation (`analytics.js` helper plus the events). Put the privacy link in
+the game's own menu, not in `#game-nav`. A wider nav covers game buttons at
+1280×720.
+
 ## Game ideas / backlog
 
 New game ideas and the concept backlog are kept in a **separate private repo**
