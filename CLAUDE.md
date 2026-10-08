@@ -29,6 +29,10 @@ implementation (`analytics.js` helper plus the events). Put the privacy link in
 the game's own menu, not in `#game-nav`. A wider nav covers game buttons at
 1280×720.
 
+Umami's dashboard counts each event property separately. For one row per round
+with all players and scores, run `python3 scripts/umami_rounds.py` (`--since 30d`,
+`--online`, `--csv`).
+
 ## Game ideas / backlog
 
 New game ideas and the concept backlog are kept in a **separate private repo**
