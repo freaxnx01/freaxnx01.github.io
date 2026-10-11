@@ -209,3 +209,40 @@ def test_clipboardRefused_showsTextareaWithBlock(ctx):
     expect(hub.locator("textarea.export-box")).to_have_value(
         re.compile(r"^Testhub feedback — fake .* — \d{4}-\d\d-\d\d\n- \[Beta block · \"Plain item without tag\"\] x$"))
     expect(hub.locator("button.copy-all")).to_have_text("Copy all 0")
+
+
+def test_foreignMessagesAndOtherGame_areIgnored(ctx):
+    errors = []
+    game = open_game(ctx)
+    game.on("pageerror", lambda e: errors.append(str(e)))
+    hub = open_hub(ctx, errors)
+    expect(hub.locator(".status.on")).to_contain_text("v1.2.3 · 2 targets")
+    game.evaluate("""() => {
+      const c = new BroadcastChannel('gg-testhub');
+      c.postMessage({ type: 'hello', game: 'fake', version: '9', targets: 'nope' });
+      c.postMessage({ type: 'hello', game: 'other', version: '7.7.7', targets: [] });
+      c.postMessage('garbage');
+    }""")
+    hub.wait_for_timeout(300)
+    expect(hub.locator(".status.on")).to_contain_text("v1.2.3 · 2 targets")
+    assert game.evaluate("window.__at") is None
+    assert errors == []
+
+
+def test_narrowWindow_hasNoHorizontalScroll(browser):
+    ctx = new_context(browser, viewport={"width": 360, "height": 700})
+    try:
+        open_game(ctx)
+        hub = open_hub(ctx)
+        expect(hub.locator(".status.on")).to_be_visible()
+        item(hub, "Second item has its own tag").locator("button.text").click()
+        assert hub.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+    finally:
+        ctx.close()
+
+
+def test_ggLang_de_switchesUiStrings(ctx):
+    hub = open_hub(ctx, init_script="localStorage.setItem('gg-lang','de')")
+    expect(hub.locator("button.copy-all")).to_have_text("Alle kopieren 0")
+    hub.locator("button.lang").click()
+    expect(hub.locator("button.copy-all")).to_have_text("Copy all 0")
