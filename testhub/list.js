@@ -1,0 +1,50 @@
+import { h } from './dom.js';
+
+function matchesFilter(view, block, item) {
+  const entry = view.store.get(item.key);
+  if (view.filter === 'open' && entry.status === 'done') return false;
+  if (view.filter === 'noted' && entry.status !== 'noted') return false;
+  if (view.filter === 'done' && entry.status !== 'done') return false;
+  const query = view.query.trim().toLowerCase();
+  return !query || `${block.heading} ${item.text} ${entry.note}`.toLowerCase().includes(query);
+}
+
+function goControl(view, item) {
+  if (!item.tag) return null;
+  const { t, conn } = view;
+  if (!conn) return h('button', { class: 'go', disabled: true, title: item.tag }, t('go'));
+  if (!conn.targets.some((target) => target.id === item.tag)) {
+    return h('span', { class: 'go-unknown', title: t('goUnknown') }, item.tag);
+  }
+  return h('button', { class: 'go', onclick: () => view.actions.go(item) }, t('go'));
+}
+
+function renderItem(view, item) {
+  const entry = view.store.get(item.key);
+  const open = view.expanded.has(item.key);
+  const error = view.errors.get(item.key);
+  return h('li', { class: `item ${entry.status}${open ? ' expanded' : ''}`, 'data-key': item.key },
+    h('div', { class: 'row' },
+      h('button', { class: 'text', 'aria-expanded': String(open), onclick: () => view.actions.toggleItem(item.key) },
+        h('span', { class: 'box' }, entry.status === 'done' ? '☑' : '☐'), ' ', item.text),
+      goControl(view, item)),
+    error ? h('p', { class: 'error', role: 'alert' }, error) : null);
+}
+
+function renderBlock(view, block) {
+  const visible = block.items.filter((item) => matchesFilter(view, block, item));
+  if (visible.length === 0) return null;
+  const done = block.items.filter((item) => view.store.get(item.key).status === 'done').length;
+  const total = block.items.length;
+  const collapsed = view.collapsed.has(block.heading) ? view.collapsed.get(block.heading) : done === total;
+  return h('section', { class: 'block', 'data-block': block.heading },
+    h('button', { class: 'block-head', 'aria-expanded': String(!collapsed), onclick: () => view.actions.toggleBlock(block.heading, collapsed) },
+      h('span', { class: 'block-title' }, `${collapsed ? '▸' : '▾'} ${block.heading}`),
+      h('span', { class: 'progress' }, `${done} / ${total} ✓`)),
+    collapsed ? null : h('ul', {}, visible.map((item) => renderItem(view, item))));
+}
+
+export function renderList(view) {
+  const blocks = view.blocks.map((block) => renderBlock(view, block)).filter(Boolean);
+  return blocks.length === 0 ? h('p', { class: 'empty' }, view.t('noItems')) : h('div', { class: 'list' }, blocks);
+}
