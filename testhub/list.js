@@ -20,11 +20,18 @@ function goControl(view, item) {
 }
 
 function editor(view, item, entry) {
-  const { t, conn, actions } = view;
-  return h('div', { class: 'editor' },
+  const { t, conn, actions, drafts } = view;
+  const draft = drafts.has(item.key) ? drafts.get(item.key) : entry.note;
+  const area = h('textarea', {
+    class: 'note', rows: 3, placeholder: t('notePlaceholder'), 'data-focus': `note:${item.key}`,
+    oninput: (e) => drafts.set(item.key, e.target.value),
+  }, draft);
+  return h('div', { class: 'editor' }, area,
     h('div', { class: 'chips' }, entry.screenshots.map((name) => h('span', { class: 'chip' }, `📷 ${name} ✓`))),
     h('div', { class: 'buttons' },
-      h('button', { class: 'shot', type: 'button', disabled: !conn, onclick: () => actions.shot(item) }, t('shot'))));
+      h('button', { class: 'shot', type: 'button', disabled: !conn, onclick: () => actions.shot(item) }, t('shot')),
+      h('button', { class: 'save', type: 'button', onclick: () => actions.save(item) }, t('save')),
+      h('button', { class: 'done', type: 'button', onclick: () => actions.done(item) }, t('done'))));
 }
 
 function renderItem(view, item) {

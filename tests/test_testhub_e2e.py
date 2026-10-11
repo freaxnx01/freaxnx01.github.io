@@ -155,3 +155,57 @@ def test_screenshot_rejected_showsGameMessage_andStoresNothing(ctx):
     row.locator("button.text").click()
     row.locator("button.shot").click()
     expect(row.locator(".error")).to_have_text("photo failed")
+
+
+def add_note(hub, text, note):
+    row = item(hub, text)
+    row.locator("button.text").click()
+    row.locator("textarea.note").fill(note)
+    row.locator("button.save").click()
+
+
+def test_noteAndDone_copyAllExportsExactBlock_andMarksSent(ctx):
+    open_game(ctx)
+    hub = open_hub(ctx)
+    expect(hub.locator(".status.on")).to_be_visible()
+    add_note(hub, "First item inherits", "Turm zu dunkel")
+    typo = item(hub, "Typo tag item")
+    typo.locator("button.text").click()
+    typo.locator("button.done").click()
+    expect(hub.locator("button.copy-all")).to_have_text("Copy all 2")
+    hub.bring_to_front()
+    hub.locator("button.copy-all").click()
+    expect(hub.locator(".notice.ok")).to_contain_text("Copied 2 entries")
+    date = datetime.now(ZoneInfo(TZ)).strftime("%Y-%m-%d")
+    assert hub.evaluate("navigator.clipboard.readText()") == "\n".join([
+        f"Testhub feedback — fake v1.2.3 — {date}",
+        '- [Alpha block · "First item inherits the block tag" · go:fake.alpha] Turm zu dunkel',
+        '- ✓ tested: [Beta block · "Typo tag item"]',
+    ])
+    expect(hub.locator("button.copy-all")).to_have_text("Copy all 0")
+    expect(hub.locator("button.copy-all")).to_be_disabled()
+
+
+def test_stateSurvivesReload_doneHiddenUnderOpen_search(ctx):
+    hub = open_hub(ctx)
+    add_note(hub, "Plain item", "findme")
+    typo = item(hub, "Typo tag item")
+    typo.locator("button.text").click()
+    typo.locator("button.done").click()
+    expect(item(hub, "Typo tag item")).to_have_count(0)
+    hub.reload()
+    expect(hub.locator(".item")).to_have_count(3)
+    hub.locator("input.search").fill("findme")
+    expect(hub.locator(".item")).to_have_count(1)
+    hub.locator("input.search").fill("")
+    hub.locator("input[value=done]").check()
+    expect(hub.locator(".block", has_text="Beta block").locator(".progress")).to_have_text("1 / 2 ✓")
+
+
+def test_clipboardRefused_showsTextareaWithBlock(ctx):
+    hub = open_hub(ctx, init_script="Object.defineProperty(navigator,'clipboard',{value:{writeText:()=>Promise.reject(new Error('no'))}})")
+    add_note(hub, "Plain item", "x")
+    hub.locator("button.copy-all").click()
+    expect(hub.locator("textarea.export-box")).to_have_value(
+        re.compile(r"^Testhub feedback — fake .* — \d{4}-\d\d-\d\d\n- \[Beta block · \"Plain item without tag\"\] x$"))
+    expect(hub.locator("button.copy-all")).to_have_text("Copy all 0")
