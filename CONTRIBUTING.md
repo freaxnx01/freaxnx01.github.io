@@ -14,7 +14,7 @@ the `master` branch at a custom domain configured via `CNAME`.
 There is no build step or dependency manifest committed to this repo. To
 preview changes locally, use Jekyll directly as documented at
 [jekyllrb.com/docs](https://jekyllrb.com/docs/), pointing it at this
-directory. There is no test suite.
+directory. Tests live in tests/ (pytest + Playwright in .venv; node --test for testhub/).
 
 ## Layout
 
@@ -22,6 +22,7 @@ directory. There is no test suite.
 - `games/` — the Browser Games Hub, a static page (`index.html`, `style.css`,
   `lightbox.js`, `filter.js`, and `assets/`) linking out to individual
   `game-<name>` repos.
+- `testhub/` — the playtest hub and client.js, the one script games load in dev mode.
 - `docs/superpowers/specs/` — design specs for features on this site.
 - `docs/superpowers/plans/` — implementation plans for features on this site.
 

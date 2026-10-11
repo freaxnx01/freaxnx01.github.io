@@ -33,6 +33,16 @@ Umami's dashboard counts each event property separately. For one row per round
 with all players and scores, run `python3 scripts/umami_rounds.py` (`--since 30d`,
 `--online`, `--csv`).
 
+## Testhub
+
+`/testhub/` lists each game's open `test-todo.md` items, jumps the game to the
+place an item is about and exports notes with Copy all. Spec: `freaxnx01/game-rhyflitzer`
+`docs/superpowers/specs/2026-10-11-testhub-design.md`. Add a game by appending its
+slug to `GAMES` in `testhub/app.js`. A game loads `/testhub/client.js` async in dev
+mode only (`?dev=1`) and registers after the `gg-testhub-ready` event (contract in
+the header comment of `testhub/client.js`). Items are tagged `{go: <id>}`.
+Tests: `node --test tests/testhub/*.test.mjs` and `.venv/bin/pytest tests/test_testhub_e2e.py`.
+
 ## Game ideas / backlog
 
 New game ideas and the concept backlog are kept in a **separate private repo**
