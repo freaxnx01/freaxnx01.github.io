@@ -186,6 +186,32 @@ def test_noteAndDone_copyAllExportsExactBlock_andMarksSent(ctx):
     expect(hub.locator("button.copy-all")).to_be_disabled()
 
 
+def test_boxClick_marksDoneWithoutExpanding_countsInCopyAll_unsentUndoes(ctx):
+    hub = open_hub(ctx)
+    plain = item(hub, "Plain item without tag")
+    block = hub.locator(".block", has_text="Beta block")
+    expect(plain.locator("button.box")).to_have_attribute("aria-pressed", "false")
+    plain.locator("button.box").click()
+    expect(block.locator(".progress")).to_have_text("1 / 2 ✓")
+    expect(hub.locator("button.copy-all")).to_have_text("Copy all 1")
+    hub.locator("input[value=done]").check()
+    box = plain.locator("button.box")
+    expect(box).to_have_attribute("aria-pressed", "true")
+    expect(plain.locator("button.text")).to_have_attribute("aria-expanded", "false")
+    expect(plain.locator("textarea.note")).to_have_count(0)
+    box.click()
+    expect(hub.locator("button.copy-all")).to_have_text("Copy all 0")
+    hub.locator("input[value=open]").check()
+    expect(block.locator(".progress")).to_have_text("0 / 2 ✓")
+    plain.locator("button.box").click()
+    hub.locator("input[value=done]").check()
+    hub.bring_to_front()
+    hub.locator("button.copy-all").click()
+    expect(hub.locator(".notice.ok")).to_contain_text("Copied 1 entries")
+    expect(box).to_be_disabled()
+    expect(box).to_have_attribute("aria-pressed", "true")
+
+
 def test_stateSurvivesReload_doneHiddenUnderOpen_search(ctx):
     hub = open_hub(ctx)
     add_note(hub, "Plain item", "findme")
