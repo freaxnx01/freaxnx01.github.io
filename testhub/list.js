@@ -34,14 +34,25 @@ function editor(view, item, entry) {
       h('button', { class: 'done', type: 'button', onclick: () => actions.done(item) }, t('done'))));
 }
 
+function doneBox(view, item, entry) {
+  const { t } = view;
+  const done = entry.status === 'done';
+  const locked = done && entry.sent;
+  const label = t(locked ? 'doneSent' : done ? 'markOpen' : 'markDone');
+  return h('button', {
+    class: 'box', type: 'button', 'aria-pressed': String(done), 'aria-label': label, title: label,
+    disabled: locked, onclick: () => view.actions.toggleDone(item),
+  }, done ? '☑' : '☐');
+}
+
 function renderItem(view, item) {
   const entry = view.store.get(item.key);
   const open = view.expanded.has(item.key);
   const error = view.errors.get(item.key);
   return h('li', { class: `item ${entry.status}${open ? ' expanded' : ''}`, 'data-key': item.key },
     h('div', { class: 'row' },
-      h('button', { class: 'text', 'aria-expanded': String(open), onclick: () => view.actions.toggleItem(item.key) },
-        h('span', { class: 'box' }, entry.status === 'done' ? '☑' : '☐'), ' ', item.text),
+      doneBox(view, item, entry), ' ',
+      h('button', { class: 'text', 'aria-expanded': String(open), onclick: () => view.actions.toggleItem(item.key) }, item.text),
       goControl(view, item)),
     error ? h('p', { class: 'error', role: 'alert' }, error) : null,
     open ? editor(view, item, entry) : null);

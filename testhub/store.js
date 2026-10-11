@@ -40,6 +40,18 @@ export function createStore(storage) {
     save();
   }
 
+  function toggleDone(key, note) {
+    const entry = get(key);
+    if (entry.status === 'done') {
+      if (entry.sent) return null;
+      const status = entry.note.trim() || entry.screenshots.length ? 'noted' : 'open';
+      update(key, { status });
+      return status;
+    }
+    update(key, { status: 'done', note });
+    return 'done';
+  }
+
   function nextShotName(game, date) {
     const prefix = `fb-${game}-${pad(date.getMonth() + 1)}${pad(date.getDate())}-`;
     let highest = 0;
@@ -52,7 +64,7 @@ export function createStore(storage) {
   }
 
   return {
-    get, update, nextShotName,
+    get, update, toggleDone, nextShotName,
     setVersion(game, version) { state.versions[game] = version; save(); },
     version: (game) => state.versions[game] || '',
     isPersistent: () => persistent,

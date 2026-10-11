@@ -33,3 +33,30 @@ test('nextShotName_countsUpPerGameAndDay', () => {
   assert.equal(store.nextShotName('rhyflitzer', day), 'fb-rhyflitzer-1011-4.png');
   assert.equal(store.nextShotName('rhyflitzer', new Date(2026, 9, 12)), 'fb-rhyflitzer-1012-1.png');
 });
+
+test('toggleDone_openEntry_marksDoneKeepingNote', () => {
+  const store = createStore(fakeStorage());
+  assert.equal(store.toggleDone('k', 'hello'), 'done');
+  assert.deepEqual([store.get('k').status, store.get('k').note], ['done', 'hello']);
+});
+
+test('toggleDone_unsentDone_goesBackToOpen', () => {
+  const store = createStore(fakeStorage());
+  store.toggleDone('k', '');
+  assert.equal(store.toggleDone('k', ''), 'open');
+  assert.equal(store.get('k').status, 'open');
+});
+
+test('toggleDone_unsentDoneWithNote_goesBackToNoted', () => {
+  const store = createStore(fakeStorage());
+  store.toggleDone('k', 'a note');
+  assert.equal(store.toggleDone('k', 'a note'), 'noted');
+});
+
+test('toggleDone_sentDone_staysDoneAndSent', () => {
+  const store = createStore(fakeStorage());
+  store.toggleDone('k', '');
+  store.update('k', { sent: true });
+  assert.equal(store.toggleDone('k', ''), null);
+  assert.deepEqual([store.get('k').status, store.get('k').sent], ['done', true]);
+});

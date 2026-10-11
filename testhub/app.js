@@ -101,6 +101,10 @@ const actions = {
     store.update(item.key, { status: 'done', note: draftFor(item) });
     render();
   },
+  toggleDone(item) {
+    store.toggleDone(item.key, draftFor(item));
+    render();
+  },
   copyAll,
   async go(item) {
     ui.errors.delete(item.key);

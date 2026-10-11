@@ -11,6 +11,8 @@ button, input, select, textarea { font: inherit; }
 .block-head { display: flex; justify-content: space-between; gap: 8px; width: 100%; }
 .block-title, .item .text { overflow-wrap: anywhere; min-width: 0; text-align: left; }
 .item .text { flex: 1; border: 0; background: none; }
+.item .box { border: 0; background: none; padding: 0 2px; font-size: 1.2em; line-height: 1; cursor: pointer; }
+.item .box:disabled { cursor: default; opacity: .6; }
 .item.done .text, .progress, .chip, .go-unknown { opacity: .6; }
 ul { list-style: none; margin: 0; padding-left: 12px; }
 .note, .export-box { width: 100%; }
