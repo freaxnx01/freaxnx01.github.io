@@ -19,6 +19,14 @@ function goControl(view, item) {
   return h('button', { class: 'go', onclick: () => view.actions.go(item) }, t('go'));
 }
 
+function editor(view, item, entry) {
+  const { t, conn, actions } = view;
+  return h('div', { class: 'editor' },
+    h('div', { class: 'chips' }, entry.screenshots.map((name) => h('span', { class: 'chip' }, `📷 ${name} ✓`))),
+    h('div', { class: 'buttons' },
+      h('button', { class: 'shot', type: 'button', disabled: !conn, onclick: () => actions.shot(item) }, t('shot'))));
+}
+
 function renderItem(view, item) {
   const entry = view.store.get(item.key);
   const open = view.expanded.has(item.key);
@@ -28,7 +36,8 @@ function renderItem(view, item) {
       h('button', { class: 'text', 'aria-expanded': String(open), onclick: () => view.actions.toggleItem(item.key) },
         h('span', { class: 'box' }, entry.status === 'done' ? '☑' : '☐'), ' ', item.text),
       goControl(view, item)),
-    error ? h('p', { class: 'error', role: 'alert' }, error) : null);
+    error ? h('p', { class: 'error', role: 'alert' }, error) : null,
+    open ? editor(view, item, entry) : null);
 }
 
 function renderBlock(view, block) {

@@ -3,6 +3,7 @@ import { parseTodo } from './parser.js';
 import { getStorage, createStore } from './store.js';
 import { createT, detectLang } from './strings.js';
 import { renderList } from './list.js';
+import { createLink } from './link.js';
 
 export const GAMES = ['rhyflitzer', 'wipfelkratzer'];
 const SLUG_RE = /^[a-z0-9-]+$/;
@@ -14,13 +15,16 @@ const storage = getStorage();
 const store = createStore(storage);
 let lang = detectLang(storage, navigator.language);
 let t = createT(lang);
-let link = null; // created in Task 8
+const link = createLink({
+  game,
+  onChange: () => { if (link.conn) store.setVersion(game, link.conn.version); render(); },
+});
 
 const ui = {
   blocks: [], loadError: null, filter: 'open', query: '',
   expanded: new Set(), collapsed: new Map(), drafts: new Map(), errors: new Map(),
 };
-const conn = () => (link ? link.conn : null);
+const conn = () => link.conn;
 
 function captureFocus() {
   const el = document.activeElement;
@@ -35,6 +39,15 @@ function restoreFocus(saved) {
   if (typeof saved.start === 'number') el.setSelectionRange(saved.start, saved.start);
 }
 
+const errorText = (error) => (error.code && error.code !== 'remote' ? t(`err_${error.code}`) : error.message);
+
+function download(dataUrl, name) {
+  const anchor = h('a', { href: dataUrl, download: name });
+  document.body.append(anchor);
+  anchor.click();
+  anchor.remove();
+}
+
 const actions = {
   toggleItem(key) {
     if (ui.expanded.has(key)) ui.expanded.delete(key); else ui.expanded.add(key);
@@ -42,6 +55,23 @@ const actions = {
   },
   toggleBlock(heading, wasCollapsed) {
     ui.collapsed.set(heading, !wasCollapsed);
+    render();
+  },
+  async go(item) {
+    ui.errors.delete(item.key);
+    try { await link.go(item.tag); } catch (error) { ui.errors.set(item.key, errorText(error)); }
+    render();
+  },
+  async shot(item) {
+    ui.errors.delete(item.key);
+    try {
+      const png = await link.screenshot();
+      const name = store.nextShotName(game, new Date());
+      download(png.dataUrl, name);
+      store.update(item.key, { screenshots: [...store.get(item.key).screenshots, name] });
+    } catch (error) {
+      ui.errors.set(item.key, errorText(error));
+    }
     render();
   },
 };

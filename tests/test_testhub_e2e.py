@@ -100,3 +100,58 @@ def test_storageUnavailable_warnsAndStillRenders(ctx):
     hub = open_hub(ctx, init_script="Object.defineProperty(window,'localStorage',{get(){throw new Error('denied')}})")
     expect(hub.locator(".notice.warn")).to_contain_text("notes are kept for this session only")
     expect(hub.locator(".item")).to_have_count(4)
+
+
+def mmdd():
+    return datetime.now(ZoneInfo(TZ)).strftime("%m%d")
+
+
+def test_connected_greyTag_lateTarget_goRunsInGame(ctx):
+    game = open_game(ctx)
+    hub = open_hub(ctx)
+    expect(hub.locator(".status.on")).to_contain_text("v1.2.3 · 2 targets")  # fake.beta registers 200 ms late
+    expect(item(hub, "Typo tag item").locator(".go-unknown")).to_have_text("fake.typo")
+    item(hub, "First item inherits").locator("button.go").click()
+    game.wait_for_function("window.__at === 'alpha'")
+    item(hub, "Second item").locator("button.go").click()
+    game.wait_for_function("window.__at === 'beta'")
+
+
+def test_screenshot_downloadsNumberedFiles(ctx):
+    open_game(ctx)
+    hub = open_hub(ctx)
+    expect(hub.locator(".status.on")).to_be_visible()
+    row = item(hub, "First item inherits")
+    row.locator("button.text").click()
+    with hub.expect_download() as first:
+        row.locator("button.shot").click()
+    assert first.value.suggested_filename == f"fb-fake-{mmdd()}-1.png"
+    expect(row.locator(".chip")).to_have_text(f"📷 fb-fake-{mmdd()}-1.png ✓")
+    with hub.expect_download() as second:
+        row.locator("button.shot").click()
+    assert second.value.suggested_filename == f"fb-fake-{mmdd()}-2.png"
+
+
+def test_screenshot_withoutAnswer_showsTimeoutError(ctx):
+    game = open_game(ctx)
+    game.evaluate("window.__shot = 'hang'")
+    hub = ctx.new_page()
+    hub.clock.install()
+    hub.goto(f"{ORIGIN}/testhub/?game=fake")
+    expect(hub.locator(".status.on")).to_be_visible()
+    row = item(hub, "First item inherits")
+    row.locator("button.text").click()
+    row.locator("button.shot").click()
+    hub.clock.run_for(11000)
+    expect(row.locator(".error")).to_contain_text("No answer from the game within 10 s")
+
+
+def test_screenshot_rejected_showsGameMessage_andStoresNothing(ctx):
+    game = open_game(ctx)
+    game.evaluate("window.__shot = 'reject'")
+    hub = open_hub(ctx)
+    expect(hub.locator(".status.on")).to_be_visible()
+    row = item(hub, "First item inherits")
+    row.locator("button.text").click()
+    row.locator("button.shot").click()
+    expect(row.locator(".error")).to_have_text("photo failed")
