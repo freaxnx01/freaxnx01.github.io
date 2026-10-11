@@ -1,0 +1,23 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Fake game</title>
+<script>
+  window.__at = null;
+  window.__shot = 'ok'; // 'ok' | 'reject' | 'hang'
+  var PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+  function boot() {
+    ggTesthub.setInfo({ game: 'fake', version: '1.2.3' });
+    ggTesthub.register('fake.alpha', function () { window.__at = 'alpha'; }, 'Alpha spot');
+    ggTesthub.onScreenshot(function () {
+      if (window.__shot === 'hang') return new Promise(function () {});
+      if (window.__shot === 'reject') return Promise.reject('photo failed');
+      return Promise.resolve(PNG);
+    });
+    setTimeout(function () { ggTesthub.register('fake.beta', function () { window.__at = 'beta'; }, 'Late spot'); }, 200);
+  }
+  if (window.ggTesthub) boot(); else window.addEventListener('gg-testhub-ready', boot);
+  var s = document.createElement('script');
+  s.src = '/testhub/client.js';
+  s.async = true;
+  document.head.appendChild(s);
+</script>

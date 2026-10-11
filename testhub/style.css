@@ -1,0 +1,16 @@
+* { box-sizing: border-box; }
+body { margin: 0; font: 15px/1.4 system-ui, sans-serif; color-scheme: dark light; }
+#app { padding: 8px 12px; }
+button, input, select, textarea { font: inherit; }
+.head, .status, .toolbar, .buttons, .chips, .item .row { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+.head h1 { font-size: 1.1rem; margin: 0 auto 0 0; }
+.status { justify-content: space-between; overflow-wrap: anywhere; }
+.status.on, .notice.ok { color: #2e9e5b; }
+.status.off, .notice.warn, .error, .load-error { color: #d64545; }
+.search { flex: 1 1 8rem; min-width: 0; }
+.block-head { display: flex; justify-content: space-between; gap: 8px; width: 100%; }
+.block-title, .item .text { overflow-wrap: anywhere; min-width: 0; text-align: left; }
+.item .text { flex: 1; border: 0; background: none; }
+.item.done .text, .progress, .chip, .go-unknown { opacity: .6; }
+ul { list-style: none; margin: 0; padding-left: 12px; }
+.note, .export-box { width: 100%; }
