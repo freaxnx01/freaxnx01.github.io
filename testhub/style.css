@@ -16,3 +16,8 @@ button, input, select, textarea { font: inherit; }
 .item.done .text, .progress, .chip, .go-unknown { opacity: .6; }
 ul { list-style: none; margin: 0; padding-left: 12px; }
 .note, .export-box { width: 100%; }
+.saved-notes { margin: 0 0 6px; padding: 0; }
+.saved-note { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; overflow-wrap: anywhere; }
+.saved-note .text-body { flex: 1 1 10rem; min-width: 0; }
+.saved-note .when, .saved-note.sent { opacity: .6; font-size: .85em; }
+.saved-note .delete-note { border: 0; background: none; cursor: pointer; }
