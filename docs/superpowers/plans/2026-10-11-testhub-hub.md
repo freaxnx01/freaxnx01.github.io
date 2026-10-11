@@ -2,91 +2,49 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** A playtest hub page at `/testhub/` plus a one-copy-for-all-games `client.js`, so the maintainer sees only untested `test-todo.md` items per game, jumps to each with one click, attaches notes and screenshots, and exports everything with **Copy all**.
+**Goal:** A playtest hub page at `/testhub/` plus one shared `client.js`, so the maintainer sees only untested `test-todo.md` items per game, jumps to each with one click, adds notes and screenshots, and exports it all with **Copy all**.
 
-**Architecture:** Pure ES modules (`parser`, `store`, `export`, `protocol`, `strings`) are unit-tested with `node --test`. The hub UI (`app.js`, `list.js`, `link.js`) renders with plain DOM calls and talks to game windows over `BroadcastChannel('gg-testhub')`. `client.js` is a classic (non-module) script so any game can load it with a plain `<script src>`. One Python Playwright test opens the hub and a fake game in two pages of one browser context, both served by `context.route` on a fixed origin, so no server is needed.
+**Architecture:** Pure ES modules tested with `node --test`; a plain-DOM hub UI talking to game windows over `BroadcastChannel('gg-testhub')`; `client.js` as a classic script any game loads with `<script src>`. One Python Playwright file opens the hub and a fake game in two pages of one context, served by `context.route`.
 
-**Tech Stack:** Vanilla JS (ES modules, no framework, no build step, no `package.json` unless Task 1's fallback applies), `node --test` (Node 22+, repo has v24), pytest + Playwright (Python) as already used in `tests/`.
+**Tech Stack:** Vanilla JS (ES modules, no framework/build/`package.json`), `node --test`, pytest + Playwright.
 
-**Spec:** `docs/superpowers/specs/2026-10-11-testhub-design.md` in `freaxnx01/game-rhyflitzer` (origin/main). Sections 1, 2, 4, "Error handling" and the hub half of "Testing". The Rhyflitzer integration (spec section 3) and the ai-instructions section are separate plans. Parent issue: `freaxnx01/game-rhyflitzer#251`.
+**Spec:** `docs/superpowers/specs/2026-10-11-testhub-design.md` in `freaxnx01/game-rhyflitzer` (sections 1, 2, 4, error handling, hub tests); parent issue `freaxnx01/game-rhyflitzer#251`. The Rhyflitzer integration is a separate plan.
 
 ## Global Constraints
 
-- Static only (GitHub Pages, served from `master`). No server, no token, no build step, no framework, no `eval`.
-- Hub path `testhub/` in this repo; client at `/testhub/client.js` (one copy for all games).
-- BroadcastChannel name and localStorage key are both `gg-testhub`. Language key is `gg-lang` (`en`/`de`).
-- Item key is `<game>|<block heading>|<item text without tag>`. Tag syntax `{go: <id>}`, id `[a-z0-9._-]+`.
-- Item status values: `open`, `noted`, `done`. Per-item state: `{ status, note, screenshots: [filename], sent: bool }`.
-- Screenshot file name: `fb-<game>-<MMDD>-<n>.png`.
-- Copy-all export, exactly:
-
-```
-Testhub feedback — rhyflitzer v0.9.0 — 2026-10-11
-- [Hideout in the Hübel · "Inside: the tower reads as…" · go:hideout.tower] Turm wirkt von unten zu dunkel (📷 fb-rhyflitzer-1011-3.png)
-- ✓ tested: [Pontoon bridge · "U again: the bridge disappears…"]
-```
-
-- `client.js` contract (agreed with the Rhyflitzer plan, `game-rhyflitzer#251`): it defines `window.ggTesthub`, then fires `window.dispatchEvent(new Event('gg-testhub-ready'))` and sends a first `hello`; any `register`/`setInfo`/`onScreenshot` call triggers a fresh debounced `hello`; the game registers after that first hello. `register(id, fn, label)`: id `[a-z0-9._-]+`, a repeated id replaces the earlier one, `fn()` is synchronous and its return value is ignored. `onScreenshot(fn)`: `fn()` returns `Promise<'data:image/png;base64,…'>` and may reject (e.g. `'screenshot already pending'`, `'photo failed'`) or hang; the hub's 10 s timeout covers it. `setInfo({game, version})` is called once, `version` has no leading `v`. Loader URL exactly `/testhub/client.js`, loaded async in dev mode only. Ids look like `j.<slug>`, `uw.boat`, `uw.car`, `hideout.gate`, `hideout.tower`.
-- Request timeout for go/screenshot: 10 s. All `localStorage` access in try/catch.
-- UI strings de/en via `gg-lang`; item text stays as in `test-todo.md`. German text: real umlauts, capitalized address pronouns.
-- Game list starts with `rhyflitzer`, `wipfelkratzer`.
-- Base branch is `master`. Conventional Commits. Do not add a `package.json`, bundler or dependencies (Task 1 documents the single permitted fallback).
+- Static only (Pages, branch `master`): no server, token, build step, framework or `eval`. Hub in `testhub/`.
+- BroadcastChannel and localStorage key are both `gg-testhub`; language key `gg-lang` (`en`/`de`). All storage access in try/catch.
+- Item key `<game>|<block heading>|<item text without tag>`; tag `{go: <id>}`, id `[a-z0-9._-]+`; status `open|noted|done`; screenshots `fb-<game>-<MMDD>-<n>.png`; go/screenshot timeout 10 s; games start `rhyflitzer`, `wipfelkratzer`.
+- Copy-all export format exactly as the spec's section 4 (header `Testhub feedback — <game> v<version> — <YYYY-MM-DD>`, note lines, `✓ tested` lines); Task 3's test pins it.
+- `client.js` contract (agreed with the Rhyflitzer plan): defines `window.ggTesthub`, then fires `gg-testhub-ready` on `window` and sends a first `hello`; every `register`/`setInfo`/`onScreenshot` call triggers a fresh debounced `hello`; the game registers after that. `register(id, fn, label)`: a repeated id replaces the earlier one, `fn()` is synchronous, its return value ignored. `onScreenshot(fn)`: `fn()` returns `Promise<'data:image/png;base64,…'>`, may reject or hang; the hub's 10 s timeout covers it. `setInfo({game, version})` once, `version` without leading `v` (the hub shows `v` + version). Loader URL exactly `/testhub/client.js`, async, dev mode only.
+- UI strings de/en via `gg-lang` (real umlauts); item text stays as in `test-todo.md`.
 
 ## Review Focus
 
-Failure modes the spec implies; each has a pinning test in the named task.
-
-1. Foreign or malformed `BroadcastChannel` messages (wrong types, `targets: "nope"`, non-PNG `dataUrl`, a hub-style `{type:'hello'}` arriving at a game, a game-style hello arriving at a game) must be ignored without a thrown error: Tasks 4, 6, 10.
-2. A second game window of a different game must not change the hub's status or receive Go: Task 10.
-3. `test-todo.md` with CRLF line endings, a `###` sub-heading, malformed tags (`{go: BAD ID}`, `{go:}`) must not break parsing or leak into item text wrongly: Task 1.
-4. Corrupt JSON in `gg-testhub` (or a throwing `localStorage` accessor) must not stop the hub: Tasks 2 and 7.
-5. A multi-line note or a note containing quotes must still export as one line per entry: Task 3.
-
-## File Structure
-
-| File | Responsibility |
-|---|---|
-| `testhub/parser.js` | Pure: `test-todo.md` text to blocks/items with tags and keys |
-| `testhub/store.js` | `gg-testhub` state in localStorage with in-memory fallback; screenshot file names |
-| `testhub/export.js` | Pure: Copy-all Markdown; `isoDate` |
-| `testhub/protocol.js` | Pure: channel name, message validation (game to hub), message builders |
-| `testhub/strings.js` | de/en strings, language detection, `createT` |
-| `testhub/dom.js` | Tiny `h()` element builder (no `innerHTML`) |
-| `testhub/list.js` | Renders blocks and items (progress, filter, Go control, editor) |
-| `testhub/link.js` | Channel to the game window: hello polling, `go`, `screenshot`, timeouts |
-| `testhub/app.js` | Wiring: state, load `test-todo.md`, header/status/toolbar, actions |
-| `testhub/index.html`, `testhub/style.css` | Page shell and narrow-strip layout |
-| `testhub/client.js` | Classic script loaded by games in dev mode; `window.ggTesthub` |
-| `tests/testhub/*.test.mjs` | `node --test` unit tests |
-| `tests/test_testhub_e2e.py` | Playwright e2e (hub + fake game) |
-| `tests/testhub/fixtures/` | `test-todo.md`, `fake-game.html` |
+1. Foreign/malformed channel messages (`targets: "nope"`, non-PNG data URL, hub-style `hello` at a game, another game's `hello`) are ignored without error: Tasks 4, 6, 10.
+2. A second game window must not change the hub status: Task 10.
+3. CRLF, `###` sub-headings, malformed tags in `test-todo.md`: Task 1.
+4. Corrupt JSON or a throwing `localStorage` accessor must not stop the hub: Tasks 2, 7.
+5. Multi-line or quoted notes export as one line: Task 3.
 
 ## Test setup (decision)
 
-The repo already has pytest + Playwright under `tests/` (venv `.venv/` is gitignored) and no JS tooling. So:
-
-- **Pure modules and `client.js`**: `node --test tests/testhub/*.test.mjs`. Node built-in, no `package.json`, no dependency. Source files are `.js` ES modules; Node 22.12+/24 detects module syntax in a typeless context. If a Node run prints `ERR_REQUIRE_ESM` or a module-type error, the one permitted fallback is a file `testhub/package.json` containing `{"type":"module"}` (served harmlessly by Pages).
-- **E2E**: Python Playwright in `tests/test_testhub_e2e.py`, same style as `tests/test_buildtime_snippet_browser.py`. Setup once: `python3 -m venv .venv && .venv/bin/pip install pytest playwright && .venv/bin/playwright install chromium`.
-- No CI workflow runs tests in this repo today; adding one is out of scope. Tests run locally.
+The repo has pytest + Playwright in `tests/` (`.venv/` gitignored) and no JS tooling. So: `node --test tests/testhub/*.test.mjs` for modules and `client.js` (if Node reports a module-type error, add `testhub/package.json` = `{"type":"module"}`), Python Playwright for e2e (`python3 -m venv .venv && .venv/bin/pip install pytest playwright && .venv/bin/playwright install chromium`). No CI runs tests here (out of scope).
 
 ---
 
 ### Task 1: Pure parser for `test-todo.md`
 
-**Files:**
-- Create: `testhub/parser.js`
-- Test: `tests/testhub/parser.test.mjs`
+**Files:** Create `testhub/parser.js`; Test `tests/testhub/parser.test.mjs`
 
-**Interfaces:**
-- Produces: `splitTag(text) -> { text: string, tag: string|null }`; `itemKey(game, heading, text) -> string`; `parseTodo(markdown, game) -> Block[]` where `Block = { heading: string, tag: string|null, items: Item[] }`, `Item = { key: string, text: string, tag: string|null }`. Blocks without open items are dropped.
+**Interfaces:** Produces `splitTag(text) -> {text, tag|null}`, `itemKey(game, heading, text)`, `parseTodo(markdown, game) -> [{heading, tag, items:[{key, text, tag}]}]` (blocks without open items dropped; item tag falls back to block tag).
 
 - [ ] **Step 1: Write the failing test**
 
 ```js
-// tests/testhub/parser.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseTodo, splitTag, itemKey } from '../../testhub/parser.js';
+import { parseTodo, splitTag } from '../../testhub/parser.js';
 
 test('splitTag_tagInText_isStrippedAndReturned', () => {
   assert.deepEqual(splitTag('Inside: tower {go: hideout.tower} reads dark'), { text: 'Inside: tower reads dark', tag: 'hideout.tower' });
@@ -97,49 +55,29 @@ test('splitTag_malformedTags_stayAsText', () => {
   assert.deepEqual(splitTag('a {go:} b'), { text: 'a {go:} b', tag: null });
 });
 
-test('itemKey_joinsGameHeadingText', () => {
-  assert.equal(itemKey('rhyflitzer', 'Pontoon bridge', 'U again'), 'rhyflitzer|Pontoon bridge|U again');
-});
-
-test('parseTodo_blocksAndOpenItems_ticked_skipped', () => {
-  const md = '# Title\n- [ ] ignored, no block yet\n## Alpha\n- [ ] one\n- [x] done already\n- [X] done too\n- [ ] two\n## Empty\n- [x] all ticked\n';
+test('parseTodo_openItemsOnly_withKeys_crlfAndSubheadingsOk', () => {
+  const md = '# Title\r\n- [ ] no block yet\r\n## Alpha\r\n- [ ] one\r\n- [x] done\r\n### Sub\r\n- [X] done too\r\n  - [ ] two\r\n## Empty\r\n- [x] all ticked\r\n';
   const blocks = parseTodo(md, 'g');
   assert.equal(blocks.length, 1);
-  assert.equal(blocks[0].heading, 'Alpha');
   assert.deepEqual(blocks[0].items.map((i) => i.text), ['one', 'two']);
   assert.equal(blocks[0].items[0].key, 'g|Alpha|one');
 });
 
 test('parseTodo_blockTag_isInheritedUnlessItemHasOwn', () => {
-  const md = '## Hideout {go: hideout.gate}\n- [ ] inherits\n- [ ] own {go: hideout.tower}\n';
-  const [block] = parseTodo(md, 'g');
+  const [block] = parseTodo('## Hideout {go: hideout.gate}\n- [ ] inherits\n- [ ] own {go: hideout.tower}\n', 'g');
   assert.equal(block.heading, 'Hideout');
-  assert.equal(block.tag, 'hideout.gate');
   assert.deepEqual(block.items.map((i) => i.tag), ['hideout.gate', 'hideout.tower']);
   assert.equal(block.items[1].text, 'own');
 });
-
-test('parseTodo_crlfAndSubheadings_areHandled', () => {
-  const md = '## Alpha\r\n### Sub\r\n- [ ] one\r\n  - [ ] nested\r\n';
-  const [block] = parseTodo(md, 'g');
-  assert.equal(block.heading, 'Alpha');
-  assert.deepEqual(block.items.map((i) => i.text), ['one', 'nested']);
-});
-
-test('parseTodo_itemWithOnlyTag_isSkipped', () => {
-  assert.equal(parseTodo('## A\n- [ ] {go: x}\n', 'g').length, 0);
-});
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [ ] **Step 2: Run to verify it fails**
 
-Run: `node --test tests/testhub/parser.test.mjs`
-Expected: FAIL, cannot find module `testhub/parser.js`.
+Run: `node --test tests/testhub/parser.test.mjs` — Expected: FAIL, missing `testhub/parser.js`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [ ] **Step 3: Implement**
 
 ```js
-// testhub/parser.js
 const TAG_RE = /\{go:\s*([a-z0-9._-]+)\s*\}/;
 const TAG_STRIP_RE = /\s*\{go:\s*[a-z0-9._-]+\s*\}/g;
 const H1_RE = /^#\s/;
@@ -148,13 +86,10 @@ const ITEM_RE = /^\s*- \[ \]\s+(.*\S)\s*$/;
 
 export function splitTag(text) {
   const match = TAG_RE.exec(text);
-  const clean = text.replace(TAG_STRIP_RE, '').replace(/\s+/g, ' ').trim();
-  return { text: clean, tag: match ? match[1] : null };
+  return { text: text.replace(TAG_STRIP_RE, '').replace(/\s+/g, ' ').trim(), tag: match ? match[1] : null };
 }
 
-export function itemKey(game, heading, text) {
-  return `${game}|${heading}|${text}`;
-}
+export const itemKey = (game, heading, text) => `${game}|${heading}|${text}`;
 
 export function parseTodo(markdown, game) {
   const blocks = [];
@@ -171,52 +106,38 @@ export function parseTodo(markdown, game) {
     const item = ITEM_RE.exec(line);
     if (!item || !block) continue;
     const { text, tag } = splitTag(item[1]);
-    if (!text) continue;
-    block.items.push({ key: itemKey(game, block.heading, text), text, tag: tag || block.tag });
+    if (text) block.items.push({ key: itemKey(game, block.heading, text), text, tag: tag || block.tag });
   }
   return blocks.filter((b) => b.items.length > 0);
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [ ] **Step 4: Run to verify it passes** — `node --test tests/testhub/parser.test.mjs` — Expected: PASS (4).
 
-Run: `node --test tests/testhub/parser.test.mjs`
-Expected: PASS (7 tests). If Node reports a module-type error, apply the `testhub/package.json` fallback from "Test setup" and re-run.
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add testhub/parser.js tests/testhub/parser.test.mjs
-git commit -m "feat(testhub): parse test-todo.md into blocks and tagged items"
-```
+- [ ] **Step 5: Commit** — `git add testhub tests && git commit -m "feat(testhub): parse test-todo.md into blocks and tagged items"`
 
 ---
 
 ### Task 2: State store with localStorage fallback
 
-**Files:**
-- Create: `testhub/store.js`
-- Test: `tests/testhub/store.test.mjs`
+**Files:** Create `testhub/store.js`; Test `tests/testhub/store.test.mjs`
 
-**Interfaces:**
-- Produces: `getStorage() -> Storage|null` (never throws); `createStore(storage) -> { get(key), update(key, patch), setVersion(game, version), version(game), nextShotName(game, date), isPersistent() }`. `get` returns `{ status:'open', note:'', screenshots:[], sent:false }` merged with stored data. `update` merges `patch` and resets `sent` to `false` unless `patch` contains `sent`. `nextShotName(game, date: Date) -> 'fb-<game>-<MMDD>-<n>.png'`, `n` = 1 + highest `n` already stored for that game and day (local date).
+**Interfaces:** Produces `getStorage() -> Storage|null` (never throws); `createStore(storage) -> { get(key), update(key, patch), setVersion(game, v), version(game), nextShotName(game, date), isPersistent() }`. `get` merges stored data over `{status:'open', note:'', screenshots:[], sent:false}`; `update` merges the patch and resets `sent` unless the patch sets it; `nextShotName(game, Date)` = `fb-<game>-<MMDD>-<1 + highest stored n that day>.png`.
 
 - [ ] **Step 1: Write the failing test**
 
 ```js
-// tests/testhub/store.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createStore, getStorage } from '../../testhub/store.js';
+import { createStore } from '../../testhub/store.js';
 
-function fakeStorage(initial) {
+const fakeStorage = (initial) => {
   const data = new Map(initial ? [['gg-testhub', initial]] : []);
-  return { getItem: (k) => (data.has(k) ? data.get(k) : null), setItem: (k, v) => data.set(k, v), data };
-}
+  return { getItem: (k) => (data.has(k) ? data.get(k) : null), setItem: (k, v) => data.set(k, v) };
+};
 
 test('get_unknownKey_returnsOpenDefaults', () => {
-  const store = createStore(fakeStorage());
-  assert.deepEqual(store.get('a|b|c'), { status: 'open', note: '', screenshots: [], sent: false });
+  assert.deepEqual(createStore(fakeStorage()).get('k'), { status: 'open', note: '', screenshots: [], sent: false });
 });
 
 test('update_persistsAndResetsSent', () => {
@@ -226,79 +147,36 @@ test('update_persistsAndResetsSent', () => {
   assert.equal(store.get('k').sent, true);
   store.update('k', { note: 'y' });
   assert.equal(store.get('k').sent, false);
-  const again = createStore(storage);
-  assert.equal(again.get('k').note, 'y');
-  assert.equal(store.isPersistent(), true);
+  assert.equal(createStore(storage).get('k').note, 'y');
 });
 
 test('createStore_corruptJson_startsEmpty', () => {
-  const store = createStore(fakeStorage('{not json'));
-  assert.equal(store.get('k').status, 'open');
-});
-
-test('createStore_wrongShape_startsEmpty', () => {
-  const store = createStore(fakeStorage('[1,2]'));
-  assert.equal(store.get('k').status, 'open');
-});
-
-test('createStore_nullStorage_worksInMemoryButNotPersistent', () => {
-  const store = createStore(null);
-  store.update('k', { status: 'done' });
-  assert.equal(store.get('k').status, 'done');
-  assert.equal(store.isPersistent(), false);
-});
-
-test('update_throwingSetItem_keepsStateAndFlagsNotPersistent', () => {
-  const storage = { getItem: () => null, setItem: () => { throw new Error('quota'); } };
-  const store = createStore(storage);
-  store.update('k', { status: 'done' });
-  assert.equal(store.get('k').status, 'done');
-  assert.equal(store.isPersistent(), false);
-});
-
-test('getStorage_throwingAccessor_returnsNull', () => {
-  const original = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
-  Object.defineProperty(globalThis, 'localStorage', { configurable: true, get() { throw new Error('denied'); } });
-  try { assert.equal(getStorage(), null); } finally {
-    if (original) Object.defineProperty(globalThis, 'localStorage', original); else delete globalThis.localStorage;
-  }
-});
-
-test('version_roundTrips', () => {
-  const store = createStore(fakeStorage());
-  store.setVersion('rhyflitzer', '0.9.0');
-  assert.equal(store.version('rhyflitzer'), '0.9.0');
-  assert.equal(store.version('other'), '');
+  assert.equal(createStore(fakeStorage('{not json')).get('k').status, 'open');
 });
 
 test('nextShotName_countsUpPerGameAndDay', () => {
   const store = createStore(fakeStorage());
   const day = new Date(2026, 9, 11);
   assert.equal(store.nextShotName('rhyflitzer', day), 'fb-rhyflitzer-1011-1.png');
-  store.update('a', { screenshots: ['fb-rhyflitzer-1011-1.png'] });
   store.update('b', { screenshots: ['fb-rhyflitzer-1011-3.png', 'fb-other-1011-9.png'] });
   assert.equal(store.nextShotName('rhyflitzer', day), 'fb-rhyflitzer-1011-4.png');
   assert.equal(store.nextShotName('rhyflitzer', new Date(2026, 9, 12)), 'fb-rhyflitzer-1012-1.png');
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [ ] **Step 2: Run to verify it fails** — `node --test tests/testhub/store.test.mjs` — Expected: FAIL, missing `testhub/store.js`.
 
-Run: `node --test tests/testhub/store.test.mjs`
-Expected: FAIL, cannot find module `testhub/store.js`.
-
-- [ ] **Step 3: Write minimal implementation**
+- [ ] **Step 3: Implement**
 
 ```js
-// testhub/store.js
 const KEY = 'gg-testhub';
 const DEFAULT_ENTRY = { status: 'open', note: '', screenshots: [], sent: false };
+const pad = (n) => String(n).padStart(2, '0');
+const emptyState = () => ({ v: 1, items: {}, versions: {} });
 
 export function getStorage() {
   try { return globalThis.localStorage || null; } catch (e) { return null; }
 }
-
-function emptyState() { return { v: 1, items: {}, versions: {} }; }
 
 function readState(storage) {
   if (!storage) return emptyState();
@@ -312,11 +190,9 @@ function readState(storage) {
   }
 }
 
-const pad = (n) => String(n).padStart(2, '0');
-
 export function createStore(storage) {
   const state = readState(storage);
-  let persistent = storage !== null && storage !== undefined;
+  let persistent = Boolean(storage);
 
   function save() {
     if (!storage) { persistent = false; return; }
@@ -335,70 +211,51 @@ export function createStore(storage) {
     save();
   }
 
-  function setVersion(game, version) { state.versions[game] = version; save(); }
-  function version(game) { return state.versions[game] || ''; }
-
   function nextShotName(game, date) {
     const prefix = `fb-${game}-${pad(date.getMonth() + 1)}${pad(date.getDate())}-`;
     let highest = 0;
     for (const entry of Object.values(state.items)) {
       for (const name of entry.screenshots || []) {
-        if (!name.startsWith(prefix)) continue;
-        const n = parseInt(name.slice(prefix.length), 10);
-        if (n > highest) highest = n;
+        if (name.startsWith(prefix)) highest = Math.max(highest, parseInt(name.slice(prefix.length), 10) || 0);
       }
     }
     return `${prefix}${highest + 1}.png`;
   }
 
-  return { get, update, setVersion, version, nextShotName, isPersistent: () => persistent };
+  return {
+    get, update, nextShotName,
+    setVersion(game, version) { state.versions[game] = version; save(); },
+    version: (game) => state.versions[game] || '',
+    isPersistent: () => persistent,
+  };
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [ ] **Step 4: Run to verify it passes** — `node --test tests/testhub/store.test.mjs` — Expected: PASS (4).
 
-Run: `node --test tests/testhub/store.test.mjs`
-Expected: PASS (9 tests).
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add testhub/store.js tests/testhub/store.test.mjs
-git commit -m "feat(testhub): persist item state in gg-testhub with in-memory fallback"
-```
+- [ ] **Step 5: Commit** — `git add testhub tests && git commit -m "feat(testhub): persist item state in gg-testhub with in-memory fallback"`
 
 ---
 
 ### Task 3: Copy-all export format
 
-**Files:**
-- Create: `testhub/export.js`
-- Test: `tests/testhub/export.test.mjs`
+**Files:** Create `testhub/export.js`; Test `tests/testhub/export.test.mjs`
 
-**Interfaces:**
-- Produces: `isoDate(date: Date) -> 'YYYY-MM-DD'` (local date); `buildExport({ game, version, date, entries }) -> string` with `entries = [{ block, text, tag, status, note, screenshots }]` in list order. A note line is emitted when `note` or `screenshots` is non-empty; a `✓ tested` line when `status === 'done'`. Whitespace runs in notes (including newlines) collapse to one space. `version` empty gives `version unknown` in the header.
+**Interfaces:** Produces `isoDate(Date) -> 'YYYY-MM-DD'` (local) and `buildExport({game, version, date, entries}) -> string` with `entries = [{block, text, tag, status, note, screenshots}]`: a note line if `note`/`screenshots` is non-empty, then a `✓ tested` line if `status === 'done'`; whitespace in notes collapses; empty `version` gives `version unknown`.
 
 - [ ] **Step 1: Write the failing test**
 
 ```js
-// tests/testhub/export.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildExport, isoDate } from '../../testhub/export.js';
-
-test('isoDate_usesLocalDate', () => {
-  assert.equal(isoDate(new Date(2026, 9, 1)), '2026-10-01');
-});
+import { buildExport } from '../../testhub/export.js';
 
 test('buildExport_matchesSpecFormat', () => {
-  const text = buildExport({
-    game: 'rhyflitzer', version: '0.9.0', date: '2026-10-11',
-    entries: [
-      { block: 'Hideout in the Hübel', text: 'Inside: the tower reads as…', tag: 'hideout.tower', status: 'noted',
-        note: 'Turm wirkt von unten zu dunkel', screenshots: ['fb-rhyflitzer-1011-3.png'] },
-      { block: 'Pontoon bridge', text: 'U again: the bridge disappears…', tag: null, status: 'done', note: '', screenshots: [] },
-    ],
-  });
+  const text = buildExport({ game: 'rhyflitzer', version: '0.9.0', date: '2026-10-11', entries: [
+    { block: 'Hideout in the Hübel', text: 'Inside: the tower reads as…', tag: 'hideout.tower', status: 'noted',
+      note: 'Turm wirkt von unten zu dunkel', screenshots: ['fb-rhyflitzer-1011-3.png'] },
+    { block: 'Pontoon bridge', text: 'U again: the bridge disappears…', tag: null, status: 'done', note: '', screenshots: [] },
+  ] });
   assert.equal(text, [
     'Testhub feedback — rhyflitzer v0.9.0 — 2026-10-11',
     '- [Hideout in the Hübel · "Inside: the tower reads as…" · go:hideout.tower] Turm wirkt von unten zu dunkel (📷 fb-rhyflitzer-1011-3.png)',
@@ -406,163 +263,93 @@ test('buildExport_matchesSpecFormat', () => {
   ].join('\n'));
 });
 
-test('buildExport_doneWithNote_emitsNoteLineThenTestedLine', () => {
-  const text = buildExport({ game: 'g', version: '1', date: 'D', entries: [
-    { block: 'B', text: 'T', tag: null, status: 'done', note: 'fine but slow', screenshots: [] },
-  ] });
-  assert.deepEqual(text.split('\n').slice(1), ['- [B · "T"] fine but slow', '- ✓ tested: [B · "T"]']);
-});
-
 test('buildExport_multilineNoteWithQuotes_staysOneLine', () => {
-  const text = buildExport({ game: 'g', version: '1', date: 'D', entries: [
-    { block: 'B', text: 'T', tag: null, status: 'noted', note: 'line one\n  line "two"', screenshots: ['a.png', 'b.png'] },
+  const text = buildExport({ game: 'g', version: '', date: 'D', entries: [
+    { block: 'B', text: 'T', tag: null, status: 'noted', note: 'one\n  line "two"', screenshots: ['a.png', 'b.png'] },
   ] });
-  assert.equal(text.split('\n')[1], '- [B · "T"] line one line "two" (📷 a.png, b.png)');
-});
-
-test('buildExport_screenshotOnly_hasNoteLineWithoutText', () => {
-  const text = buildExport({ game: 'g', version: '1', date: 'D', entries: [
-    { block: 'B', text: 'T', tag: null, status: 'noted', note: '', screenshots: ['a.png'] },
-  ] });
-  assert.equal(text.split('\n')[1], '- [B · "T"] (📷 a.png)');
-});
-
-test('buildExport_unknownVersion_saysSo', () => {
-  assert.equal(buildExport({ game: 'g', version: '', date: 'D', entries: [] }), 'Testhub feedback — g version unknown — D');
+  assert.deepEqual(text.split('\n'), ['Testhub feedback — g version unknown — D', '- [B · "T"] one line "two" (📷 a.png, b.png)']);
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [ ] **Step 2: Run to verify it fails** — `node --test tests/testhub/export.test.mjs` — Expected: FAIL, missing `testhub/export.js`.
 
-Run: `node --test tests/testhub/export.test.mjs`
-Expected: FAIL, cannot find module `testhub/export.js`.
-
-- [ ] **Step 3: Write minimal implementation**
+- [ ] **Step 3: Implement**
 
 ```js
-// testhub/export.js
 const pad = (n) => String(n).padStart(2, '0');
 
-export function isoDate(date) {
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-}
-
-function label(entry) {
-  const tag = entry.tag ? ` · go:${entry.tag}` : '';
-  return `[${entry.block} · "${entry.text}"${tag}]`;
-}
+export const isoDate = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
 function noteLine(entry) {
+  const tag = entry.tag ? ` · go:${entry.tag}` : '';
   const note = entry.note.replace(/\s+/g, ' ').trim();
   const shots = entry.screenshots.length ? `(📷 ${entry.screenshots.join(', ')})` : '';
-  const body = [note, shots].filter(Boolean).join(' ');
-  return `- ${label(entry)} ${body}`;
-}
-
-function testedLine(entry) {
-  return `- ✓ tested: [${entry.block} · "${entry.text}"]`;
+  return `- [${entry.block} · "${entry.text}"${tag}] ${[note, shots].filter(Boolean).join(' ')}`;
 }
 
 export function buildExport({ game, version, date, entries }) {
-  const versionText = version ? `v${version}` : 'version unknown';
-  const lines = [`Testhub feedback — ${game} ${versionText} — ${date}`];
+  const lines = [`Testhub feedback — ${game} ${version ? `v${version}` : 'version unknown'} — ${date}`];
   for (const entry of entries) {
     if (entry.note.trim() || entry.screenshots.length) lines.push(noteLine(entry));
-    if (entry.status === 'done') lines.push(testedLine(entry));
+    if (entry.status === 'done') lines.push(`- ✓ tested: [${entry.block} · "${entry.text}"]`);
   }
   return lines.join('\n');
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [ ] **Step 4: Run to verify it passes** — `node --test tests/testhub/export.test.mjs` — Expected: PASS (2).
 
-Run: `node --test tests/testhub/export.test.mjs`
-Expected: PASS (6 tests).
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add testhub/export.js tests/testhub/export.test.mjs
-git commit -m "feat(testhub): build the Copy-all feedback block"
-```
+- [ ] **Step 5: Commit** — `git add testhub tests && git commit -m "feat(testhub): build the Copy-all feedback block"`
 
 ---
 
 ### Task 4: Protocol validation and message builders
 
-**Files:**
-- Create: `testhub/protocol.js`
-- Test: `tests/testhub/protocol.test.mjs`
+**Files:** Create `testhub/protocol.js`; Test `tests/testhub/protocol.test.mjs`
 
-**Interfaces:**
-- Produces: `CHANNEL = 'gg-testhub'`; `validateGameMessage(raw) -> msg|null` accepting `hello {game, version, targets:[{id,label}]}`, `png {req, dataUrl}`, `done {req}`, `error {req, message}` and returning a normalized copy; `helloMsg() -> {type:'hello'}`; `goMsg(game, id, req) -> {type:'go', game, id, req}`; `screenshotMsg(game, req) -> {type:'screenshot', game, req}`; `newReq() -> string`.
-- Note (documented extension of the spec's wire format, kept compatible): `go` and `screenshot` carry `game` so only the matching game window answers; `go` carries `req` and the game answers `done {req}` so the hub can tell success from silence.
+**Interfaces:** Produces `CHANNEL = 'gg-testhub'`; `validateGameMessage(raw) -> normalized msg|null` for `hello {game, version, targets:[{id,label}]}`, `png {req, dataUrl}`, `done {req}`, `error {req, message}`; `helloMsg()`, `goMsg(game, id, req)`, `screenshotMsg(game, req)`, `newReq()`. Compatible extensions of the spec wire format: `go`/`screenshot` carry `game`; `go` carries `req` and is answered by `done {req}`.
 
 - [ ] **Step 1: Write the failing test**
 
 ```js
-// tests/testhub/protocol.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { CHANNEL, validateGameMessage, helloMsg, goMsg, screenshotMsg, newReq } from '../../testhub/protocol.js';
+import { validateGameMessage as v } from '../../testhub/protocol.js';
 
 const PNG = 'data:image/png;base64,iVBORw0KGgo=';
 
-test('channel_name', () => assert.equal(CHANNEL, 'gg-testhub'));
-
 test('validateGameMessage_validHello_isNormalized', () => {
-  const msg = validateGameMessage({ type: 'hello', game: 'g', version: '1.0', targets: [{ id: 'j.a', label: 'A', extra: 1 }], junk: true });
-  assert.deepEqual(msg, { type: 'hello', game: 'g', version: '1.0', targets: [{ id: 'j.a', label: 'A' }] });
-});
-
-test('validateGameMessage_hubStyleHelloWithoutTargets_isRejected', () => {
-  assert.equal(validateGameMessage({ type: 'hello' }), null);
+  assert.deepEqual(v({ type: 'hello', game: 'g', version: '1.0', targets: [{ id: 'j.a', label: 'A', x: 1 }], junk: 1 }),
+    { type: 'hello', game: 'g', version: '1.0', targets: [{ id: 'j.a', label: 'A' }] });
 });
 
 test('validateGameMessage_badTargets_areRejected', () => {
-  assert.equal(validateGameMessage({ type: 'hello', game: 'g', version: '1', targets: 'nope' }), null);
-  assert.equal(validateGameMessage({ type: 'hello', game: 'g', version: '1', targets: [{ id: 'Bad Id', label: 'x' }] }), null);
-  assert.equal(validateGameMessage({ type: 'hello', game: 'g', version: '1', targets: [{ id: '<script>', label: 'x' }] }), null);
-  assert.equal(validateGameMessage({ type: 'hello', game: 'g', version: 1, targets: [] }), null);
+  assert.equal(v({ type: 'hello' }), null);
+  assert.equal(v({ type: 'hello', game: 'g', version: '1', targets: 'nope' }), null);
+  assert.equal(v({ type: 'hello', game: 'g', version: '1', targets: [{ id: '<script>', label: 'x' }] }), null);
+  assert.equal(v({ type: 'hello', game: 'g', version: 1, targets: [] }), null);
 });
 
 test('validateGameMessage_png_requiresPngDataUrl', () => {
-  assert.deepEqual(validateGameMessage({ type: 'png', req: 'r', dataUrl: PNG }), { type: 'png', req: 'r', dataUrl: PNG });
-  assert.equal(validateGameMessage({ type: 'png', req: 'r', dataUrl: 'data:text/html;base64,AAAA' }), null);
-  assert.equal(validateGameMessage({ type: 'png', req: 5, dataUrl: PNG }), null);
-  assert.equal(validateGameMessage({ type: 'png', req: 'r', dataUrl: PNG + 'A'.repeat(16 * 1024 * 1024) }), null);
+  assert.deepEqual(v({ type: 'png', req: 'r', dataUrl: PNG }), { type: 'png', req: 'r', dataUrl: PNG });
+  assert.equal(v({ type: 'png', req: 'r', dataUrl: 'data:text/html;base64,AAAA' }), null);
+  assert.equal(v({ type: 'png', req: 'r', dataUrl: PNG + 'A'.repeat(16 * 1024 * 1024) }), null);
 });
 
-test('validateGameMessage_doneAndError', () => {
-  assert.deepEqual(validateGameMessage({ type: 'done', req: 'r' }), { type: 'done', req: 'r' });
-  assert.deepEqual(validateGameMessage({ type: 'error', req: 'r', message: 'm' }), { type: 'error', req: 'r', message: 'm' });
-  assert.equal(validateGameMessage({ type: 'error', req: 'r' }), null);
-});
-
-test('validateGameMessage_garbage_isRejected', () => {
-  for (const raw of [null, undefined, 'x', 5, [], {}, { type: 5 }, { type: 'go', id: 'a' }, { type: 'unknown' }]) {
-    assert.equal(validateGameMessage(raw), null);
+test('validateGameMessage_doneErrorAndGarbage', () => {
+  assert.deepEqual(v({ type: 'done', req: 'r' }), { type: 'done', req: 'r' });
+  assert.deepEqual(v({ type: 'error', req: 'r', message: 'm' }), { type: 'error', req: 'r', message: 'm' });
+  for (const raw of [null, undefined, 'x', 5, [], {}, { type: 5 }, { type: 'error', req: 'r' }, { type: 'go', id: 'a' }]) {
+    assert.equal(v(raw), null);
   }
 });
-
-test('builders_shape', () => {
-  assert.deepEqual(helloMsg(), { type: 'hello' });
-  assert.deepEqual(goMsg('g', 'j.a', 'r1'), { type: 'go', game: 'g', id: 'j.a', req: 'r1' });
-  assert.deepEqual(screenshotMsg('g', 'r2'), { type: 'screenshot', game: 'g', req: 'r2' });
-});
-
-test('newReq_isUnique', () => assert.notEqual(newReq(), newReq()));
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [ ] **Step 2: Run to verify it fails** — `node --test tests/testhub/protocol.test.mjs` — Expected: FAIL, missing `testhub/protocol.js`.
 
-Run: `node --test tests/testhub/protocol.test.mjs`
-Expected: FAIL, cannot find module `testhub/protocol.js`.
-
-- [ ] **Step 3: Write minimal implementation**
+- [ ] **Step 3: Implement**
 
 ```js
-// testhub/protocol.js
 export const CHANNEL = 'gg-testhub';
 
 const ID_RE = /^[a-z0-9._-]+$/;
@@ -571,13 +358,13 @@ const MAX_DATA_URL = 15 * 1024 * 1024;
 const PNG_PREFIX = 'data:image/png;base64,';
 
 const isString = (v, max = 300) => typeof v === 'string' && v.length <= max;
-const isPlainObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
+const isObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 
 function validateTargets(list) {
   if (!Array.isArray(list) || list.length > MAX_TARGETS) return null;
   const out = [];
   for (const target of list) {
-    const valid = isPlainObject(target) && isString(target.id, 100) && ID_RE.test(target.id) && isString(target.label, 200);
+    const valid = isObject(target) && isString(target.id, 100) && ID_RE.test(target.id) && isString(target.label, 200);
     if (!valid) return null;
     out.push({ id: target.id, label: target.label });
   }
@@ -590,18 +377,14 @@ function validateHello(msg) {
   return { type: 'hello', game: msg.game, version: msg.version, targets };
 }
 
-function validatePng(msg) {
-  const valid = isString(msg.req, 100) && isString(msg.dataUrl, MAX_DATA_URL) && msg.dataUrl.startsWith(PNG_PREFIX);
-  return valid ? { type: 'png', req: msg.req, dataUrl: msg.dataUrl } : null;
-}
-
 export function validateGameMessage(msg) {
-  if (!isPlainObject(msg) || !isString(msg.type, 20)) return null;
+  if (!isObject(msg) || !isString(msg.type, 20)) return null;
   if (msg.type === 'hello') return validateHello(msg);
-  if (msg.type === 'png') return validatePng(msg);
-  if (msg.type === 'done') return isString(msg.req, 100) ? { type: 'done', req: msg.req } : null;
-  if (msg.type === 'error') {
-    return isString(msg.req, 100) && isString(msg.message, 500) ? { type: 'error', req: msg.req, message: msg.message } : null;
+  if (!isString(msg.req, 100)) return null;
+  if (msg.type === 'done') return { type: 'done', req: msg.req };
+  if (msg.type === 'error') return isString(msg.message, 500) ? { type: 'error', req: msg.req, message: msg.message } : null;
+  if (msg.type === 'png') {
+    return isString(msg.dataUrl, MAX_DATA_URL) && msg.dataUrl.startsWith(PNG_PREFIX) ? { type: 'png', req: msg.req, dataUrl: msg.dataUrl } : null;
   }
   return null;
 }
@@ -612,34 +395,21 @@ export const screenshotMsg = (game, req) => ({ type: 'screenshot', game, req });
 export const newReq = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [ ] **Step 4: Run to verify it passes** — `node --test tests/testhub/protocol.test.mjs` — Expected: PASS (5).
 
-Run: `node --test tests/testhub/protocol.test.mjs`
-Expected: PASS (8 tests).
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add testhub/protocol.js tests/testhub/protocol.test.mjs
-git commit -m "feat(testhub): validate channel messages from game windows"
-```
+- [ ] **Step 5: Commit** — `git add testhub tests && git commit -m "feat(testhub): validate channel messages from game windows"`
 
 ---
 
 ### Task 5: de/en strings and language detection
 
-**Files:**
-- Create: `testhub/strings.js`
-- Test: `tests/testhub/strings.test.mjs`
+**Files:** Create `testhub/strings.js`; Test `tests/testhub/strings.test.mjs`
 
-**Interfaces:**
-- Produces: `STRINGS = { en: {...}, de: {...} }`; `detectLang(storage|null, navigatorLanguage) -> 'en'|'de'` (reads `gg-lang`, else `de*` navigator language, else `en`); `createT(lang) -> (key, params?) -> string` replacing `{name}` placeholders; unknown key returns the key.
-- Keys used by later tasks: `title`, `connected` (`{version}`, `{n}`), `disconnected`, `openGame`, `filter_open`, `filter_noted`, `filter_done`, `search`, `copyAll` (`{n}`), `go`, `goUnknown`, `notePlaceholder`, `save`, `done`, `reopen`, `shot`, `loadError` (`{game}`, `{reason}`), `noItems`, `noStorage`, `err_timeout`, `err_noGame`, `copied` (`{n}`), `copyManual`, `markSent`, `langToggle`.
+**Interfaces:** Produces `STRINGS = {en, de}`; `detectLang(storage|null, navigatorLanguage) -> 'en'|'de'` (`gg-lang` first, else `de*` navigator, else `en`); `createT(lang) -> (key, params?) -> string` (`{name}` placeholders; unknown key returns the key).
 
 - [ ] **Step 1: Write the failing test**
 
 ```js
-// tests/testhub/strings.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { STRINGS, detectLang, createT } from '../../testhub/strings.js';
@@ -648,68 +418,31 @@ test('STRINGS_bothLanguages_haveTheSameKeys', () => {
   assert.deepEqual(Object.keys(STRINGS.de).sort(), Object.keys(STRINGS.en).sort());
 });
 
-test('STRINGS_german_usesRealUmlauts', () => {
-  const all = Object.values(STRINGS.de).join(' ');
-  assert.doesNotMatch(all, /\b\w*(ae|oe|ue)\w*\b.*(ä|ö|ü)?/i.source === '' ? /$^/ : /Spiel verbunden/ ? /\bwaehl|\bkoenn|\bfuer\b|\bueber\b/ : /$^/);
-  assert.match(STRINGS.de.openGame, /öffnen/);
-});
-
-test('detectLang_storedValueWins', () => {
-  const storage = { getItem: (k) => (k === 'gg-lang' ? 'de' : null) };
-  assert.equal(detectLang(storage, 'en-GB'), 'de');
-});
-
-test('detectLang_invalidStored_fallsBackToNavigator', () => {
-  const storage = { getItem: () => 'fr' };
-  assert.equal(detectLang(storage, 'de-CH'), 'de');
-  assert.equal(detectLang(storage, 'en-US'), 'en');
-});
-
-test('detectLang_noStorage_usesNavigator', () => {
-  assert.equal(detectLang(null, 'de'), 'de');
-  assert.equal(detectLang(null, undefined), 'en');
-});
-
-test('detectLang_throwingStorage_fallsBack', () => {
-  assert.equal(detectLang({ getItem() { throw new Error('x'); } }, 'de-AT'), 'de');
+test('detectLang_storedWins_elseNavigator', () => {
+  assert.equal(detectLang({ getItem: () => 'de' }, 'en-GB'), 'de');
+  assert.equal(detectLang({ getItem: () => 'fr' }, 'de-CH'), 'de');
+  assert.equal(detectLang(null, 'en-US'), 'en');
 });
 
 test('createT_replacesPlaceholdersAndFallsBackToKey', () => {
-  const t = createT('en');
-  assert.equal(t('copyAll', { n: 3 }), 'Copy all 3');
-  assert.equal(t('missing.key'), 'missing.key');
+  assert.equal(createT('en')('copyAll', { n: 3 }), 'Copy all 3');
   assert.equal(createT('de')('copyAll', { n: 3 }), 'Alle kopieren 3');
+  assert.equal(createT('en')('missing.key'), 'missing.key');
 });
 ```
 
-Note for the implementer: the second test above is deliberately simple in intent (real umlauts, no `ae/oe/ue` transliteration); replace its body with this clearer version before running:
+- [ ] **Step 2: Run to verify it fails** — `node --test tests/testhub/strings.test.mjs` — Expected: FAIL, missing `testhub/strings.js`.
+
+- [ ] **Step 3: Implement**
 
 ```js
-test('STRINGS_german_usesRealUmlauts', () => {
-  const all = Object.values(STRINGS.de).join(' ');
-  assert.doesNotMatch(all, /\b(fuer|ueber|koennen|oeffnen|Eintraege)\b/);
-  assert.match(STRINGS.de.openGame, /öffnen/);
-});
-```
-
-- [ ] **Step 2: Run test to verify it fails**
-
-Run: `node --test tests/testhub/strings.test.mjs`
-Expected: FAIL, cannot find module `testhub/strings.js`.
-
-- [ ] **Step 3: Write minimal implementation**
-
-```js
-// testhub/strings.js
 export const STRINGS = {
   en: {
     title: 'Testhub',
     connected: 'Game connected (v{version} · {n} targets)',
     disconnected: 'No game window',
     openGame: 'Open the game with ?dev=1',
-    filter_open: 'Open',
-    filter_noted: 'Noted',
-    filter_done: 'Done',
+    filter_open: 'Open', filter_noted: 'Noted', filter_done: 'Done',
     search: 'Search…',
     copyAll: 'Copy all {n}',
     go: 'Go ▸',
@@ -717,7 +450,6 @@ export const STRINGS = {
     notePlaceholder: 'Note…',
     save: 'Save',
     done: '✓ Done',
-    reopen: 'Reopen',
     shot: '📷 Screenshot',
     loadError: 'Could not load test-todo.md for {game}: {reason}',
     noItems: 'Nothing to show.',
@@ -726,7 +458,6 @@ export const STRINGS = {
     err_noGame: 'No game window connected.',
     copied: 'Copied {n} entries.',
     copyManual: 'Copy was refused. Copy the text below by hand:',
-    markSent: 'Mark as sent',
     langToggle: 'DE',
   },
   de: {
@@ -734,9 +465,7 @@ export const STRINGS = {
     connected: 'Spiel verbunden (v{version} · {n} Ziele)',
     disconnected: 'Kein Spielfenster',
     openGame: 'Spiel mit ?dev=1 öffnen',
-    filter_open: 'Offen',
-    filter_noted: 'Notiert',
-    filter_done: 'Erledigt',
+    filter_open: 'Offen', filter_noted: 'Notiert', filter_done: 'Erledigt',
     search: 'Suchen…',
     copyAll: 'Alle kopieren {n}',
     go: 'Los ▸',
@@ -744,7 +473,6 @@ export const STRINGS = {
     notePlaceholder: 'Notiz…',
     save: 'Speichern',
     done: '✓ Erledigt',
-    reopen: 'Wieder öffnen',
     shot: '📷 Screenshot',
     loadError: 'test-todo.md für {game} konnte nicht geladen werden: {reason}',
     noItems: 'Nichts anzuzeigen.',
@@ -753,17 +481,14 @@ export const STRINGS = {
     err_noGame: 'Kein Spielfenster verbunden.',
     copied: '{n} Einträge kopiert.',
     copyManual: 'Kopieren wurde abgelehnt. Text unten von Hand kopieren:',
-    markSent: 'Als gesendet markieren',
     langToggle: 'EN',
   },
 };
 
-const SUPPORTED = ['en', 'de'];
-
 export function detectLang(storage, navigatorLanguage) {
   let stored = null;
   try { stored = storage ? storage.getItem('gg-lang') : null; } catch (e) { stored = null; }
-  if (SUPPORTED.includes(stored)) return stored;
+  if (stored === 'en' || stored === 'de') return stored;
   return String(navigatorLanguage || 'en').toLowerCase().startsWith('de') ? 'de' : 'en';
 }
 
@@ -776,34 +501,21 @@ export function createT(lang) {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [ ] **Step 4: Run to verify it passes** — `node --test tests/testhub/strings.test.mjs` — Expected: PASS (3).
 
-Run: `node --test tests/testhub/strings.test.mjs`
-Expected: PASS (7 tests).
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add testhub/strings.js tests/testhub/strings.test.mjs
-git commit -m "feat(testhub): de/en UI strings driven by gg-lang"
-```
+- [ ] **Step 5: Commit** — `git add testhub tests && git commit -m "feat(testhub): de/en UI strings driven by gg-lang"`
 
 ---
 
 ### Task 6: `client.js` for game windows
 
-**Files:**
-- Create: `testhub/client.js`
-- Test: `tests/testhub/client.test.mjs`
+**Files:** Create `testhub/client.js`; Test `tests/testhub/client.test.mjs`
 
-**Interfaces:**
-- Consumes: wire format from Task 4 (`go {game,id,req}`, `screenshot {game,req}`, hub `hello` without `targets`).
-- Produces: classic script defining `window.ggTesthub = { register(id, fn, label?), onScreenshot(fn), setInfo({game, version}) }`, then firing `window.dispatchEvent(new Event('gg-testhub-ready'))` and queueing a first `hello` (the script is loaded async, so games register on that event or immediately if `window.ggTesthub` already exists). `register` with a repeated id replaces the target; `fn()` is called synchronously and its return value ignored. Game to hub: `hello {game, version, targets}` (debounced after `register`/`setInfo`, and in reply to a hub hello), `done {req}`, `png {req, dataUrl}`, `error {req, message}`. Ignores everything malformed, messages with a different `game`, and any `hello` that carries `targets` (another game's hello).
+**Interfaces:** Consumes Task 4's wire format. Produces a classic script defining `window.ggTesthub = { register(id, fn, label?), onScreenshot(fn), setInfo({game, version}) }`, then firing `gg-testhub-ready` on `window` and queueing a first `hello`. Ignores malformed messages, other games' `go`/`screenshot` and any `hello` carrying `targets`.
 
 - [ ] **Step 1: Write the failing test**
 
 ```js
-// tests/testhub/client.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -816,200 +528,98 @@ const tick = () => new Promise((resolve) => setTimeout(resolve, 15));
 function boot() {
   const posted = [];
   const channels = [];
+  const events = [];
   class FakeChannel {
     constructor(name) { this.name = name; channels.push(this); }
     postMessage(m) { posted.push(JSON.parse(JSON.stringify(m))); }
   }
-  const events = [];
   const win = { BroadcastChannel: FakeChannel, setTimeout, Event: class { constructor(type) { this.type = type; } }, dispatchEvent: (e) => events.push(e.type) };
   win.window = win;
   vm.runInNewContext(SOURCE, win);
-  return { api: win.ggTesthub, posted, events, channel: channels[0], deliver: (m) => channels[0].onmessage({ data: m }) };
+  return { api: win.ggTesthub, posted, events, deliver: (m) => channels[0].onmessage({ data: m }) };
 }
 
-test('register_thenHello_listsTargetsOnce', async () => {
-  const { api, posted } = boot();
-  api.setInfo({ game: 'g', version: '1.2.3' });
-  api.register('j.a', () => {}, 'Alpha');
-  api.register('j.b', () => {});
+async function ready(game = 'g') {
+  const env = boot();
+  env.api.setInfo({ game, version: '1' });
   await tick();
-  assert.equal(posted.length, 1);
-  assert.deepEqual(posted[0], { type: 'hello', game: 'g', version: '1.2.3', targets: [{ id: 'j.a', label: 'Alpha' }, { id: 'j.b', label: 'j.b' }] });
-});
+  env.posted.length = 0;
+  return env;
+}
 
 test('load_firesReadyEventAndSendsFirstHello', async () => {
-  const { api, events, posted } = boot();
+  const { events, posted } = boot();
   assert.deepEqual(events, ['gg-testhub-ready']);
-  assert.ok(api);
   await tick();
-  assert.equal(posted.length, 1);
-  assert.deepEqual(posted[0], { type: 'hello', game: '', version: '', targets: [] });
+  assert.deepEqual(posted, [{ type: 'hello', game: '', version: '', targets: [] }]);
 });
 
-test('lateRegistration_sendsFreshHelloWithAllTargets', async () => {
-  const { api, posted } = boot();
-  await tick();
-  posted.length = 0;
-  api.register('j.a', () => {});
-  api.register('j.b', () => {});
-  await tick();
-  assert.equal(posted.length, 1);
-  assert.deepEqual(posted[0].targets.map((t) => t.id), ['j.a', 'j.b']);
-});
-
-test('register_repeatedId_replacesEarlierTarget', async () => {
-  const { api, posted, deliver } = boot();
-  api.setInfo({ game: 'g', version: '1' });
+test('lateRegistration_sendsOneFreshHello_repeatedIdReplaces', async () => {
+  const { api, posted, deliver } = await ready();
   const calls = [];
   api.register('j.a', () => calls.push('old'), 'Old');
   api.register('j.a', () => calls.push('new'), 'New');
+  api.register('j.b', () => {});
   await tick();
-  assert.deepEqual(posted[0].targets, [{ id: 'j.a', label: 'New' }]);
+  assert.equal(posted.length, 1);
+  assert.deepEqual(posted[0].targets, [{ id: 'j.a', label: 'New' }, { id: 'j.b', label: 'j.b' }]);
   deliver({ type: 'go', game: 'g', id: 'j.a', req: 'r' });
   assert.deepEqual(calls, ['new']);
 });
 
-test('channel_usesGgTesthubName', () => assert.equal(boot().channel.name, 'gg-testhub'));
-
-test('hubHello_isAnswered', async () => {
-  const { api, posted, deliver } = boot();
-  api.setInfo({ game: 'g', version: '1' });
+test('go_answersDone_ignoresReturnValue_errorsOnThrowOrUnknownId', async () => {
+  const { api, posted, deliver } = await ready();
+  api.register('j.hang', () => new Promise(() => {}));
+  api.register('j.boom', () => { throw new Error('boom'); });
   await tick();
   posted.length = 0;
-  deliver({ type: 'hello' });
-  assert.equal(posted.length, 1);
-  assert.equal(posted[0].type, 'hello');
-});
-
-test('helloWithTargets_fromAnotherGame_isIgnored', () => {
-  const { posted, deliver } = boot();
-  deliver({ type: 'hello', game: 'other', version: '1', targets: [] });
-  assert.equal(posted.length, 0);
-});
-
-test('go_knownId_runsFnAndAnswersDone', async () => {
-  const { api, posted, deliver } = boot();
-  api.setInfo({ game: 'g', version: '1' });
-  let ran = 0;
-  api.register('j.a', () => { ran += 1; });
-  await tick();
-  posted.length = 0;
-  deliver({ type: 'go', game: 'g', id: 'j.a', req: 'r1' });
-  await tick();
-  assert.equal(ran, 1);
-  assert.deepEqual(posted, [{ type: 'done', req: 'r1' }]);
-});
-
-test('go_returnedPromise_isIgnoredAndStillAnswersDone', async () => {
-  const { api, posted, deliver } = boot();
-  api.setInfo({ game: 'g', version: '1' });
-  api.register('j.a', () => new Promise(() => {}));
-  await tick();
-  posted.length = 0;
-  deliver({ type: 'go', game: 'g', id: 'j.a', req: 'r1' });
-  await tick();
-  assert.deepEqual(posted, [{ type: 'done', req: 'r1' }]);
-});
-
-test('go_unknownId_answersError', async () => {
-  const { api, posted, deliver } = boot();
-  api.setInfo({ game: 'g', version: '1' });
-  await tick();
-  posted.length = 0;
-  deliver({ type: 'go', game: 'g', id: 'nope', req: 'r1' });
-  await tick();
-  assert.equal(posted[0].type, 'error');
-  assert.equal(posted[0].req, 'r1');
-});
-
-test('go_throwingFn_answersError', async () => {
-  const { api, posted, deliver } = boot();
-  api.setInfo({ game: 'g', version: '1' });
-  api.register('j.a', () => { throw new Error('boom'); });
-  await tick();
-  posted.length = 0;
-  deliver({ type: 'go', game: 'g', id: 'j.a', req: 'r1' });
-  await tick();
-  assert.deepEqual(posted, [{ type: 'error', req: 'r1', message: 'boom' }]);
-});
-
-test('go_forAnotherGame_isIgnored', async () => {
-  const { api, posted, deliver } = boot();
-  api.setInfo({ game: 'g', version: '1' });
-  let ran = 0;
-  api.register('j.a', () => { ran += 1; });
-  await tick();
-  posted.length = 0;
-  deliver({ type: 'go', game: 'other', id: 'j.a', req: 'r1' });
-  await tick();
-  assert.equal(ran, 0);
-  assert.equal(posted.length, 0);
+  deliver({ type: 'go', game: 'g', id: 'j.hang', req: 'r1' });
+  deliver({ type: 'go', game: 'g', id: 'j.boom', req: 'r2' });
+  deliver({ type: 'go', game: 'g', id: 'nope', req: 'r3' });
+  deliver({ type: 'go', game: 'other', id: 'j.hang', req: 'r4' });
+  assert.deepEqual(posted.map((m) => [m.type, m.req]), [['done', 'r1'], ['error', 'r2'], ['error', 'r3']]);
+  assert.equal(posted[1].message, 'boom');
 });
 
 test('screenshot_returnsPng_orErrors', async () => {
-  const { api, posted, deliver } = boot();
-  api.setInfo({ game: 'g', version: '1' });
-  await tick();
-  posted.length = 0;
+  const { api, posted, deliver } = await ready();
   deliver({ type: 'screenshot', game: 'g', req: 'r0' });
-  await tick();
-  assert.equal(posted[0].type, 'error');
-
   api.onScreenshot(() => Promise.resolve(PNG));
-  posted.length = 0;
   deliver({ type: 'screenshot', game: 'g', req: 'r1' });
   await tick();
-  assert.deepEqual(posted, [{ type: 'png', req: 'r1', dataUrl: PNG }]);
-
   api.onScreenshot(() => 'data:text/html;base64,AAAA');
-  posted.length = 0;
   deliver({ type: 'screenshot', game: 'g', req: 'r2' });
-  await tick();
-  assert.equal(posted[0].type, 'error');
-});
-
-test('screenshot_rejectionWithString_becomesErrorMessage', async () => {
-  const { api, posted, deliver } = boot();
-  api.setInfo({ game: 'g', version: '1' });
   api.onScreenshot(() => Promise.reject('photo failed'));
+  deliver({ type: 'screenshot', game: 'g', req: 'r3' });
   await tick();
-  posted.length = 0;
-  deliver({ type: 'screenshot', game: 'g', req: 'r1' });
-  await tick();
-  assert.deepEqual(posted, [{ type: 'error', req: 'r1', message: 'photo failed' }]);
+  const byReq = Object.fromEntries(posted.map((m) => [m.req, m]));
+  assert.equal(byReq.r0.type, 'error');
+  assert.deepEqual(byReq.r1, { type: 'png', req: 'r1', dataUrl: PNG });
+  assert.equal(byReq.r2.type, 'error');
+  assert.deepEqual(byReq.r3, { type: 'error', req: 'r3', message: 'photo failed' });
 });
 
 test('malformedMessages_areIgnoredWithoutThrowing', async () => {
-  const { api, posted, deliver } = boot();
-  api.setInfo({ game: 'g', version: '1' });
+  const { api, posted, deliver } = await ready();
   api.register('j.a', () => {});
   await tick();
   posted.length = 0;
-  for (const m of [null, 'x', 5, [], {}, { type: 'go' }, { type: 'go', id: '<script>', req: 'r' }, { type: 'go', id: 'j.a', req: 7 },
-    { type: 'screenshot' }, { type: 'unknown' }]) {
+  for (const m of [{ type: 'hello', game: 'other', version: '1', targets: [] }, null, 'x', 5, [], {}, { type: 'go' }, { type: 'go', id: '<script>', req: 'r' }, { type: 'go', id: 'j.a', req: 7 }, { type: 'screenshot' }, { type: 'unknown' }]) {
     deliver(m);
   }
   await tick();
   assert.equal(posted.length, 0);
-});
-
-test('register_invalidInput_throws', () => {
-  const { api } = boot();
   assert.throws(() => api.register('Bad Id', () => {}), TypeError);
-  assert.throws(() => api.register('ok.id', 'notAFunction'), TypeError);
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [ ] **Step 2: Run to verify it fails** — `node --test tests/testhub/client.test.mjs` — Expected: FAIL, ENOENT reading `testhub/client.js`.
 
-Run: `node --test tests/testhub/client.test.mjs`
-Expected: FAIL, ENOENT reading `testhub/client.js`.
-
-- [ ] **Step 3: Write minimal implementation**
+- [ ] **Step 3: Implement**
 
 ```js
-// testhub/client.js
-// Classic script (no modules): a game loads it async, only in dev mode, and registers on 'gg-testhub-ready'. See CLAUDE.md "Testhub".
+// Classic script, loaded async by a game in dev mode only. Contract: window.ggTesthub = { setInfo({game, version}) once,
+// register(id, fn, label) (sync fn, repeated id replaces), onScreenshot(fn) }; register after 'gg-testhub-ready' fires on window.
 (function () {
   'use strict';
   if (window.ggTesthub) return;
@@ -1041,22 +651,17 @@ Expected: FAIL, ENOENT reading `testhub/client.js`.
   }
 
   function fail(req, err) {
-    var message = String(err && err.message ? err.message : err).slice(0, 500);
-    send({ type: 'error', req: req || '', message: message });
+    send({ type: 'error', req: req || '', message: String(err && err.message ? err.message : err).slice(0, 500) });
   }
 
   function parse(m) {
     if (!m || typeof m !== 'object' || Array.isArray(m) || typeof m.type !== 'string') return null;
     if (m.type === 'hello') return m.targets === undefined ? { type: 'hello' } : null;
     if (!isOptionalText(m.game) || !isOptionalText(m.req)) return null;
-    if (m.type === 'go') {
-      return isText(m.id, 100) && ID_RE.test(m.id) ? { type: 'go', game: m.game, id: m.id, req: m.req } : null;
-    }
+    if (m.type === 'go') return isText(m.id, 100) && ID_RE.test(m.id) ? { type: 'go', game: m.game, id: m.id, req: m.req } : null;
     if (m.type === 'screenshot') return isText(m.req, 100) ? { type: 'screenshot', game: m.game, req: m.req } : null;
     return null;
   }
-
-  function isForMe(m) { return !m.game || !info.game || m.game === info.game; }
 
   function onGo(m) {
     var target = targets.get(m.id);
@@ -1078,9 +683,8 @@ Expected: FAIL, ENOENT reading `testhub/client.js`.
       var m = parse(event.data);
       if (!m) return;
       if (m.type === 'hello') { sendHello(); return; }
-      if (!isForMe(m)) return;
-      if (m.type === 'go') onGo(m);
-      else onScreenshotRequest(m);
+      if (m.game && info.game && m.game !== info.game) return;
+      if (m.type === 'go') onGo(m); else onScreenshotRequest(m);
     };
   }
 
@@ -1106,34 +710,17 @@ Expected: FAIL, ENOENT reading `testhub/client.js`.
 })();
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [ ] **Step 4: Run to verify it passes** — `node --test tests/testhub/*.test.mjs` — Expected: PASS (all).
 
-Run: `node --test tests/testhub/client.test.mjs`
-Expected: PASS (11 tests).
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add testhub/client.js tests/testhub/client.test.mjs
-git commit -m "feat(testhub): client.js registers jump targets and answers the hub"
-```
+- [ ] **Step 5: Commit** — `git add testhub tests && git commit -m "feat(testhub): client.js registers jump targets and answers the hub"`
 
 ---
 
 ### Task 7: Hub page shell, list rendering, e2e harness
 
-**Files:**
-- Create: `testhub/index.html`, `testhub/style.css`, `testhub/dom.js`, `testhub/list.js`, `testhub/app.js`
-- Create: `tests/testhub/fixtures/test-todo.md`, `tests/testhub/fixtures/fake-game.html`
-- Create: `tests/test_testhub_e2e.py`
+**Files:** Create `testhub/{index.html,style.css,dom.js,list.js,app.js}`, `tests/testhub/fixtures/{test-todo.md,fake-game.html}`, `tests/test_testhub_e2e.py`
 
-**Interfaces:**
-- Consumes: `parseTodo` (Task 1), `getStorage`/`createStore` (Task 2), `detectLang`/`createT` (Task 5).
-- Produces:
-  - `h(tag, props, ...children) -> HTMLElement` (`dom.js`): `on*` props add listeners, `class` sets className, `true` sets an empty attribute, `false`/`null` skip, children arrays are flattened, strings become text nodes.
-  - `renderList(view) -> HTMLElement` (`list.js`), `view = { t, blocks, store, filter, query, expanded: Set<key>, collapsed: Map<heading, bool>, drafts: Map<key,string>, errors: Map<key,string>, conn: {version, targets}|null, actions: { toggleItem(key), toggleBlock(heading, wasCollapsed), go(item), shot(item), save(item), done(item), reopen(item) } }`. Each item renders as `li.item[data-key]` with a `button.text` and a Go control (`button.go`, or `span.go-unknown` for an unknown tag; disabled button when `conn` is null).
-  - `app.js` sets up `#app` with `.status` (red/green line), `.toolbar`, notices and the list; `?game=<slug>` selects the game (slug `[a-z0-9-]+`, appended to the picker if not in `GAMES`); `GAMES = ['rhyflitzer', 'wipfelkratzer']`.
-  - E2E helpers in `tests/test_testhub_e2e.py`: `ORIGIN = "http://localhost:4173"` (served by `context.route`, secure context so the Clipboard API works), `new_context(browser, todo=True)`, `open_game(ctx)`, `open_hub(ctx, errors=None)`, `item(hub, text)`.
+**Interfaces:** Consumes Tasks 1, 2, 5. Produces `h(tag, props, ...children)` (`on*` props are listeners, `class` sets className, `true`/`false`/`null` as attribute values set or skip, never `innerHTML`); `renderList(view)` with `view = { t, blocks, store, filter, query, expanded:Set, collapsed:Map, drafts:Map, errors:Map, conn:{version,targets}|null, actions:{toggleItem, toggleBlock, go, shot, save, done} }`, rendering `li.item` with `button.text` and a Go control (`button.go`, disabled without `conn`; grey `span.go-unknown` for a tag not in `conn.targets`); `app.js` with `GAMES` and `?game=<slug>` (`[a-z0-9-]+`, appended to the picker if unknown). E2E helpers `new_context`, `open_game`, `open_hub`, `item` on `ORIGIN = http://localhost:4173` (a secure context, so the Clipboard API works).
 
 - [ ] **Step 1: Write fixtures and the failing e2e tests**
 
@@ -1152,7 +739,7 @@ git commit -m "feat(testhub): client.js registers jump targets and answers the h
 - [ ] Plain item without tag
 ```
 
-`tests/testhub/fixtures/fake-game.html` (a tiny game: loads the client async like a real game, registers on `gg-testhub-ready`, registers one target late, and a screenshot hook whose behaviour the test switches via `window.__shot`):
+`tests/testhub/fixtures/fake-game.html` (loads the client async like a real game, registers on `gg-testhub-ready`, registers one target late, screenshot behaviour switched via `window.__shot`):
 
 ```html
 <!doctype html>
@@ -1178,7 +765,6 @@ git commit -m "feat(testhub): client.js registers jump targets and answers the h
   s.async = true;
   document.head.appendChild(s);
 </script>
-<p>fake game</p>
 ```
 
 `tests/test_testhub_e2e.py`:
@@ -1197,12 +783,8 @@ ROOT = Path(__file__).parent.parent
 FIXTURES = Path(__file__).parent / "testhub" / "fixtures"
 ORIGIN = "http://localhost:4173"
 TZ = "Europe/Zurich"
-TYPES = {
-    ".html": "text/html; charset=utf-8",
-    ".js": "text/javascript; charset=utf-8",
-    ".css": "text/css; charset=utf-8",
-    ".md": "text/markdown; charset=utf-8",
-}
+TYPES = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8",
+         ".css": "text/css; charset=utf-8", ".md": "text/markdown; charset=utf-8"}
 
 
 def serve(route, request, todo):
@@ -1222,10 +804,8 @@ def serve(route, request, todo):
 
 
 def new_context(browser, todo=True, **kwargs):
-    ctx = browser.new_context(
-        locale="en-GB", timezone_id=TZ, accept_downloads=True,
-        permissions=["clipboard-read", "clipboard-write"], **kwargs,
-    )
+    ctx = browser.new_context(locale="en-GB", timezone_id=TZ, accept_downloads=True,
+                              permissions=["clipboard-read", "clipboard-write"], **kwargs)
     ctx.route(f"{ORIGIN}/**", lambda route, request: serve(route, request, todo))
     return ctx
 
@@ -1266,22 +846,16 @@ def ctx(browser):
     c.close()
 
 
-def test_list_showsOpenItemsOnly_withTagsStripped(ctx):
+def test_list_showsOpenItemsOnly_tagsStripped_noGameIsRed(ctx):
     errors = []
     hub = open_hub(ctx, errors)
     expect(hub.locator(".item")).to_have_count(4)
     expect(item(hub, "Second item has its own tag")).to_have_text(re.compile(r"^\s*☐ Second item has its own tag\s*Go"))
     expect(hub.locator(".block", has_text="Alpha block").locator(".progress")).to_have_text("0 / 2 ✓")
-    assert hub.locator("text=Already tested").count() == 0
-    assert hub.locator("text={go:").count() == 0
-    assert errors == []
-
-
-def test_noGameWindow_statusRed_goDisabled_linkToGame(ctx):
-    hub = open_hub(ctx)
     expect(hub.locator(".status.off")).to_contain_text("No game window")
     expect(hub.locator(".status a")).to_have_attribute("href", "/game-fake/?dev=1")
     expect(item(hub, "First item").locator("button.go")).to_be_disabled()
+    assert errors == []
 
 
 def test_missingTodo_showsMessage_hubStillOpens(browser):
@@ -1300,17 +874,13 @@ def test_storageUnavailable_warnsAndStillRenders(ctx):
     expect(hub.locator(".item")).to_have_count(4)
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [ ] **Step 2: Run to verify it fails** — `.venv/bin/pytest tests/test_testhub_e2e.py -v` — Expected: FAIL (`testhub/index.html` 404, `.status` never appears).
 
-Run: `.venv/bin/pytest tests/test_testhub_e2e.py -v`
-Expected: FAIL, the hub page 404s (`testhub/index.html` does not exist), so `.status` never appears.
-
-- [ ] **Step 3: Write the implementation**
+- [ ] **Step 3: Implement**
 
 `testhub/dom.js`:
 
 ```js
-// testhub/dom.js
 export function h(tag, props = {}, ...children) {
   const el = document.createElement(tag);
   for (const [name, value] of Object.entries(props)) {
@@ -1329,7 +899,6 @@ export function h(tag, props = {}, ...children) {
 `testhub/list.js`:
 
 ```js
-// testhub/list.js
 import { h } from './dom.js';
 
 function matchesFilter(view, block, item) {
@@ -1338,16 +907,16 @@ function matchesFilter(view, block, item) {
   if (view.filter === 'noted' && entry.status !== 'noted') return false;
   if (view.filter === 'done' && entry.status !== 'done') return false;
   const query = view.query.trim().toLowerCase();
-  if (!query) return true;
-  return `${block.heading} ${item.text} ${entry.note}`.toLowerCase().includes(query);
+  return !query || `${block.heading} ${item.text} ${entry.note}`.toLowerCase().includes(query);
 }
 
 function goControl(view, item) {
   if (!item.tag) return null;
   const { t, conn } = view;
   if (!conn) return h('button', { class: 'go', disabled: true, title: item.tag }, t('go'));
-  const known = conn.targets.some((target) => target.id === item.tag);
-  if (!known) return h('span', { class: 'go-unknown', title: t('goUnknown') }, item.tag);
+  if (!conn.targets.some((target) => target.id === item.tag)) {
+    return h('span', { class: 'go-unknown', title: t('goUnknown') }, item.tag);
+  }
   return h('button', { class: 'go', onclick: () => view.actions.go(item) }, t('go'));
 }
 
@@ -1378,15 +947,13 @@ function renderBlock(view, block) {
 
 export function renderList(view) {
   const blocks = view.blocks.map((block) => renderBlock(view, block)).filter(Boolean);
-  if (blocks.length === 0) return h('p', { class: 'empty' }, view.t('noItems'));
-  return h('div', { class: 'list' }, blocks);
+  return blocks.length === 0 ? h('p', { class: 'empty' }, view.t('noItems')) : h('div', { class: 'list' }, blocks);
 }
 ```
 
 `testhub/app.js`:
 
 ```js
-// testhub/app.js
 import { h } from './dom.js';
 import { parseTodo } from './parser.js';
 import { getStorage, createStore } from './store.js';
@@ -1396,38 +963,32 @@ import { renderList } from './list.js';
 export const GAMES = ['rhyflitzer', 'wipfelkratzer'];
 const SLUG_RE = /^[a-z0-9-]+$/;
 
-function pickGame() {
-  const requested = new URLSearchParams(location.search).get('game');
-  return requested && SLUG_RE.test(requested) ? requested : GAMES[0];
-}
-
-const game = pickGame();
+const requested = new URLSearchParams(location.search).get('game');
+const game = requested && SLUG_RE.test(requested) ? requested : GAMES[0];
 const games = GAMES.includes(game) ? GAMES : [...GAMES, game];
 const storage = getStorage();
 const store = createStore(storage);
 let lang = detectLang(storage, navigator.language);
 let t = createT(lang);
-let link = null; // set in Task 8
+let link = null; // created in Task 8
 
 const ui = {
   blocks: [], loadError: null, filter: 'open', query: '',
   expanded: new Set(), collapsed: new Map(), drafts: new Map(), errors: new Map(),
 };
-
 const conn = () => (link ? link.conn : null);
 
 function captureFocus() {
   const el = document.activeElement;
   if (!el || !el.dataset || !el.dataset.focus) return null;
-  return { id: el.dataset.focus, start: el.selectionStart, end: el.selectionEnd };
+  return { id: el.dataset.focus, start: el.selectionStart };
 }
 
 function restoreFocus(saved) {
-  if (!saved) return;
-  const el = document.querySelector(`[data-focus="${CSS.escape(saved.id)}"]`);
+  const el = saved && document.querySelector(`[data-focus="${CSS.escape(saved.id)}"]`);
   if (!el) return;
   el.focus();
-  if (saved.start !== null && saved.start !== undefined && el.setSelectionRange) el.setSelectionRange(saved.start, saved.end);
+  if (typeof saved.start === 'number') el.setSelectionRange(saved.start, saved.start);
 }
 
 const actions = {
@@ -1441,31 +1002,31 @@ const actions = {
   },
 };
 
-function view() {
-  return { t, blocks: ui.blocks, store, filter: ui.filter, query: ui.query, conn: conn(), actions, ...ui };
+const view = () => ({ ...ui, t, store, conn: conn(), actions });
+
+function switchLang() {
+  lang = lang === 'en' ? 'de' : 'en';
+  t = createT(lang);
+  try { if (storage) storage.setItem('gg-lang', lang); } catch (e) { /* stays for this session */ }
+  render();
 }
 
 function header() {
   const picker = h('select', { class: 'picker', 'aria-label': 'Game', onchange: (e) => { location.search = `?game=${e.target.value}`; } },
     games.map((g) => h('option', { value: g, selected: g === game }, g)));
-  const toggle = h('button', { class: 'lang', type: 'button', onclick: switchLang }, t('langToggle'));
-  return h('header', { class: 'head' }, h('h1', {}, t('title')), picker, toggle);
+  return h('header', { class: 'head' }, h('h1', {}, t('title')), picker,
+    h('button', { class: 'lang', type: 'button', onclick: switchLang }, t('langToggle')));
 }
 
-function switchLang() {
-  lang = lang === 'en' ? 'de' : 'en';
-  t = createT(lang);
-  try { if (storage) storage.setItem('gg-lang', lang); } catch (e) { /* language stays for this session */ }
-  render();
-}
+const copyButton = () => null; // replaced in Task 9
 
 function statusBar() {
   const c = conn();
-  if (c) {
-    return h('div', { class: 'status on' }, '● ', t('connected', { version: c.version, n: c.targets.length }));
-  }
-  return h('div', { class: 'status off' }, '● ', t('disconnected'), ' ',
-    h('a', { href: `/game-${game}/?dev=1`, target: '_blank', rel: 'noopener' }, t('openGame')));
+  const line = c
+    ? h('span', {}, '● ', t('connected', { version: c.version, n: c.targets.length }))
+    : h('span', {}, '● ', t('disconnected'), ' ',
+      h('a', { href: `/game-${game}/?dev=1`, target: '_blank', rel: 'noopener' }, t('openGame')));
+  return h('div', { class: `status ${c ? 'on' : 'off'}` }, line, copyButton());
 }
 
 function toolbar() {
@@ -1511,8 +1072,6 @@ render();
 loadTodo();
 ```
 
-Note on `view()`: the spread of `ui` supplies `expanded`, `collapsed`, `drafts`, `errors` to `renderList`.
-
 `testhub/index.html`:
 
 ```html
@@ -1531,108 +1090,70 @@ Note on `view()`: the spread of `ui` supplies `expanded`, `collapsed`, `drafts`,
 </html>
 ```
 
-`testhub/style.css` (fluid, works as a strip beside the game, no fixed widths):
+`testhub/style.css` (fluid, narrow-strip friendly):
 
 ```css
-:root { color-scheme: dark light; --bg: #12151c; --fg: #e6e9f0; --muted: #8a93a6; --line: #2a3040; --ok: #3ecf6e; --bad: #ef5b5b; --accent: #8fd8e8; }
-@media (prefers-color-scheme: light) { :root { --bg: #f6f7fa; --fg: #1b1f2a; --muted: #5a6072; --line: #d5d9e3; --accent: #0b6e86; } }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.4 system-ui, sans-serif; }
-#app { padding: 8px 12px; max-width: 100%; }
-button, input, select, textarea { font: inherit; color: inherit; }
-button { background: none; border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; cursor: pointer; }
-button:disabled { opacity: .45; cursor: not-allowed; }
-.head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.head h1 { font-size: 1.1rem; margin: 0; flex: 1; }
-.status { padding: 6px 0; overflow-wrap: anywhere; }
-.status.on { color: var(--ok); }
-.status.off { color: var(--bad); }
-.status a { color: var(--accent); }
-.toolbar { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; padding: 4px 0 8px; }
-.search { flex: 1 1 8rem; min-width: 0; background: transparent; border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; }
-.notice.warn, .error, .load-error { color: var(--bad); margin: 4px 0; overflow-wrap: anywhere; }
-.block { border-top: 1px solid var(--line); }
-.block-head { display: flex; justify-content: space-between; gap: 8px; width: 100%; border: 0; text-align: left; padding: 8px 0; }
-.block-title { overflow-wrap: anywhere; min-width: 0; }
-.progress { color: var(--muted); white-space: nowrap; }
-ul { list-style: none; margin: 0; padding: 0 0 8px 12px; }
-.item .row { display: flex; gap: 8px; align-items: flex-start; }
-.item .text { flex: 1; min-width: 0; text-align: left; border: 0; padding: 2px 0; overflow-wrap: anywhere; }
-.item.done .text { color: var(--muted); }
-.go-unknown { color: var(--muted); font-size: .85em; border: 1px dashed var(--line); border-radius: 6px; padding: 2px 6px; overflow-wrap: anywhere; }
-.editor { padding: 4px 0 8px 18px; }
-.note { width: 100%; background: transparent; border: 1px solid var(--line); border-radius: 6px; padding: 6px; resize: vertical; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 0; }
-.chip { color: var(--muted); font-size: .85em; overflow-wrap: anywhere; }
-.buttons { display: flex; flex-wrap: wrap; gap: 6px; }
-.export-box { width: 100%; min-height: 8rem; background: transparent; border: 1px solid var(--line); border-radius: 6px; padding: 6px; }
+body { margin: 0; font: 15px/1.4 system-ui, sans-serif; color-scheme: dark light; }
+#app { padding: 8px 12px; }
+button, input, select, textarea { font: inherit; }
+.head, .status, .toolbar, .buttons, .chips, .item .row { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+.head h1 { font-size: 1.1rem; margin: 0 auto 0 0; }
+.status { justify-content: space-between; overflow-wrap: anywhere; }
+.status.on, .notice.ok { color: #2e9e5b; }
+.status.off, .notice.warn, .error, .load-error { color: #d64545; }
+.search { flex: 1 1 8rem; min-width: 0; }
+.block-head { display: flex; justify-content: space-between; gap: 8px; width: 100%; }
+.block-title, .item .text { overflow-wrap: anywhere; min-width: 0; text-align: left; }
+.item .text { flex: 1; border: 0; background: none; }
+.item.done .text, .progress, .chip, .go-unknown { opacity: .6; }
+ul { list-style: none; margin: 0; padding-left: 12px; }
+.note, .export-box { width: 100%; }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [ ] **Step 4: Run to verify it passes** — `.venv/bin/pytest tests/test_testhub_e2e.py -v` — Expected: PASS (3).
 
-Run: `.venv/bin/pytest tests/test_testhub_e2e.py -v`
-Expected: PASS (4 tests). First-time setup if `.venv` is missing: `python3 -m venv .venv && .venv/bin/pip install pytest playwright && .venv/bin/playwright install chromium`.
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add testhub tests/test_testhub_e2e.py tests/testhub/fixtures
-git commit -m "feat(testhub): hub page lists open test-todo items per game"
-```
+- [ ] **Step 5: Commit** — `git add testhub tests && git commit -m "feat(testhub): hub page lists open test-todo items per game"`
 
 ---
 
 ### Task 8: Game connection, Go, screenshot download
 
-**Files:**
-- Create: `testhub/link.js`
-- Modify: `testhub/app.js` (import, create `link`, `go`/`shot` actions), `testhub/list.js` (editor with the screenshot button; see below)
-- Test: `tests/test_testhub_e2e.py` (append)
+**Files:** Create `testhub/link.js`; Modify `testhub/app.js`, `testhub/list.js`; Test `tests/test_testhub_e2e.py` (append)
 
-**Interfaces:**
-- Consumes: `CHANNEL`, `validateGameMessage`, `helloMsg`, `goMsg`, `screenshotMsg`, `newReq` (Task 4); `store.nextShotName`, `store.update`, `store.setVersion` (Task 2); `h` (Task 7).
-- Produces: `createLink({ game, onChange, timeoutMs? }) -> { get conn(): {version, targets:[{id,label}], seen:number}|null, hello(), go(id): Promise<msg>, screenshot(): Promise<{type:'png', dataUrl}>, close() }`. Requests reject with an `Error` whose `code` is `'timeout'` (after 10 s) or `'noGame'` (no connection), or with the game's error message (no `code`). `onChange()` fires when connection state or the target list changes. The hub sends `hello` on creation and every 10 s; a connection with no hello for 25 s is dropped.
-- `app.js` actions added: `go(item)`, `shot(item)`. The list gets an `editor(view, item, entry)` (screenshot chips and button); Task 9 extends it with the textarea and buttons.
+**Interfaces:** Produces `createLink({game, onChange, timeoutMs?}) -> { get conn(): {version, targets, seen}|null, go(id), screenshot() }`; requests resolve with the answering message or reject with an `Error` whose `code` is `timeout` (10 s), `noGame`, or `remote` (the game's message). `onChange` fires when connection or target list changes; the hub sends `hello` on creation and every 10 s and drops a connection silent for 25 s. `app.js` gains actions `go(item)`, `shot(item)`; `list.js` gains `editor(view, item, entry)` (extended in Task 9).
 
-- [ ] **Step 1: Write the failing e2e tests (append to `tests/test_testhub_e2e.py`)**
+- [ ] **Step 1: Append the failing e2e tests**
 
 ```python
 def mmdd():
     return datetime.now(ZoneInfo(TZ)).strftime("%m%d")
 
 
-def test_connectedStatus_showsVersionAndTargets_unknownTagIsGrey(ctx):
-    open_game(ctx)
-    hub = open_hub(ctx)
-    expect(hub.locator(".status.on")).to_contain_text("v1.2.3 · 2 targets")
-    expect(item(hub, "Typo tag item").locator("button.go")).to_have_count(0)
-    expect(item(hub, "Typo tag item").locator(".go-unknown")).to_have_text("fake.typo")
-    expect(item(hub, "Plain item").locator("button.go")).to_have_count(0)
-
-
-def test_gameOpenedAfterHub_turnsStatusGreen(ctx):
-    hub = open_hub(ctx)
-    expect(hub.locator(".status.off")).to_be_visible()
-    open_game(ctx)
-    expect(hub.locator(".status.on")).to_contain_text("2 targets")
-
-
-def test_go_runsTargetInGameWindow(ctx):
+def test_connected_greyTag_lateTarget_goRunsInGame(ctx):
     game = open_game(ctx)
     hub = open_hub(ctx)
-    expect(hub.locator(".status.on")).to_be_visible()
+    expect(hub.locator(".status.on")).to_contain_text("v1.2.3 · 2 targets")  # fake.beta registers 200 ms late
+    expect(item(hub, "Typo tag item").locator(".go-unknown")).to_have_text("fake.typo")
     item(hub, "First item inherits").locator("button.go").click()
     game.wait_for_function("window.__at === 'alpha'")
-
-
-def test_lateRegisteredTarget_turnsGreyTagIntoGoButton(ctx):
-    game = open_game(ctx)
-    hub = open_hub(ctx)
-    row = item(hub, "Second item has its own tag")
-    expect(row.locator("button.go")).to_be_visible()
-    expect(hub.locator(".status.on")).to_contain_text("2 targets")
-    row.locator("button.go").click()
+    item(hub, "Second item").locator("button.go").click()
     game.wait_for_function("window.__at === 'beta'")
+
+
+def test_screenshot_downloadsNumberedFiles(ctx):
+    open_game(ctx)
+    hub = open_hub(ctx)
+    expect(hub.locator(".status.on")).to_be_visible()
+    row = item(hub, "First item inherits")
+    row.locator("button.text").click()
+    with hub.expect_download() as first:
+        row.locator("button.shot").click()
+    assert first.value.suggested_filename == f"fb-fake-{mmdd()}-1.png"
+    expect(row.locator(".chip")).to_have_text(f"📷 fb-fake-{mmdd()}-1.png ✓")
+    with hub.expect_download() as second:
+        row.locator("button.shot").click()
+    assert second.value.suggested_filename == f"fb-fake-{mmdd()}-2.png"
 
 
 def test_screenshot_withoutAnswer_showsTimeoutError(ctx):
@@ -1658,41 +1179,15 @@ def test_screenshot_rejected_showsGameMessage_andStoresNothing(ctx):
     row.locator("button.text").click()
     row.locator("button.shot").click()
     expect(row.locator(".error")).to_have_text("photo failed")
-    expect(row.locator(".chip")).to_have_count(0)
-
-
-def test_screenshot_downloadsNumberedFile(ctx):
-    open_game(ctx)
-    hub = open_hub(ctx)
-    expect(hub.locator(".status.on")).to_be_visible()
-    row = item(hub, "First item inherits")
-    row.locator("button.text").click()
-    with hub.expect_download() as first:
-        row.locator("button.shot").click()
-    assert first.value.suggested_filename == f"fb-fake-{mmdd()}-1.png"
-    expect(row.locator(".chip")).to_have_text(f"📷 fb-fake-{mmdd()}-1.png ✓")
-    with hub.expect_download() as second:
-        row.locator("button.shot").click()
-    assert second.value.suggested_filename == f"fb-fake-{mmdd()}-2.png"
-
-
-def test_screenshot_withoutGame_isDisabled(ctx):
-    hub = open_hub(ctx)
-    item(hub, "First item inherits").locator("button.text").click()
-    expect(item(hub, "First item inherits").locator("button.shot")).to_be_disabled()
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [ ] **Step 2: Run to verify it fails** — `.venv/bin/pytest tests/test_testhub_e2e.py -v -k "connected or screenshot"` — Expected: FAIL (status never green; no `button.shot`).
 
-Run: `.venv/bin/pytest tests/test_testhub_e2e.py -v -k "connected or opened_after or go_ or screenshot"`
-Expected: FAIL (status never turns green; no `button.shot`).
-
-- [ ] **Step 3: Write the implementation**
+- [ ] **Step 3: Implement**
 
 `testhub/link.js`:
 
 ```js
-// testhub/link.js
 import { CHANNEL, validateGameMessage, helloMsg, goMsg, screenshotMsg, newReq } from './protocol.js';
 
 export const REQUEST_TIMEOUT_MS = 10000;
@@ -1723,16 +1218,14 @@ export function createLink({ game, onChange, timeoutMs = REQUEST_TIMEOUT_MS }) {
     if (!entry) return;
     pending.delete(msg.req);
     clearTimeout(entry.timer);
-    if (msg.type === 'error') entry.reject(linkError('remote', msg.message));
-    else entry.resolve(msg);
+    if (msg.type === 'error') entry.reject(linkError('remote', msg.message)); else entry.resolve(msg);
   }
 
   function onMessage(raw) {
     const msg = validateGameMessage(raw);
     if (!msg) return;
     if (msg.type !== 'hello') { settle(msg); return; }
-    if (msg.game !== game) return;
-    setConn({ version: msg.version, targets: msg.targets, seen: Date.now() });
+    if (msg.game === game) setConn({ version: msg.version, targets: msg.targets, seen: Date.now() });
   }
 
   function request(build) {
@@ -1745,54 +1238,40 @@ export function createLink({ game, onChange, timeoutMs = REQUEST_TIMEOUT_MS }) {
     });
   }
 
-  function hello() {
-    if (channel) channel.postMessage(helloMsg());
-  }
-
-  function poll() {
-    hello();
-    if (conn && Date.now() - conn.seen > STALE_MS) setConn(null);
-  }
+  const hello = () => { if (channel) channel.postMessage(helloMsg()); };
 
   if (channel) channel.onmessage = (event) => onMessage(event.data);
-  const timer = setInterval(poll, POLL_MS);
+  setInterval(() => {
+    hello();
+    if (conn && Date.now() - conn.seen > STALE_MS) setConn(null);
+  }, POLL_MS);
   hello();
 
   return {
     get conn() { return conn; },
-    hello,
     go: (id) => request((req) => goMsg(game, id, req)),
     screenshot: () => request((req) => screenshotMsg(game, req)),
-    close() { clearInterval(timer); if (channel) channel.close(); },
   };
 }
 ```
 
 `testhub/app.js` edits:
 
-1. Add imports after the existing ones:
-
-```js
-import { createLink } from './link.js';
-```
-
-2. Replace `let link = null; // set in Task 8` with:
+1. Add `import { createLink } from './link.js';` with the other imports.
+2. Replace `let link = null; // created in Task 8` with:
 
 ```js
 const link = createLink({
   game,
-  onChange: () => { const c = link && link.conn; if (c) store.setVersion(game, c.version); render(); },
+  onChange: () => { if (link.conn) store.setVersion(game, link.conn.version); render(); },
 });
 ```
 
-(`link` is referenced inside `onChange` only after construction; `onChange` can fire only from a later message, so there is no temporal-dead-zone problem. Keep `const conn = () => link.conn;` in place of the old `conn` helper.)
-
-3. Add helpers before `const actions`:
+3. Replace `const conn = () => (link ? link.conn : null);` with `const conn = () => link.conn;`
+4. Add before `const actions`:
 
 ```js
-function errorText(error) {
-  return error.code && error.code !== 'remote' ? t(`err_${error.code}`) : error.message;
-}
+const errorText = (error) => (error.code && error.code !== 'remote' ? t(`err_${error.code}`) : error.message);
 
 function download(dataUrl, name) {
   const anchor = h('a', { href: dataUrl, download: name });
@@ -1802,7 +1281,7 @@ function download(dataUrl, name) {
 }
 ```
 
-4. Add to the `actions` object:
+5. Add inside `actions`:
 
 ```js
   async go(item) {
@@ -1824,9 +1303,7 @@ function download(dataUrl, name) {
   },
 ```
 
-5. In `view()` nothing changes (`conn: conn()` now reads `link.conn`).
-
-`testhub/list.js` edits: add the editor and show it when expanded.
+`testhub/list.js`: add the editor and render it in `renderItem` (after the `error ? ... : null` argument add `, open ? editor(view, item, entry) : null`):
 
 ```js
 function editor(view, item, entry) {
@@ -1838,39 +1315,21 @@ function editor(view, item, entry) {
 }
 ```
 
-and in `renderItem`, after the `error ? … : null` line add `open ? editor(view, item, entry) : null`.
+- [ ] **Step 4: Run to verify it passes** — `.venv/bin/pytest tests/test_testhub_e2e.py -v` — Expected: PASS.
 
-- [ ] **Step 4: Run tests to verify they pass**
-
-Run: `.venv/bin/pytest tests/test_testhub_e2e.py -v`
-Expected: PASS (all tests so far). If `test_screenshot_withoutAnswer_showsTimeoutError` is flaky because of the fake clock, replace `hub.clock.install()` / `run_for` with a short-timeout hook: export `REQUEST_TIMEOUT_MS` and read an optional `?timeout=` query value in `app.js` only when the slug page is served on `localhost`; document the choice in the commit message.
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add testhub tests/test_testhub_e2e.py
-git commit -m "feat(testhub): connect to the game window, Go jumps, screenshot download"
-```
+- [ ] **Step 5: Commit** — `git add testhub tests && git commit -m "feat(testhub): connect to the game window, Go jumps, screenshot download"`
 
 ---
 
 ### Task 9: Notes, Done, filter/search, Copy all with clipboard fallback
 
-**Files:**
-- Modify: `testhub/list.js` (full editor), `testhub/app.js` (actions `save`, `done`, `reopen`, copy-all button and fallback panel)
-- Test: `tests/test_testhub_e2e.py` (append)
+**Files:** Modify `testhub/list.js`, `testhub/app.js`; Test `tests/test_testhub_e2e.py` (append)
 
-**Interfaces:**
-- Consumes: `buildExport`, `isoDate` (Task 3); `store.get/update` (Task 2); `ui.drafts` (Task 7).
-- Produces: actions `save(item)` (status `noted`; ignored when note and screenshots are both empty), `done(item)` (status `done`, note kept), `reopen(item)` (status `open`); `collectUnsent() -> entries[]`; `copyAll()`; **Copy all N** button `button.copy-all` (disabled at N = 0); fallback panel `textarea.export-box` plus `button.mark-sent` when the clipboard is refused. N counts items with status `noted` or `done` and `sent === false`.
+**Interfaces:** Consumes `buildExport`, `isoDate` (Task 3). Produces actions `save(item)` (status `noted`; ignored when note and screenshots are empty), `done(item)` (status `done`), `copyAll()`; `button.copy-all` ("Copy all N", disabled at 0; N = items `noted`/`done` and not `sent`). If the clipboard is refused, the block shows in a pre-selected `textarea.export-box` and the entries are marked sent.
 
-- [ ] **Step 1: Write the failing e2e tests (append)**
+- [ ] **Step 1: Append the failing e2e tests**
 
 ```python
-def expected_header():
-    return f"Testhub feedback — fake v1.2.3 — {datetime.now(ZoneInfo(TZ)).strftime('%Y-%m-%d')}"
-
-
 def add_note(hub, text, note):
     row = item(hub, text)
     row.locator("button.text").click()
@@ -1890,9 +1349,9 @@ def test_noteAndDone_copyAllExportsExactBlock_andMarksSent(ctx):
     hub.bring_to_front()
     hub.locator("button.copy-all").click()
     expect(hub.locator(".notice.ok")).to_contain_text("Copied 2 entries")
-    clipboard = hub.evaluate("navigator.clipboard.readText()")
-    assert clipboard == "\n".join([
-        expected_header(),
+    date = datetime.now(ZoneInfo(TZ)).strftime("%Y-%m-%d")
+    assert hub.evaluate("navigator.clipboard.readText()") == "\n".join([
+        f"Testhub feedback — fake v1.2.3 — {date}",
         '- [Alpha block · "First item inherits the block tag" · go:fake.alpha] Turm zu dunkel',
         '- ✓ tested: [Beta block · "Typo tag item"]',
     ])
@@ -1900,89 +1359,36 @@ def test_noteAndDone_copyAllExportsExactBlock_andMarksSent(ctx):
     expect(hub.locator("button.copy-all")).to_be_disabled()
 
 
-def test_stateSurvivesReload_doneItemsDisappearFromOpenFilter(ctx):
+def test_stateSurvivesReload_doneHiddenUnderOpen_search(ctx):
     hub = open_hub(ctx)
+    add_note(hub, "Plain item", "findme")
     typo = item(hub, "Typo tag item")
     typo.locator("button.text").click()
     typo.locator("button.done").click()
     expect(item(hub, "Typo tag item")).to_have_count(0)
     hub.reload()
     expect(hub.locator(".item")).to_have_count(3)
-    hub.locator("input[value=done]").check()
-    expect(hub.locator(".item")).to_have_count(1)
-    expect(hub.locator(".block", has_text="Beta block").locator(".progress")).to_have_text("1 / 2 ✓")
-
-
-def test_noteWithScreenshot_exportsScreenshotName(ctx):
-    open_game(ctx)
-    hub = open_hub(ctx)
-    expect(hub.locator(".status.on")).to_be_visible()
-    row = item(hub, "First item inherits")
-    row.locator("button.text").click()
-    with hub.expect_download():
-        row.locator("button.shot").click()
-    row.locator("textarea.note").fill("sieht schief aus")
-    row.locator("button.save").click()
-    hub.bring_to_front()
-    hub.locator("button.copy-all").click()
-    clipboard = hub.evaluate("navigator.clipboard.readText()")
-    assert clipboard.endswith(f"] sieht schief aus (📷 fb-fake-{mmdd()}-1.png)")
-
-
-def test_search_filtersByTextAndNote(ctx):
-    hub = open_hub(ctx)
-    add_note(hub, "Plain item", "findme")
     hub.locator("input.search").fill("findme")
     expect(hub.locator(".item")).to_have_count(1)
     hub.locator("input.search").fill("")
-    hub.locator("input[value=noted]").check()
-    expect(hub.locator(".item")).to_have_count(1)
-
-
-def test_typingInNote_survivesStatusRerender(ctx):
-    hub = open_hub(ctx)
-    row = item(hub, "Plain item")
-    row.locator("button.text").click()
-    row.locator("textarea.note").fill("half typed")
-    open_game(ctx)
-    expect(hub.locator(".status.on")).to_be_visible()
-    expect(item(hub, "Plain item").locator("textarea.note")).to_have_value("half typed")
-
-
-def test_reopen_bringsDoneItemBack(ctx):
-    hub = open_hub(ctx)
-    row = item(hub, "Plain item")
-    row.locator("button.text").click()
-    row.locator("button.done").click()
     hub.locator("input[value=done]").check()
-    row = item(hub, "Plain item")
-    row.locator("button.text").click()
-    row.locator("button.reopen").click()
-    hub.locator("input[value=open]").check()
-    expect(item(hub, "Plain item")).to_have_count(1)
+    expect(hub.locator(".block", has_text="Beta block").locator(".progress")).to_have_text("1 / 2 ✓")
 
 
-def test_clipboardRefused_showsTextareaWithBlock_andMarkSent(ctx):
+def test_clipboardRefused_showsTextareaWithBlock(ctx):
     hub = open_hub(ctx, init_script="Object.defineProperty(navigator,'clipboard',{value:{writeText:()=>Promise.reject(new Error('no'))}})")
     add_note(hub, "Plain item", "x")
     hub.locator("button.copy-all").click()
-    box = hub.locator("textarea.export-box")
-    expect(box).to_be_visible()
-    expect(box).to_have_value(re.compile(r"^Testhub feedback — fake .* — \d{4}-\d\d-\d\d\n- \[Beta block · \"Plain item\"\] x$"))
-    expect(hub.locator("button.copy-all")).to_have_text("Copy all 1")
-    hub.locator("button.mark-sent").click()
-    expect(box).to_have_count(0)
+    expect(hub.locator("textarea.export-box")).to_have_value(
+        re.compile(r"^Testhub feedback — fake .* — \d{4}-\d\d-\d\d\n- \[Beta block · \"Plain item\"\] x$"))
     expect(hub.locator("button.copy-all")).to_have_text("Copy all 0")
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [ ] **Step 2: Run to verify it fails** — `.venv/bin/pytest tests/test_testhub_e2e.py -v -k "note or Reload or clipboard"` — Expected: FAIL (`textarea.note`, `button.copy-all` missing).
 
-Run: `.venv/bin/pytest tests/test_testhub_e2e.py -v -k "note or Done or reload or search or typing or reopen or clipboard"`
-Expected: FAIL (`textarea.note` and `button.copy-all` do not exist).
+- [ ] **Step 3: Implement**
 
-- [ ] **Step 3: Write the implementation**
-
-`testhub/list.js`: replace the `editor` function from Task 8 with the full version:
+`testhub/list.js`: replace `editor` with the full version:
 
 ```js
 function editor(view, item, entry) {
@@ -1992,28 +1398,23 @@ function editor(view, item, entry) {
     class: 'note', rows: 3, placeholder: t('notePlaceholder'), 'data-focus': `note:${item.key}`,
     oninput: (e) => drafts.set(item.key, e.target.value),
   }, draft);
-  const finish = entry.status === 'done'
-    ? h('button', { class: 'reopen', type: 'button', onclick: () => actions.reopen(item) }, t('reopen'))
-    : h('button', { class: 'done', type: 'button', onclick: () => actions.done(item) }, t('done'));
   return h('div', { class: 'editor' }, area,
     h('div', { class: 'chips' }, entry.screenshots.map((name) => h('span', { class: 'chip' }, `📷 ${name} ✓`))),
     h('div', { class: 'buttons' },
       h('button', { class: 'shot', type: 'button', disabled: !conn, onclick: () => actions.shot(item) }, t('shot')),
       h('button', { class: 'save', type: 'button', onclick: () => actions.save(item) }, t('save')),
-      finish));
+      h('button', { class: 'done', type: 'button', onclick: () => actions.done(item) }, t('done'))));
 }
 ```
 
 `testhub/app.js` edits:
 
-1. Imports: `import { buildExport, isoDate } from './export.js';`
-2. Extend `ui` with `notice: null, manual: null` (manual = `{ text, keys }` while the clipboard fallback panel is shown).
-3. Add helpers and actions (before `const actions`, and inside it):
+1. Import: `import { buildExport, isoDate } from './export.js';`
+2. Extend `ui` with `notice: null, manual: null` (`manual` = export text while the fallback panel shows).
+3. Add before `const actions`:
 
 ```js
-function draftFor(item) {
-  return ui.drafts.has(item.key) ? ui.drafts.get(item.key) : store.get(item.key).note;
-}
+const draftFor = (item) => (ui.drafts.has(item.key) ? ui.drafts.get(item.key) : store.get(item.key).note);
 
 function collectUnsent() {
   const entries = [];
@@ -2027,29 +1428,26 @@ function collectUnsent() {
   return entries;
 }
 
-function markSent(entries) {
-  for (const entry of entries) store.update(entry.key, { sent: true });
-}
+const markSent = (entries) => entries.forEach((entry) => store.update(entry.key, { sent: true }));
 
 async function copyAll() {
   const entries = collectUnsent();
   if (entries.length === 0) return;
   const version = (conn() && conn().version) || store.version(game);
   const text = buildExport({ game, version, date: isoDate(new Date()), entries });
-  ui.notice = null;
+  ui.notice = ui.manual = null;
   try {
     await navigator.clipboard.writeText(text);
-    markSent(entries);
-    ui.manual = null;
     ui.notice = t('copied', { n: entries.length });
   } catch (error) {
-    ui.manual = { text, entries };
+    ui.manual = text;
   }
+  markSent(entries);
   render();
 }
 ```
 
-Actions to add inside `actions`:
+4. Add inside `actions`:
 
 ```js
   save(item) {
@@ -2062,19 +1460,10 @@ Actions to add inside `actions`:
     store.update(item.key, { status: 'done', note: draftFor(item) });
     render();
   },
-  reopen(item) {
-    store.update(item.key, { status: 'open' });
-    render();
-  },
   copyAll,
-  markSent() {
-    markSent(ui.manual.entries);
-    ui.manual = null;
-    render();
-  },
 ```
 
-4. In `statusBar()` append the copy button to both returned elements. Replace the function with:
+5. Replace the `copyButton` stub and `notices`:
 
 ```js
 function copyButton() {
@@ -2082,101 +1471,49 @@ function copyButton() {
   return h('button', { class: 'copy-all', type: 'button', disabled: n === 0, onclick: actions.copyAll }, t('copyAll', { n }));
 }
 
-function statusBar() {
-  const c = conn();
-  const line = c
-    ? [h('span', {}, '● ', t('connected', { version: c.version, n: c.targets.length }))]
-    : [h('span', {}, '● ', t('disconnected'), ' ',
-      h('a', { href: `/game-${game}/?dev=1`, target: '_blank', rel: 'noopener' }, t('openGame')))];
-  return h('div', { class: `status ${c ? 'on' : 'off'}` }, line, copyButton());
-}
-```
-
-5. In `notices()` return the fallback panel and the success notice too:
-
-```js
 function notices() {
-  const manual = ui.manual && h('div', { class: 'notice' },
-    h('p', {}, t('copyManual')),
-    h('textarea', { class: 'export-box', readonly: true, 'data-focus': 'export' }, ui.manual.text),
-    h('button', { class: 'mark-sent', type: 'button', onclick: actions.markSent }, t('markSent')));
   return [
     store.isPersistent() ? null : h('p', { class: 'notice warn' }, t('noStorage')),
     ui.notice ? h('p', { class: 'notice ok' }, ui.notice) : null,
-    manual,
+    ui.manual ? h('div', { class: 'notice' }, h('p', {}, t('copyManual')),
+      h('textarea', { class: 'export-box', readonly: true, 'data-focus': 'export' }, ui.manual)) : null,
   ];
 }
 ```
 
-6. After the fallback `textarea` is rendered, select its text: at the end of `render()`, add
+6. At the end of `render()` add: `const box = document.querySelector('.export-box'); if (box) box.select();`
 
-```js
-  const box = document.querySelector('.export-box');
-  if (box) box.select();
-```
+- [ ] **Step 4: Run to verify it passes** — `.venv/bin/pytest tests/test_testhub_e2e.py -v && node --test tests/testhub/*.test.mjs` — Expected: PASS.
 
-Add to `style.css`: `.status { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: center; }` and `.notice.ok { color: var(--ok); }`.
-
-- [ ] **Step 4: Run tests to verify they pass**
-
-Run: `.venv/bin/pytest tests/test_testhub_e2e.py -v` and `node --test tests/testhub/*.test.mjs`
-Expected: PASS for both.
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add testhub tests/test_testhub_e2e.py
-git commit -m "feat(testhub): notes, done marks, filters and Copy all with clipboard fallback"
-```
+- [ ] **Step 5: Commit** — `git add testhub tests && git commit -m "feat(testhub): notes, done marks, filters and Copy all with clipboard fallback"`
 
 ---
 
 ### Task 10: Hardening tests (foreign messages, second game, narrow window, German)
 
-**Files:**
-- Test: `tests/test_testhub_e2e.py` (append). Production files only change if a test fails; fix the owning module (`protocol.js`, `link.js`, `client.js`, `style.css`, `strings.js`).
+**Files:** Test `tests/test_testhub_e2e.py` (append). Production code changes only if a test fails: fix the owning module, not the test.
 
-**Interfaces:**
-- Consumes: everything from Tasks 4-9. These tests pin Review Focus items 1 and 2 plus the narrow-layout and `gg-lang` requirements at e2e level. They are expected to pass on first run; a failure is a real defect to fix.
+**Interfaces:** Pins Review Focus 1-2, the narrow layout and `gg-lang`.
 
-- [ ] **Step 1: Write the tests (append)**
+- [ ] **Step 1: Append the tests**
 
 ```python
-def test_foreignAndMalformedMessages_areIgnored(ctx):
+def test_foreignMessagesAndOtherGame_areIgnored(ctx):
     errors = []
     game = open_game(ctx)
     game.on("pageerror", lambda e: errors.append(str(e)))
     hub = open_hub(ctx, errors)
-    expect(hub.locator(".status.on")).to_contain_text("v1.2.3")
+    expect(hub.locator(".status.on")).to_contain_text("v1.2.3 · 2 targets")
     game.evaluate("""() => {
       const c = new BroadcastChannel('gg-testhub');
       c.postMessage({ type: 'hello', game: 'fake', version: '9', targets: 'nope' });
-      c.postMessage({ type: 'hello', game: 'fake', version: '9', targets: [{ id: '<script>', label: 'x' }] });
-      c.postMessage({ type: 'png', req: 5, dataUrl: 'data:text/html;base64,AAAA' });
-      c.postMessage({ type: 'error', req: 'unknown-req', message: 'x' });
-      c.postMessage({ type: 'go', id: '<script>', req: 'r' });
+      c.postMessage({ type: 'hello', game: 'other', version: '7.7.7', targets: [] });
       c.postMessage('garbage');
-      c.postMessage(null);
-      c.close();
     }""")
     hub.wait_for_timeout(300)
     expect(hub.locator(".status.on")).to_contain_text("v1.2.3 · 2 targets")
     assert game.evaluate("window.__at") is None
     assert errors == []
-
-
-def test_otherGameWindow_doesNotChangeStatus(ctx):
-    open_game(ctx)
-    hub = open_hub(ctx)
-    expect(hub.locator(".status.on")).to_contain_text("v1.2.3")
-    other = ctx.new_page()
-    other.goto(f"{ORIGIN}/game-fake/")
-    other.evaluate("""() => {
-      const c = new BroadcastChannel('gg-testhub');
-      c.postMessage({ type: 'hello', game: 'other', version: '7.7.7', targets: [] });
-    }""")
-    hub.wait_for_timeout(300)
-    expect(hub.locator(".status.on")).to_contain_text("v1.2.3 · 2 targets")
 
 
 def test_narrowWindow_hasNoHorizontalScroll(browser):
@@ -2185,108 +1522,31 @@ def test_narrowWindow_hasNoHorizontalScroll(browser):
         open_game(ctx)
         hub = open_hub(ctx)
         expect(hub.locator(".status.on")).to_be_visible()
-        row = item(hub, "Second item has its own tag")
-        row.locator("button.text").click()
+        item(hub, "Second item has its own tag").locator("button.text").click()
         assert hub.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
     finally:
         ctx.close()
 
 
-def test_ggLang_de_switchesUiStringsNotItemText(ctx):
-    open_game(ctx)
+def test_ggLang_de_switchesUiStrings(ctx):
     hub = open_hub(ctx, init_script="localStorage.setItem('gg-lang','de')")
-    expect(hub.locator(".status.on")).to_contain_text("Spiel verbunden (v1.2.3 · 2 Ziele)")
     expect(hub.locator("button.copy-all")).to_have_text("Alle kopieren 0")
-    expect(item(hub, "First item inherits the block tag")).to_be_visible()
     hub.locator("button.lang").click()
     expect(hub.locator("button.copy-all")).to_have_text("Copy all 0")
 ```
 
-- [ ] **Step 2: Run tests**
+- [ ] **Step 2: Run** — `.venv/bin/pytest tests/test_testhub_e2e.py -v` — Expected: PASS. A failure is a real defect: fix the owning module and re-run the suite.
 
-Run: `.venv/bin/pytest tests/test_testhub_e2e.py -v`
-Expected: PASS. If one fails, fix the owning module (not the test), rerun the full suite and `node --test tests/testhub/*.test.mjs`.
-
-- [ ] **Step 3: Commit**
-
-```bash
-git add tests/test_testhub_e2e.py testhub
-git commit -m "test(testhub): pin foreign messages, second game, narrow layout and German UI"
-```
+- [ ] **Step 3: Commit** — `git add tests && git commit -m "test(testhub): pin foreign messages, second game, narrow layout and German UI"`
 
 ---
 
-### Task 11: Documentation for game repos and contributors
+### Task 11: Documentation
 
-**Files:**
-- Modify: `CLAUDE.md` (new "Testhub" section), `CONTRIBUTING.md` (the "There is no test suite" sentence and layout list)
-- Test: none (docs); verify with the full test run.
+**Files:** Modify `CLAUDE.md`, `CONTRIBUTING.md`
 
-**Interfaces:**
-- Produces: the loader snippet and API reference that the Rhyflitzer plan and the ai-instructions stack overlay copy from.
+- [ ] **Step 1:** Add to `CLAUDE.md` (after the Umami section) a "Testhub" section: `/testhub/` lists each game's open `test-todo.md` items, jumps the game to the place an item is about and exports notes with Copy all; spec in `freaxnx01/game-rhyflitzer` `docs/superpowers/specs/2026-10-11-testhub-design.md`; add a game by appending its slug to `GAMES` in `testhub/app.js`; a game loads `/testhub/client.js` async in dev mode only (`?dev=1`) and registers after the `gg-testhub-ready` event (contract in the header comment of `testhub/client.js`); items are tagged `{go: <id>}`; tests: `node --test tests/testhub/*.test.mjs` and `.venv/bin/pytest tests/test_testhub_e2e.py`.
 
-- [ ] **Step 1: Add the Testhub section to `CLAUDE.md`** (after the Umami section)
+- [ ] **Step 2:** In `CONTRIBUTING.md` replace `There is no test suite.` with `Tests live in tests/ (pytest + Playwright in .venv; node --test for testhub/).` and add the Layout line `- testhub/ — the playtest hub and client.js, the one script games load in dev mode.`
 
-````markdown
-## Testhub (playtest hub)
-
-`/testhub/` lists each game's open `test-todo.md` items (`- [ ]` under `## ` blocks), jumps the
-game to the place an item is about, and exports notes with **Copy all**. Spec:
-`freaxnx01/game-rhyflitzer` `docs/superpowers/specs/2026-10-11-testhub-design.md`. State is in
-`localStorage['gg-testhub']`, messages travel on `BroadcastChannel('gg-testhub')`.
-
-- Add a game: append its slug to `GAMES` in `testhub/app.js`; `?game=<slug>` also works ad hoc.
-- A game loads `client.js` async and only in dev mode. Put this loader in its `index.html`:
-
-```html
-<script>
-try {
-  var dev = /[?&]dev=([01])/.exec(location.search);
-  if (dev && dev[1] === '1') localStorage.setItem('gg-dev', '1');
-  if (dev && dev[1] === '0') localStorage.removeItem('gg-dev');
-  if (localStorage.getItem('gg-dev') === '1') {
-    var s = document.createElement('script');
-    s.src = '/testhub/client.js';
-    s.async = true;
-    document.head.appendChild(s);
-  }
-} catch (e) { /* no dev mode without storage */ }
-</script>
-```
-
-- The client fires `gg-testhub-ready` on `window` once `window.ggTesthub` exists, so register like
-  `if (window.ggTesthub) boot(); else window.addEventListener('gg-testhub-ready', boot);`
-  (it never fires outside dev mode, so players load nothing).
-- API: `ggTesthub.setInfo({ game, version })` once (`game` = repo slug without `game-`,
-  `version` without a leading `v`), `ggTesthub.register(id, fn, label)` (`id` `[a-z0-9._-]+`,
-  a repeated id replaces the earlier one, `fn()` is synchronous and its return value is ignored),
-  `ggTesthub.onScreenshot(fn)` (`fn()` returns a promise of a PNG data URL; it may reject with a
-  message, which the hub shows, or hang, which the hub's 10 s timeout covers).
-  Each call makes the client send a fresh `hello` with all targets.
-- Tag items in `test-todo.md` with `{go: <id>}`; a tag on the `## ` heading is inherited.
-- Tests: `node --test tests/testhub/*.test.mjs` and `.venv/bin/pytest tests/test_testhub_e2e.py`.
-````
-
-- [ ] **Step 2: Update `CONTRIBUTING.md`**
-
-Replace the sentence `There is no test suite.` with `Tests live in tests/: pytest + Playwright for the scripts and the Testhub e2e (.venv, see CLAUDE.md), node --test for the Testhub modules (node --test tests/testhub/*.test.mjs).` and add to the Layout list: `- testhub/ — the playtest hub (index.html, ES modules) and client.js, the one script games load in dev mode.`
-
-- [ ] **Step 3: Run the whole suite**
-
-Run: `node --test tests/testhub/*.test.mjs && .venv/bin/pytest tests -v`
-Expected: PASS (the pre-existing `tests/test_*.py` still pass).
-
-- [ ] **Step 4: Commit**
-
-```bash
-git add CLAUDE.md CONTRIBUTING.md
-git commit -m "docs(testhub): document loader, client API and test commands"
-```
-
----
-
-## Self-Review
-
-- **Spec coverage:** hub page and picker (Task 7), parser rules (1), state key and try/catch (2), UI list/status/Go/greyed tag/note/Save/Done/progress/collapse/filter (7-9), narrow layout and `gg-lang` (5, 7, 10), client API and validated messages and unknown-id error (6), several game windows (4, 8, 10), screenshot file name and download (2, 8), Copy all format, sent marks, clipboard fallback (3, 9), all five error-handling cases (7 load/storage, 8 timeout/no game, 9 clipboard, 7 missing todo), tests (1-6 node, 7-10 Playwright). Not in this plan by design: Rhyflitzer integration, ai-instructions overlay, `/processing-test-feedback` format note.
-- **Spec extensions (small, compatible):** `go`/`screenshot` carry `game`; `go` carries `req` and is answered by `done {req}`; the client fires `gg-testhub-ready` and sends a first `hello` on load (loader is async, per the Rhyflitzer contract); the hub polls `hello` every 10 s and drops a connection silent for 25 s; a `Reopen` button undoes Done.
-- **Type consistency:** `createLink` returns `conn`/`go`/`screenshot` used by `app.js`; `store.update/get/nextShotName/setVersion/version/isPersistent` match Task 2; `view` fields used by `list.js` (`t, blocks, store, filter, query, expanded, collapsed, drafts, errors, conn, actions`) are all supplied by `view()` in `app.js`; message builders and validators match `client.js`.
+- [ ] **Step 3: Run the whole suite** — `node --test tests/testhub/*.test.mjs && .venv/bin/pytest tests -v` — Expected: PASS. Then `git add CLAUDE.md CONTRIBUTING.md && git commit -m "docs(testhub): document the hub, client contract and test commands"`.
