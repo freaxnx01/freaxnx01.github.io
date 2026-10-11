@@ -6,7 +6,7 @@ function matchesFilter(view, block, item) {
   if (view.filter === 'noted' && entry.status !== 'noted') return false;
   if (view.filter === 'done' && entry.status !== 'done') return false;
   const query = view.query.trim().toLowerCase();
-  return !query || `${block.heading} ${item.text} ${entry.note}`.toLowerCase().includes(query);
+  return !query || `${block.heading} ${item.text} ${entry.notes.map((note) => note.text).join(' ')}`.toLowerCase().includes(query);
 }
 
 function goControl(view, item) {
@@ -19,15 +19,31 @@ function goControl(view, item) {
   return h('button', { class: 'go', onclick: () => view.actions.go(item) }, t('go'));
 }
 
+function noteTime(view, note) {
+  if (!note.ts) return null;
+  return h('time', { class: 'when' }, new Date(note.ts).toLocaleString(view.lang, { dateStyle: 'short', timeStyle: 'short' }));
+}
+
+function savedNote(view, item, note, index) {
+  const { t, actions } = view;
+  return h('li', { class: `saved-note${note.sent ? ' sent' : ''}` },
+    noteTime(view, note), ' ', h('span', { class: 'text-body' }, note.text),
+    h('span', { class: 'chips' }, note.screenshots.map((name) => h('span', { class: 'chip' }, `📷 ${name}`))),
+    note.sent
+      ? h('span', { class: 'sent-mark', title: t('noteSent') }, '✓')
+      : h('button', { class: 'delete-note', type: 'button', title: t('deleteNote'), 'aria-label': t('deleteNote'), onclick: () => actions.deleteNote(item, index) }, '✕'));
+}
+
 function editor(view, item, entry) {
   const { t, conn, actions, drafts } = view;
-  const draft = drafts.has(item.key) ? drafts.get(item.key) : entry.note;
   const area = h('textarea', {
     class: 'note', rows: 3, placeholder: t('notePlaceholder'), 'data-focus': `note:${item.key}`,
     oninput: (e) => drafts.set(item.key, e.target.value),
-  }, draft);
-  return h('div', { class: 'editor' }, area,
-    h('div', { class: 'chips' }, entry.screenshots.map((name) => h('span', { class: 'chip' }, `📷 ${name} ✓`))),
+  }, drafts.get(item.key) || '');
+  return h('div', { class: 'editor' },
+    entry.notes.length ? h('ul', { class: 'saved-notes' }, entry.notes.map((note, index) => savedNote(view, item, note, index))) : null,
+    area,
+    h('div', { class: 'chips' }, entry.draftShots.map((name) => h('span', { class: 'chip' }, `📷 ${name} ✓`))),
     h('div', { class: 'buttons' },
       h('button', { class: 'shot', type: 'button', disabled: !conn, onclick: () => actions.shot(item) }, t('shot')),
       h('button', { class: 'save', type: 'button', onclick: () => actions.save(item) }, t('save')),

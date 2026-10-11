@@ -212,6 +212,56 @@ def test_boxClick_marksDoneWithoutExpanding_countsInCopyAll_unsentUndoes(ctx):
     expect(box).to_have_attribute("aria-pressed", "true")
 
 
+def test_severalNotes_oneExportLineEach_deleteUnsent_sentStayAndNeverResent(ctx):
+    open_game(ctx)
+    hub = open_hub(ctx)
+    expect(hub.locator(".status.on")).to_be_visible()
+    row = item(hub, "First item inherits")
+    row.locator("button.text").click()
+    area = row.locator("textarea.note")
+    area.fill("Erste")
+    row.locator("button.save").click()
+    expect(area).to_have_value("")
+    with hub.expect_download():
+        row.locator("button.shot").click()
+    area.fill("Zweite")
+    row.locator("button.save").click()
+    area.fill("Weg damit")
+    row.locator("button.save").click()
+    expect(row.locator("li.saved-note")).to_have_count(3)
+    expect(row.locator("li.saved-note").nth(1)).to_contain_text(f"fb-fake-{mmdd()}-1.png")
+    row.locator("li.saved-note").nth(2).locator("button.delete-note").click()
+    expect(row.locator("li.saved-note")).to_have_count(2)
+    expect(hub.locator("button.copy-all")).to_have_text("Copy all 2")
+    hub.bring_to_front()
+    hub.locator("button.copy-all").click()
+    expect(hub.locator(".notice.ok")).to_contain_text("Copied 2 entries")
+    date = datetime.now(ZoneInfo(TZ)).strftime("%Y-%m-%d")
+    assert hub.evaluate("navigator.clipboard.readText()") == "\n".join([
+        f"Testhub feedback — fake v1.2.3 — {date}",
+        '- [Alpha block · "First item inherits the block tag" · go:fake.alpha] Erste',
+        f'- [Alpha block · "First item inherits the block tag" · go:fake.alpha] Zweite (📷 fb-fake-{mmdd()}-1.png)',
+    ])
+    expect(row.locator("li.saved-note button.delete-note")).to_have_count(0)
+    area.fill("Dritte")
+    row.locator("button.save").click()
+    expect(hub.locator("button.copy-all")).to_have_text("Copy all 1")
+    hub.locator("button.copy-all").click()
+    assert hub.evaluate("navigator.clipboard.readText()").splitlines()[1:] == [
+        '- [Alpha block · "First item inherits the block tag" · go:fake.alpha] Dritte']
+
+
+def test_legacySingleNote_isMigratedAndShown(ctx):
+    legacy = ('{"v":1,"versions":{},"items":{"fake|Alpha block|First item inherits the block tag":'
+              '{"status":"noted","note":"alte Notiz","screenshots":[],"sent":false}}}')
+    hub = open_hub(ctx, init_script=f"if(!localStorage.getItem('gg-testhub'))localStorage.setItem('gg-testhub',{legacy!r})")
+    row = item(hub, "First item inherits")
+    row.locator("button.text").click()
+    expect(row.locator("li.saved-note")).to_have_count(1)
+    expect(row.locator("li.saved-note")).to_contain_text("alte Notiz")
+    expect(hub.locator("button.copy-all")).to_have_text("Copy all 1")
+
+
 def test_stateSurvivesReload_doneHiddenUnderOpen_search(ctx):
     hub = open_hub(ctx)
     add_note(hub, "Plain item", "findme")

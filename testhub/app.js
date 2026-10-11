@@ -41,21 +41,34 @@ function restoreFocus(saved) {
   if (typeof saved.start === 'number') el.setSelectionRange(saved.start, saved.start);
 }
 
-const draftFor = (item) => (ui.drafts.has(item.key) ? ui.drafts.get(item.key) : store.get(item.key).note);
+const draftFor = (item) => ui.drafts.get(item.key) || '';
+
+function saveDraft(item) {
+  if (store.addNote(item.key, draftFor(item), Date.now())) ui.drafts.delete(item.key);
+}
 
 function collectUnsent() {
   const entries = [];
   for (const block of ui.blocks) {
     for (const item of block.items) {
       const entry = store.get(item.key);
-      if (entry.sent || (entry.status !== 'noted' && entry.status !== 'done')) continue;
-      entries.push({ key: item.key, block: block.heading, text: item.text, tag: item.tag, status: entry.status, note: entry.note, screenshots: entry.screenshots });
+      const base = { key: item.key, block: block.heading, text: item.text, tag: item.tag };
+      entry.notes.forEach((note, index) => {
+        if (!note.sent) entries.push({ ...base, status: 'noted', note: note.text, screenshots: note.screenshots, noteIndex: index });
+      });
+      if (entry.status === 'done' && !entry.sent) entries.push({ ...base, status: 'done', note: '', screenshots: [], noteIndex: null });
     }
   }
   return entries;
 }
 
-const markSent = (entries) => entries.forEach((entry) => store.update(entry.key, { sent: true }));
+function markSent(entries) {
+  const keys = [...new Set(entries.map((entry) => entry.key))];
+  for (const key of keys) {
+    const own = entries.filter((entry) => entry.key === key);
+    store.markSent(key, own.filter((entry) => entry.noteIndex !== null).map((entry) => entry.noteIndex), own.some((entry) => entry.noteIndex === null));
+  }
+}
 
 async function copyAll() {
   const entries = collectUnsent();
@@ -92,17 +105,21 @@ const actions = {
     render();
   },
   save(item) {
-    const note = draftFor(item);
-    if (!note.trim() && store.get(item.key).screenshots.length === 0) return;
-    store.update(item.key, { status: 'noted', note });
+    saveDraft(item);
+    render();
+  },
+  deleteNote(item, index) {
+    store.deleteNote(item.key, index);
     render();
   },
   done(item) {
-    store.update(item.key, { status: 'done', note: draftFor(item) });
+    saveDraft(item);
+    if (store.get(item.key).status !== 'done') store.toggleDone(item.key);
     render();
   },
   toggleDone(item) {
-    store.toggleDone(item.key, draftFor(item));
+    if (store.get(item.key).status !== 'done') saveDraft(item);
+    store.toggleDone(item.key);
     render();
   },
   copyAll,
@@ -117,7 +134,7 @@ const actions = {
       const png = await link.screenshot();
       const name = store.nextShotName(game, new Date());
       download(png.dataUrl, name);
-      store.update(item.key, { screenshots: [...store.get(item.key).screenshots, name] });
+      store.addDraftShot(item.key, name);
     } catch (error) {
       ui.errors.set(item.key, errorText(error));
     }
@@ -125,7 +142,7 @@ const actions = {
   },
 };
 
-const view = () => ({ ...ui, t, store, conn: conn(), actions });
+const view = () => ({ ...ui, t, lang, store, conn: conn(), actions });
 
 function switchLang() {
   lang = lang === 'en' ? 'de' : 'en';
