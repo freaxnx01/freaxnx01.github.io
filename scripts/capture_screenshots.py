@@ -20,6 +20,7 @@ from PIL import Image
 from playwright.sync_api import sync_playwright
 
 REPOS = [
+    "game-toepferscheibe",
     "game-rhyflitzer",
     "game-iron-valhalla",
     "game-aerodrome-apex",
@@ -95,6 +96,12 @@ ASSETS_DIR = Path(__file__).resolve().parent.parent / "games" / "assets"
 # Games without a recipe are shot as-is (their title screen is fine).
 CENTER = (0.5, 0.6)
 ACTIONS = {
+    "game-toepferscheibe": [
+        # The start screen is a plain welcome text; put the clay on the wheel so
+        # the shot shows the 3D pottery wheel. (0.5, 0.82) is the "Ton auf die
+        # Scheibe legen" button at the 1280x800 viewport.
+        ("click", (0.5, 0.82)), ("wait", 4000),
+    ],
     "game-rhyflitzer": [
         # The start dialog covers the town; start the race so the shot shows the
         # car on the Hochrhein roads. A coordinate click, not ("select",
@@ -399,7 +406,7 @@ def main() -> int:
                 page.wait_for_timeout(RENDER_DELAY_MS)
                 if repo in ACTIONS:
                     run_actions(page, ACTIONS[repo])
-                page.screenshot(path=str(full_png))
+                page.screenshot(path=str(full_png), timeout=60000)  # heavy WebGL renders ~2 fps headless
                 page.close()
                 make_icon(full_png, icon_png)
                 print(f"  ✓ saved {full_png.name} + {icon_png.name}")
