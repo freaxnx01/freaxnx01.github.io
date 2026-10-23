@@ -43,6 +43,13 @@ mode only (`?dev=1`) and registers after the `gg-testhub-ready` event (contract 
 the header comment of `testhub/client.js`). Items are tagged `{go: <id>}`.
 Tests: `node --test tests/testhub/*.test.mjs` and `.venv/bin/pytest tests/test_testhub_e2e.py`.
 
+## Game dev resources
+
+Shared bookmarks for all games (physics engines, asset libraries, tools) live in
+`docs/game-dev-resources.md`. When the user says "note this link/library", add it
+there under the matching section: link, one-line note, license, and which game
+uses it.
+
 ## Game ideas / backlog
 
 New game ideas and the concept backlog are kept in a **separate private repo**
