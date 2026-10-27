@@ -13,6 +13,7 @@ Format:
 
 - [crashcat](https://github.com/isaac-mason/crashcat) — JS physics engine built for games, simulations and creative websites. License: MIT. Used in: game-kit-racer, game-rhyflitzer
 - [cannon-es](https://github.com/pmndrs/cannon-es) — lightweight 3D rigid-body physics, pairs well with three.js. License: MIT. Used in: game-barrel-shooter
+- [Bullet3](https://github.com/bulletphysics/bullet3) / [ammo.js](https://github.com/kripken/ammo.js) — mature C++ rigid-body physics, in the browser as the WebAssembly port ammo.js; used by the racing game awards.racing. License: zlib. Used in: -
 
 ## Rendering / game frameworks
 
@@ -33,6 +34,8 @@ Format:
 
 ### Audio & music
 
+- [Howler.js](https://howlerjs.com/) — Web Audio wrapper: sprites, spatial sound, fallbacks; used by awards.racing. License: MIT. Used in: -
+
 ### Fonts
 
 - [Google Fonts](https://fonts.google.com/) — free web fonts, mostly OFL. Most used: Bungee (17 games); also Nunito, Baloo 2, Russo One, Press Start 2P, Jost, Fredoka
@@ -48,8 +51,11 @@ Format:
 
 - [PeerJS](https://peerjs.com/) — WebRTC peer-to-peer, for online multiplayer without own server. License: MIT. Used in: game-wortduell
 - [TensorFlow.js](https://www.tensorflow.org/js) — ML in the browser. License: Apache-2.0. Used in: game-gorillazz
+- [nippleJS](https://github.com/yoannmoinet/nipplejs) — virtual on-screen joystick for touch controls; used by awards.racing. License: MIT. Used in: -
 - [Magenta.js](https://magenta.tensorflow.org/js) — music/ML models on top of TensorFlow.js. License: Apache-2.0. Used in: game-gorillazz
 
 ## Tools
+
+- [Tweakpane](https://tweakpane.github.io/docs/) — compact debug/tuning panel with sliders, colours and monitors; used by awards.racing. License: MIT. Used in: -
 
 ## Tutorials & references
