@@ -84,6 +84,13 @@ ICON_HEIGHT = round(ICON_WIDTH / ICON_ASPECT)
 
 ASSETS_DIR = Path(__file__).resolve().parent.parent / "games" / "assets"
 
+# Games whose card image was made by hand (e.g. from the game's own gallery).
+# A full run skips them so the image is not overwritten by a fresh capture;
+# naming one on the command line still captures it (its recipe stays below).
+MANUAL_IMAGES = {
+    "game-rhyflitzer",  # docs/gallery/plattform-auto-1920.jpg of the game repo
+}
+
 # Per-game "action recipes": drive the game out of its title/menu into live
 # gameplay before the shot. Each step is a (verb, arg) tuple:
 #   ("click",   fraction (x, y))   -- mouse click at viewport fraction (focus / start)
@@ -387,11 +394,18 @@ def make_icon(full_png: Path, icon_png: Path) -> None:
         cropped.save(icon_png, "PNG")
 
 
+def repos_to_capture(args: list[str]) -> list[str]:
+    """The named repos, or every repo in REPOS without a hand-made image."""
+    return list(args) or [r for r in REPOS if r not in MANUAL_IMAGES]
+
+
 def main() -> int:
     ASSETS_DIR.mkdir(parents=True, exist_ok=True)
     skipped = []
-    # Optional CLI args capture only the named repos (default: all in REPOS).
-    repos = sys.argv[1:] or REPOS
+    repos = repos_to_capture(sys.argv[1:])
+    kept = [r for r in REPOS if r in MANUAL_IMAGES and r not in repos]
+    if kept:
+        print("Keeping hand-made images (name a repo to capture it anyway): " + ", ".join(kept))
 
     with sync_playwright() as p:
         browser = p.chromium.launch()
