@@ -35,6 +35,10 @@ Format:
 ### Audio & music
 
 - [Howler.js](https://howlerjs.com/) — Web Audio wrapper: sprites, spatial sound, fallbacks; used by awards.racing. License: MIT. Used in: -
+- [Pixabay Music](https://pixabay.com/music/) — large library incl. lo-fi/chillwave driving music. License: Pixabay Content License (games OK, no attribution required; check per track for Content ID). Used in: -
+- [OpenGameArt](https://opengameart.org/art-search-advanced?field_art_type_tid%5B%5D=12) — music made for games. License: per track, often CC0 or CC BY. Used in: -
+- [incompetech (Kevin MacLeod)](https://incompetech.com/music/royalty-free/) — huge royalty-free catalogue. License: CC BY 4.0, attribution required. Used in: -
+- [Free Music Archive](https://freemusicarchive.org/) — curated independent music. License: per track, various CC (BY, BY-NC, …). Used in: -
 
 ### Fonts
 
