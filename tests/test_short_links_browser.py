@@ -19,11 +19,11 @@ def test_short_link_keeps_query_and_hash():
         with sync_playwright() as p:
             b = p.chromium.launch()
             page = b.new_page()
-            page.route(f"{base}/game-wipfelkratzer/**",
+            page.route("https://wipfelkratzer.freax.games/**",
                        lambda r: r.fulfill(status=200, content_type="text/html", body=STUB))
             page.goto(f"{base}/wipfelkratzer/?lang=de#x")
             page.wait_for_function("() => document.title === 'landed'", timeout=15000)
-            assert page.url == f"{base}/game-wipfelkratzer/?lang=de#x"
+            assert page.url == "https://wipfelkratzer.freax.games/?lang=de#x"
             b.close()
     finally:
         httpd.shutdown()
