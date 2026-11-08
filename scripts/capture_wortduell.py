@@ -19,7 +19,7 @@ Usage:
     python3 scripts/capture_wortduell.py [rounds]   # rounds default 5
 
 Requires the live site (needs the streamed dictionary), so it shoots from:
-    https://github.freaxnx01.ch/game-wortduell/
+    game_url("game-wortduell") (scripts/hubsite.py)
 """
 import sys
 from pathlib import Path
@@ -27,7 +27,9 @@ from pathlib import Path
 from PIL import Image
 from playwright.sync_api import sync_playwright
 
-URL = "https://github.freaxnx01.ch/game-wortduell/"
+from hubsite import game_url
+
+URL = game_url("game-wortduell")
 VIEWPORT = {"width": 1280, "height": 800}
 ICON_SIZE = 256
 DEFAULT_ROUNDS = 5

@@ -19,6 +19,8 @@ from pathlib import Path
 from PIL import Image
 from playwright.sync_api import sync_playwright
 
+from hubsite import game_url
+
 REPOS = [
     "game-toepferscheibe",
     "game-rhyflitzer",
@@ -64,9 +66,8 @@ REPOS = [
     "game-wipfelkratzer",
     "dogwash",
 ]
-BASE_URL = "https://github.freaxnx01.ch/{repo}/"
 # Games hosted outside the freaxnx01/game-<name> convention (e.g. a kid's own
-# repo/account) -- keyed by REPOS entry, overrides BASE_URL.format(repo=...).
+# repo/account) -- keyed by REPOS entry, overrides game_url(repo).
 URL_OVERRIDES = {
     "dogwash": "https://julia-hase.github.io/dogwash/",
 }
@@ -410,7 +411,7 @@ def main() -> int:
     with sync_playwright() as p:
         browser = p.chromium.launch()
         for repo in repos:
-            url = URL_OVERRIDES.get(repo, BASE_URL.format(repo=repo))
+            url = URL_OVERRIDES.get(repo, game_url(repo))
             full_png = ASSETS_DIR / f"{repo}.png"
             icon_png = ASSETS_DIR / f"{repo}-icon.png"
             print(f"→ {repo}: {url}")

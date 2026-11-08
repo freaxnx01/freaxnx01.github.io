@@ -23,9 +23,10 @@ from pathlib import Path
 
 from PIL import Image
 
+from hubsite import PLAY_RE
+
 ARTICLE_RE = re.compile(r'<article class="card"[^>]*>(.*?)</article>', re.DOTALL)
 ICON_RE = re.compile(r'<img class="card__thumb" src="assets/([^"]+)"')
-PLAY_RE = re.compile(r'href="https://github\.freaxnx01\.ch/([^/]+)/"')
 
 FAVICON_SIZE = (32, 32)
 LINK_TAG = '<link rel="icon" href="favicon.png" sizes="32x32" type="image/png">'
