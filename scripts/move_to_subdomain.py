@@ -123,7 +123,7 @@ def main(argv=None):
     ap.add_argument("--wait-minutes", type=int, default=30)
     a = ap.parse_args(argv)
     if a.all:
-        page = (Path(__file__).resolve().parent.parent / "games" / "index.html").read_text()
+        page = (Path(__file__).resolve().parent.parent / "index.html").read_text()
         repos = hub_repos(page)
     else:
         repos = [f"game-{n.removeprefix('game-')}" for n in a.names]

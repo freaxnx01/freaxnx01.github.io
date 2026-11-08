@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Add a per-game favicon to every game-<name> repo linked from the hub.
 
-For each game listed in games/index.html, derives a 32x32 favicon.png from
-the game's existing card icon (games/assets/<slug>-icon.png), adds a
+For each game listed in the hub index.html, derives a 32x32 favicon.png from
+the game's existing card icon (assets/<slug>-icon.png), adds a
 <link rel="icon"> tag to that repo's index.html, and commits + pushes the
 change directly to the repo's main branch.
 
@@ -37,7 +37,7 @@ GIT_ENV = {**os.environ, "GIT_TERMINAL_PROMPT": "0"}
 
 
 def discover_games(hub_root: Path) -> list[dict]:
-    html = (hub_root / "games" / "index.html").read_text()
+    html = (hub_root / "index.html").read_text()
     games = []
     for block in ARTICLE_RE.findall(html):
         icon_m = ICON_RE.search(block)
@@ -46,7 +46,7 @@ def discover_games(hub_root: Path) -> list[dict]:
             continue
         games.append({
             "repo": repo,
-            "icon_path": hub_root / "games" / "assets" / icon_m.group(1),
+            "icon_path": hub_root / "assets" / icon_m.group(1),
         })
     return games
 
@@ -58,7 +58,7 @@ def generate_favicon_bytes(icon_path: Path) -> bytes:
     resizes to 32x32, and returns PNG-encoded bytes.
 
     Args:
-        icon_path: Path to the card icon image (e.g. games/assets/game-nibbles-icon.png)
+        icon_path: Path to the card icon image (e.g. assets/game-nibbles-icon.png)
 
     Returns:
         PNG-encoded bytes of the 32x32 favicon.
@@ -243,7 +243,7 @@ def main():
         games = [g for g in games if g["repo"] in wanted]
         missing = wanted - {g["repo"] for g in games}
         if missing:
-            print(f"warning: not found in games/index.html: {sorted(missing)}", file=sys.stderr)
+            print(f"warning: not found in the hub index.html: {sorted(missing)}", file=sys.stderr)
 
     results = []
     for game in games:

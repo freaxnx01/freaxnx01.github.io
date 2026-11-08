@@ -58,7 +58,7 @@ def test_generate_favicon_bytes():
     from add_game_favicons import generate_favicon_bytes
 
     # Use the game-nibbles-icon.png as test input (400x250)
-    icon_path = Path("games/assets/game-nibbles-icon.png")
+    icon_path = Path("assets/game-nibbles-icon.png")
 
     # Generate favicon bytes
     favicon_bytes = generate_favicon_bytes(icon_path)
