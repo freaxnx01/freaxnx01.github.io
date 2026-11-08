@@ -14,9 +14,14 @@ def card(icon, href):
             f'<a class="card__play" href="{href}" target="_blank">▶ Play</a></article>')
 
 
-def test_site_games_get_a_root_relative_target():
+def test_path_play_links_also_forward_to_the_subdomain():
     html = card("game-wipfelkratzer-icon.png", "https://github.freaxnx01.ch/game-wipfelkratzer/")
-    assert short_links(html) == {"wipfelkratzer": "/game-wipfelkratzer/"}
+    assert short_links(html) == {"wipfelkratzer": "https://wipfelkratzer.freax.games/"}
+
+
+def test_subdomain_play_links_forward_to_the_subdomain():
+    html = card("game-wipfelkratzer-icon.png", "https://wipfelkratzer.freax.games/")
+    assert short_links(html) == {"wipfelkratzer": "https://wipfelkratzer.freax.games/"}
 
 
 def test_a_game_on_its_own_domain_gets_that_domain():
@@ -37,8 +42,9 @@ def test_reserved_names_are_refused(name):
 
 
 def test_stub_keeps_query_and_hash():
-    html = stub_html("/game-nibbles/")
-    assert 'location.replace("/game-nibbles/" + location.search + location.hash)' in html
+    html = stub_html("https://nibbles.freax.games/")
+    assert ('location.replace("https://nibbles.freax.games/" + location.search + location.hash)'
+            in html)
     assert '<meta name="generator" content="make_short_links">' in html
 
 
@@ -47,7 +53,7 @@ def test_write_stubs_removes_only_its_own_stale_stubs(tmp_path):
     (tmp_path / "games" / "index.html").write_text(
         card("game-nibbles-icon.png", "https://github.freaxnx01.ch/game-nibbles/"))
     (tmp_path / "gone").mkdir()
-    (tmp_path / "gone" / "index.html").write_text(stub_html("/game-gone/"))
+    (tmp_path / "gone" / "index.html").write_text(stub_html("https://gone.freax.games/"))
     (tmp_path / "keep").mkdir()
     (tmp_path / "keep" / "index.html").write_text("<p>hand-made</p>")
     assert write_stubs(tmp_path) == ["nibbles"]
@@ -60,5 +66,5 @@ def test_the_real_hub_gets_a_stub_per_game():
     hub = Path(__file__).parent.parent
     links = short_links((hub / "games" / "index.html").read_text())
     assert len(links) >= 40
-    assert links["wipfelkratzer"] == "/game-wipfelkratzer/"
+    assert links["wipfelkratzer"] == "https://wipfelkratzer.freax.games/"
     assert "dogwash" not in links
