@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Short paths for the games hub: freax.games/<name> forwards to the game.
+"""Short paths for the games hub: freax.games/<name> forwards to the game's subdomain.
 
 One stub <name>/index.html per game card, generated from games/index.html. Run after
 adding a card:  python3 scripts/make_short_links.py
@@ -10,7 +10,7 @@ import re
 import shutil
 from pathlib import Path
 
-from hubsite import PLAY_RE
+from hubsite import game_url, play_repo
 
 ARTICLE_RE = re.compile(r'<article class="card"[^>]*>(.*?)</article>', re.DOTALL)
 ICON_RE = re.compile(r'<img class="card__thumb" src="assets/game-([a-z0-9-]+)-icon\.png"')
@@ -28,9 +28,9 @@ def short_links(page: str) -> dict[str, str]:
         name = icon.group(1)
         if name in RESERVED:
             raise SystemExit(f"game-{name}: short name '{name}' clashes with a hub directory")
-        site = PLAY_RE.search(block)
-        if site:
-            links[name] = f"/{site.group(1)}/"
+        repo = play_repo(block)
+        if repo:
+            links[name] = game_url(repo)
             continue
         other = ANY_PLAY_RE.search(block)
         if other:

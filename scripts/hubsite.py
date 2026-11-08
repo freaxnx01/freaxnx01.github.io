@@ -1,13 +1,29 @@
-"""Where the hub lives. Flip SITE at the domain switch (short-domains plan, Task 4)."""
+"""Where the hub and its games live (game-subdomains spec, 2026-11-08)."""
 import re
 
 SITE = "https://freax.games"
-# Both hostnames are accepted when reading play links, so scripts work before and after the switch.
-SITE_HOSTS = ("github.freaxnx01.ch", "freax.games")
-PLAY_RE = re.compile(
-    r'href="https://(?:' + "|".join(re.escape(h) for h in SITE_HOSTS) + r')/(game-[^/"]+)/"'
-)
+GAME_DOMAIN = "freax.games"
+# Subdomains of freax.games that are not hub games.
+NOT_GAMES = {"www", "rhyflitzer"}
+# Play links in three forms: old host path, freax.games path, own subdomain.
+_PATH_RE = re.compile(r'href="https://(?:github\.freaxnx01\.ch|freax\.games)/(game-[a-z0-9-]+)/"')
+_SUB_RE = re.compile(r'href="https://([a-z0-9-]+)\.freax\.games/"')
+
+
+def play_repo(block: str) -> str | None:
+    """Repo name (game-<name>) of the play link in a card, or None for other links."""
+    m = _PATH_RE.search(block)
+    if m:
+        return m.group(1)
+    m = _SUB_RE.search(block)
+    if m and m.group(1) not in NOT_GAMES:
+        return f"game-{m.group(1)}"
+    return None
+
+
+def subdomain(repo: str) -> str:
+    return f"{repo.removeprefix('game-')}.{GAME_DOMAIN}"
 
 
 def game_url(repo: str) -> str:
-    return f"{SITE}/{repo}/"
+    return f"https://{subdomain(repo)}/"

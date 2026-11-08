@@ -23,7 +23,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from hubsite import PLAY_RE
+from hubsite import play_repo
 
 ARTICLE_RE = re.compile(r'<article class="card"[^>]*>(.*?)</article>', re.DOTALL)
 ICON_RE = re.compile(r'<img class="card__thumb" src="assets/([^"]+)"')
@@ -41,11 +41,11 @@ def discover_games(hub_root: Path) -> list[dict]:
     games = []
     for block in ARTICLE_RE.findall(html):
         icon_m = ICON_RE.search(block)
-        play_m = PLAY_RE.search(block)
-        if not icon_m or not play_m:
+        repo = play_repo(block)
+        if not icon_m or not repo:
             continue
         games.append({
-            "repo": play_m.group(1),
+            "repo": repo,
             "icon_path": hub_root / "games" / "assets" / icon_m.group(1),
         })
     return games

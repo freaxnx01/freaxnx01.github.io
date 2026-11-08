@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Live check of the short domains (short-domains plan, Task 5). Exit 1 on any failure."""
+"""Live check of the hub domains and game subdomains. Exit 1 on any failure."""
 import sys
 import urllib.error
 import urllib.request
@@ -8,7 +8,9 @@ CHECKS = [
     # (start URL, expected final URL after redirects, or None = just expect HTTP 200)
     ("https://freax.games/games/", None),
     ("https://rhyflitzer.ch/", None),
-    ("https://github.freaxnx01.ch/game-wipfelkratzer/?x=1", "https://freax.games/game-wipfelkratzer/?x=1"),
+    ("https://wipfelkratzer.freax.games/", None),
+    ("https://freax.games/game-wipfelkratzer/?x=1", "https://wipfelkratzer.freax.games/?x=1"),
+    ("https://github.freaxnx01.ch/game-wipfelkratzer/?x=1", "https://wipfelkratzer.freax.games/?x=1"),
     ("https://github.freaxnx01.ch/games/", "https://freax.games/games/"),
     ("https://rhyflitzer.freaxnx01.ch/nfz/", "https://rhyflitzer.ch/nfz/"),
     ("https://rhyflitzer.freax.games/", "https://rhyflitzer.ch/"),
@@ -16,7 +18,7 @@ CHECKS = [
 ]
 STUB_TARGETS = [
     # stub URL, string its JS forward must contain
-    ("https://freax.games/wipfelkratzer/", 'location.replace("/game-wipfelkratzer/"'),
+    ("https://freax.games/wipfelkratzer/", 'location.replace("https://wipfelkratzer.freax.games/"'),
     ("https://freax.games/rhyflitzer/", 'location.replace("https://rhyflitzer.ch/"'),
     ("https://rhyflitzer.ch/nfz/", 'location.replace("../?utm_source=nfz&utm_medium=artikel"'),
 ]
