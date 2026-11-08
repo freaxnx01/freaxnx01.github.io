@@ -18,7 +18,7 @@ directory. Tests live in tests/ (pytest + Playwright in .venv; node --test for t
 
 ## Layout
 
-- `index.md` — the site's landing page (there is no `README.md` by design).
+- `index.html` — forwards the site root to the Games Hub; `links.md` is the old landing page (there is no `README.md` by design).
 - `games/` — the Browser Games Hub, a static page (`index.html`, `style.css`,
   `lightbox.js`, `filter.js`, and `assets/`) linking out to individual
   `game-<name>` repos.
