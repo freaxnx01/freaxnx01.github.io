@@ -23,6 +23,18 @@ Every card also gets a short path `freax.games/<name>/`, a redirect stub generat
 `python3 scripts/make_short_links.py`. Rerun it after adding or removing a card and
 commit the stubs with the card.
 
+## YouTube
+
+One channel for all games, one playlist per game (#35):
+https://www.youtube.com/@freax-games (channel ID `UCoxkoWrDOklNaE3KlKB295g`).
+
+| Game | Playlist |
+|---|---|
+| Rhyflitzer – Map Madness | https://www.youtube.com/playlist?list=PLZK1QeqP1C2E |
+
+Video descriptions link the game's own URL (Rhyflitzer: `https://rhyflitzer.ch`)
+and `https://freax.games`.
+
 ## Analytics (Umami)
 
 Games get Umami analytics (umami.is), self-hosted on VPS DE. Tschau Sepp is the
