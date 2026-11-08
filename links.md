@@ -8,6 +8,6 @@
 
 [md](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
 
-[🎮 Browser Games Hub](/games/)
+[🎮 Browser Games Hub](/)
 
 [Contributing](/CONTRIBUTING.html)

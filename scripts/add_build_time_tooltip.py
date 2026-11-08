@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Add the build-time tooltip to the version badge in every game-<name> repo on the hub.
 
-For each game listed in games/index.html, injects scripts/buildtime_snippet.html
+For each game listed in the hub index.html, injects scripts/buildtime_snippet.html
 into the repo's served page (right after the fullscreen block, else before
 </body>), adds a line under `## [Unreleased]` in CHANGELOG.md, commits both and
 pushes. No release: version.js and tags are left alone.
@@ -175,7 +175,7 @@ def main(argv: list[str] | None = None) -> int:
         wanted = {r.strip() for r in args.only.split(",")}
         missing = wanted - set(repos)
         if missing:
-            print(f"warning: not found in games/index.html: {sorted(missing)}", file=sys.stderr)
+            print(f"warning: not found in the hub index.html: {sorted(missing)}", file=sys.stderr)
         repos = [r for r in repos if r in wanted]
 
     results = []

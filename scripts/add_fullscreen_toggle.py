@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Add the fullscreen toggle to #game-nav in every game-<name> repo on the hub.
 
-For each game listed in games/index.html, injects scripts/fullscreen_snippet.html
+For each game listed in the hub index.html, injects scripts/fullscreen_snippet.html
 before </body> of the repo's served page, commits it, releases the game as a
 minor version (version.js + a new CHANGELOG section + tag), and pushes.
 
@@ -250,7 +250,7 @@ def main(argv: list[str] | None = None) -> int:
         wanted = {r.strip() for r in args.only.split(",")}
         missing = wanted - set(repos)
         if missing:
-            print(f"warning: not found in games/index.html: {sorted(missing)}", file=sys.stderr)
+            print(f"warning: not found in the hub index.html: {sorted(missing)}", file=sys.stderr)
         repos = [r for r in repos if r in wanted]
 
     results = []

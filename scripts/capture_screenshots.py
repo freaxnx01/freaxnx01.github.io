@@ -2,8 +2,8 @@
 """One-time (re-runnable) screenshot capture for the Browser Games Hub.
 
 For each live game it saves:
-  games/assets/<repo>.png       — full viewport screenshot
-  games/assets/<repo>-icon.png  — 400x250 (16:10) center-cropped thumbnail
+  assets/<repo>.png       — full viewport screenshot
+  assets/<repo>-icon.png  — 400x250 (16:10) center-cropped thumbnail
 
 Load failures are logged and skipped (the run continues); skipped games are
 listed at the end so a placeholder can be dropped in by hand.
@@ -83,7 +83,7 @@ ICON_ASPECT = 16 / 10
 ICON_WIDTH = 400
 ICON_HEIGHT = round(ICON_WIDTH / ICON_ASPECT)
 
-ASSETS_DIR = Path(__file__).resolve().parent.parent / "games" / "assets"
+ASSETS_DIR = Path(__file__).resolve().parent.parent / "assets"
 
 # Games whose card image was made by hand (e.g. from the game's own gallery).
 # A full run skips them so the image is not overwritten by a fresh capture;

@@ -49,8 +49,7 @@ def test_stub_keeps_query_and_hash():
 
 
 def test_write_stubs_removes_only_its_own_stale_stubs(tmp_path):
-    (tmp_path / "games").mkdir()
-    (tmp_path / "games" / "index.html").write_text(
+    (tmp_path / "index.html").write_text(
         card("game-nibbles-icon.png", "https://github.freaxnx01.ch/game-nibbles/"))
     (tmp_path / "gone").mkdir()
     (tmp_path / "gone" / "index.html").write_text(stub_html("https://gone.freax.games/"))
@@ -64,7 +63,7 @@ def test_write_stubs_removes_only_its_own_stale_stubs(tmp_path):
 
 def test_the_real_hub_gets_a_stub_per_game():
     hub = Path(__file__).parent.parent
-    links = short_links((hub / "games" / "index.html").read_text())
+    links = short_links((hub / "index.html").read_text())
     assert len(links) >= 40
     assert links["wipfelkratzer"] == "https://wipfelkratzer.freax.games/"
     assert "dogwash" not in links

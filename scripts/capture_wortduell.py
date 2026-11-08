@@ -10,8 +10,8 @@ few player turns, letting the CPU answer between each, then screenshots the
 resulting crossword.
 
 Outputs (same names/format as capture_screenshots.py, so it just overwrites):
-  games/assets/game-wortduell.png       — full 1280x800 screenshot
-  games/assets/game-wortduell-icon.png  — 256x256 center-cropped thumbnail
+  assets/game-wortduell.png       — full 1280x800 screenshot
+  assets/game-wortduell-icon.png  — 256x256 center-cropped thumbnail
 
 Usage:
     pip install -r scripts/requirements.txt   # playwright + Pillow
@@ -34,7 +34,7 @@ VIEWPORT = {"width": 1280, "height": 800}
 ICON_SIZE = 256
 DEFAULT_ROUNDS = 5
 
-ASSETS_DIR = Path(__file__).resolve().parent.parent / "games" / "assets"
+ASSETS_DIR = Path(__file__).resolve().parent.parent / "assets"
 FULL_PNG = ASSETS_DIR / "game-wortduell.png"
 ICON_PNG = ASSETS_DIR / "game-wortduell-icon.png"
 

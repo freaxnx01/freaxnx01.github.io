@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Short paths for the games hub: freax.games/<name> forwards to the game's subdomain.
 
-One stub <name>/index.html per game card, generated from games/index.html. Run after
+One stub <name>/index.html per game card, generated from the hub index.html. Run after
 adding a card:  python3 scripts/make_short_links.py
 Spec: docs/superpowers/specs/2026-11-07-short-domains-design.md
 """
@@ -15,7 +15,7 @@ from hubsite import game_url, play_repo
 ARTICLE_RE = re.compile(r'<article class="card"[^>]*>(.*?)</article>', re.DOTALL)
 ICON_RE = re.compile(r'<img class="card__thumb" src="assets/game-([a-z0-9-]+)-icon\.png"')
 ANY_PLAY_RE = re.compile(r'class="card__play" href="(https://[^"]+)"')
-RESERVED = {"games", "docs", "scripts", "testhub", "tests", "assets"}
+RESERVED = {"games", "docs", "scripts", "testhub", "tests", "assets", "links"}
 MARKER = '<meta name="generator" content="make_short_links">'
 
 
@@ -57,7 +57,7 @@ def stub_html(target: str) -> str:
 
 
 def write_stubs(hub_root: Path) -> list[str]:
-    links = short_links((hub_root / "games" / "index.html").read_text())
+    links = short_links((hub_root / "index.html").read_text())
     for d in hub_root.iterdir():
         stub = d / "index.html"
         if d.is_dir() and d.name not in links and stub.exists() and MARKER in stub.read_text():

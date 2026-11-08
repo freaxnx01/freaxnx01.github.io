@@ -1,14 +1,683 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<!-- freax.games/ opens the Browser Games Hub. The old start page lives at /links.html. -->
-<title>freax.games</title>
-<meta http-equiv="refresh" content="0; url=/games/">
-<link rel="canonical" href="https://freax.games/games/">
-<script>location.replace("/games/" + location.search + location.hash);</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Browser Games Hub · freaxnx01</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="theme-color" content="#0e1016">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<p><a href="/games/">Browser Games Hub</a></p>
+  <main class="hub">
+    <header class="hub__header">
+      <h1><span class="accent">▶</span> Browser Games Hub</h1>
+      <p>A handful of finished browser games — card games, tank battles, physics shooters and retro clones. Click a screenshot to enlarge, or hit Play to jump straight in.</p>
+    </header>
+
+    <div class="hub__filters" data-filters>
+      <div class="filter-row filter-row--search">
+        <input type="search" id="game-search" class="search-input" placeholder="Search games…" aria-label="Search games by name">
+        <button type="button" class="filter-btn" id="kids-toggle" aria-pressed="false">🧒 Kids only</button>
+        <button type="button" class="filter-btn" id="retro-toggle" aria-pressed="false">🕹️ Retro/Clones only</button>
+        <button type="button" class="filter-btn" id="inspired-toggle" aria-pressed="false">💡 Inspired by only</button>
+        <button type="button" class="filter-btn" id="random-game-btn">🎲 Random</button>
+      </div>
+      <div class="filter-row" role="group" aria-label="Filter games by mode">
+        <button type="button" class="filter-btn is-active" data-filter="all" aria-pressed="true">All</button>
+        <button type="button" class="filter-btn" data-filter="solo" aria-pressed="false">Single player</button>
+        <button type="button" class="filter-btn" data-filter="mp" aria-pressed="false" aria-expanded="false" aria-controls="filter-sub">Multiplayer</button>
+        <button type="button" class="filter-btn" data-filter="wip" aria-pressed="false">🚧 Under construction</button>
+      </div>
+      <div class="filter-row filter-row--sub" id="filter-sub" role="group" aria-label="Filter multiplayer by connection" hidden>
+        <button type="button" class="filter-btn is-active" data-sub="all" aria-pressed="true">Local &amp; Peer2Peer</button>
+        <button type="button" class="filter-btn" data-sub="local" aria-pressed="false">Local</button>
+        <button type="button" class="filter-btn" data-sub="p2p" aria-pressed="false">Peer2Peer</button>
+      </div>
+      <div class="filter-row filter-row--category" role="group" aria-label="Filter games by category">
+        <button type="button" class="filter-btn is-active" data-category="all" aria-pressed="true">All genres</button>
+        <button type="button" class="filter-btn" data-category="shooter" aria-pressed="false">Shooter</button>
+        <button type="button" class="filter-btn" data-category="action" aria-pressed="false">Action</button>
+        <button type="button" class="filter-btn" data-category="strategy" aria-pressed="false">Strategy</button>
+        <button type="button" class="filter-btn" data-category="racing" aria-pressed="false">Racing</button>
+        <button type="button" class="filter-btn" data-category="sports" aria-pressed="false">Sports</button>
+        <button type="button" class="filter-btn" data-category="puzzle" aria-pressed="false">Puzzle</button>
+        <button type="button" class="filter-btn" data-category="card" aria-pressed="false">Card</button>
+        <button type="button" class="filter-btn" data-category="sandbox" aria-pressed="false">Sandbox</button>
+        <button type="button" class="filter-btn" data-category="arcade" aria-pressed="false">Arcade</button>
+        <button type="button" class="filter-btn" data-category="quiz" aria-pressed="false">Quiz</button>
+      </div>
+      <div class="hub__toolbar">
+        <p class="hub__count" role="status" aria-live="polite"></p>
+        <label class="hub__sort">
+          Sort:
+          <select id="sort-select">
+            <option value="az">A&ndash;Z</option>
+            <option value="newest" selected>Newest first</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <section class="hub__grid">
+
+      <article class="card" data-modes="solo" data-category="sandbox" data-added="2026-10-20" data-kids="true">
+        <img class="card__thumb" src="assets/game-toepferscheibe-icon.png" alt="Töpferwerkstatt screenshot"
+             data-full="assets/game-toepferscheibe.png" data-title="Töpferwerkstatt" tabindex="0" role="button" aria-label="Enlarge Töpferwerkstatt screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Töpferwerkstatt</h2>
+          <p class="card__desc">Ruhige virtuelle Töpferscheibe fürs iPad: Ton mit ein oder zwei Fingern formen, Glasur wählen, im Ofen brennen und in der eigenen Galerie aufstellen. Grosse Schrift, kein Zeitdruck.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://toepferscheibe.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="racing" data-added="2026-09-30" data-kids="true" data-retro="true" data-original-title="Midtown Madness" data-original-url="https://en.wikipedia.org/wiki/Midtown_Madness" data-original-screenshot="https://en.wikipedia.org/wiki/File:Midtown_madness_screenshot.jpg">
+        <img class="card__thumb" src="assets/game-rhyflitzer-icon.png" alt="Rhyflitzer – Map Madness screenshot"
+             data-full="assets/game-rhyflitzer.png" data-title="Rhyflitzer – Map Madness" tabindex="0" role="button" aria-label="Enlarge Rhyflitzer – Map Madness screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Rhyflitzer – Map Madness</h2>
+          <p class="card__desc">Open-world arcade racer on real geodata of the Hochrhein around Sisseln, Stein and Bad Säckingen: cruise, time trial, viewpoint hunt, on foot or by heli — the wooden bridge is fair game.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://rhyflitzer.ch/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="racing" data-added="2026-09-24" data-kids="true">
+        <img class="card__thumb" src="assets/game-kit-racer-icon.png" alt="Kit Racer screenshot"
+             data-full="assets/game-kit-racer.png" data-title="Kit Racer" tabindex="0" role="button" aria-label="Enlarge Kit Racer screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Kit Racer</h2>
+          <p class="card__desc">3D tile-track racer with drift physics — pick an Aerodrome Apex circuit, build your own in the editor, or turn your streets from OpenStreetMap into a track.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://kit-racer.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="sandbox" data-added="2026-09-11" data-kids="true">
+        <img class="card__thumb" src="assets/game-wipfelkratzer-icon.png" alt="Wipfelkratzer screenshot"
+             data-full="assets/game-wipfelkratzer.png" data-title="Wipfelkratzer" tabindex="0" role="button" aria-label="Enlarge Wipfelkratzer screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Wipfelkratzer</h2>
+          <p class="card__desc">3D-Bauspiel nach dem Pixi-Buch «Willi baut»: Holzturm Stock für Stock hochziehen, Wohnungen einrichten und den tierischen Mietern ihre Wünsche erfüllen.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://wipfelkratzer.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="puzzle" data-added="2026-09-09" data-kids="true">
+        <img class="card__thumb" src="assets/game-stylestar-icon.png" alt="StyleStar screenshot"
+             data-full="assets/game-stylestar.png" data-title="StyleStar" tabindex="0" role="button" aria-label="Enlarge StyleStar screenshot">
+        <div class="card__body">
+          <h2 class="card__title">StyleStar</h2>
+          <p class="card__desc">Ankleide-Puzzle: style deine Figur über sechs Ebenen passend zum Thema und sammle Sterne durch acht Level.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://stylestar.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="arcade" data-added="2026-09-07" data-kids="true" data-retro="true" data-original-title="Die schrillen Vier auf Achse" data-original-url="https://de.wikipedia.org/wiki/Die_schrillen_Vier_auf_Achse" data-original-screenshot="https://de.wikipedia.org/wiki/Datei:FamilyTruckster.jpg">
+        <img class="card__thumb" src="assets/game-trip-muncher-icon.png" alt="Trip Muncher screenshot"
+             data-full="assets/game-trip-muncher.png" data-title="Trip Muncher" tabindex="0" role="button" aria-label="Enlarge Trip Muncher screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Trip Muncher</h2>
+          <p class="card__desc">Eat the family station wagon's cross-country vacation, city by city — five stages on a simulated 1983 CRT.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://trip-muncher.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="strategy" data-added="2026-08-01" data-retro="true" data-original-title="Battle Chess" data-original-url="https://en.wikipedia.org/wiki/Battle_Chess" data-original-screenshot="https://en.wikipedia.org/wiki/File:Battle_Chess.png">
+        <img class="card__thumb" src="assets/game-iron-valhalla-icon.png" alt="Iron Valhalla — Battlechess screenshot"
+             data-full="assets/game-iron-valhalla.png" data-title="Iron Valhalla — Battlechess" tabindex="0" role="button" aria-label="Enlarge Iron Valhalla — Battlechess screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Iron Valhalla — Battlechess</h2>
+          <p class="card__desc">Full chess vs. a CPU on an isometric board — captures play out as animated duels, with an AI-search visualizer.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://iron-valhalla.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="racing" data-added="2026-07-27" data-kids="true">
+        <img class="card__thumb" src="assets/game-aerodrome-apex-icon.png" alt="Aerodrome Apex screenshot"
+             data-full="assets/game-aerodrome-apex.png" data-title="Aerodrome Apex" tabindex="0" role="button" aria-label="Enlarge Aerodrome Apex screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Aerodrome Apex</h2>
+          <p class="card__desc">Micro Machines–style top-down racer — tiny cars, big circuits, drift physics vs. AI or solo time trial.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://aerodrome-apex.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="arcade" data-added="2026-07-27" data-kids="true" data-retro="true" data-original-title="Arkanoid" data-original-url="https://en.wikipedia.org/wiki/Arkanoid" data-original-screenshot="https://en.wikipedia.org/wiki/File:Arkanoid_arcadeflyer.png">
+        <img class="card__thumb" src="assets/game-brickfall-icon.png" alt="Brickfall screenshot"
+             data-full="assets/game-brickfall.png" data-title="Brickfall" tabindex="0" role="button" aria-label="Enlarge Brickfall screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Brickfall</h2>
+          <p class="card__desc">8-level Arkanoid-style brick-breaker with power-ups, laser mode and combo scoring.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://brickfall.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="arcade" data-added="2026-07-27" data-kids="true" data-retro="true" data-original-title="Boulder Dash" data-original-url="https://en.wikipedia.org/wiki/Boulder_Dash_(video_game)" data-original-screenshot="https://en.wikipedia.org/wiki/File:Boulderdash-screenshot.png">
+        <img class="card__thumb" src="assets/game-rockfall-icon.png" alt="Rockfall screenshot"
+             data-full="assets/game-rockfall.png" data-title="Rockfall" tabindex="0" role="button" aria-label="Enlarge Rockfall screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Rockfall</h2>
+          <p class="card__desc">Boulder-Dash-style cave digger — dig, dodge rocks, and collect gems across 5 handcrafted caves.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://rockfall.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="arcade" data-added="2026-07-27" data-kids="true" data-retro="true" data-original-title="Oil Imperium" data-original-url="https://en.wikipedia.org/wiki/Oil_Imperium" data-original-screenshot="https://en.wikipedia.org/wiki/File:Black_Gold_Coverart.png">
+        <img class="card__thumb" src="assets/game-oil-fever-89-icon.png" alt="Oil Fever '89 screenshot"
+             data-full="assets/game-oil-fever-89.png" data-title="Oil Fever '89" tabindex="0" role="button" aria-label="Enlarge Oil Fever '89 screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Oil Fever '89</h2>
+          <p class="card__desc">Late-80s oil-tycoon arcade trilogy — drill for crude, race pipeline, fight a wellhead fire, no scoring.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://oil-fever-89.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="arcade" data-added="2026-07-23" data-kids="true">
+        <img class="card__thumb" src="assets/dogwash-icon.png" alt="Welpen-Wäscherei screenshot"
+             data-full="assets/dogwash.png" data-title="Welpen-Wäscherei" tabindex="0" role="button" aria-label="Enlarge Welpen-Wäscherei screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Welpen-Wäscherei</h2>
+          <p class="card__desc">Wash Mama dog and all her puppies at once — scrub off the dirt spots before time runs out and level up. Made by Julia, vibe-coded with Claude.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://julia-hase.github.io/dogwash/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="puzzle" data-added="2026-07-19" data-kids="true">
+        <img class="card__thumb" src="assets/game-photo-puzzler-icon.png" alt="Photo Puzzler screenshot"
+             data-full="assets/game-photo-puzzler.png" data-title="Photo Puzzler" tabindex="0" role="button" aria-label="Enlarge Photo Puzzler screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Photo Puzzler</h2>
+          <p class="card__desc">Turn any photo into a sliding 15-puzzle or a drag-and-snap jigsaw — pick a preset or upload your own, race the clock and beat your best time.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://photo-puzzler.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="puzzle" data-added="2026-07-19" data-kids="true">
+        <img class="card__thumb" src="assets/game-criss-cross-icon.png" alt="Criss Cross screenshot"
+             data-full="assets/game-criss-cross.png" data-title="Criss Cross" tabindex="0" role="button" aria-label="Enlarge Criss Cross screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Criss Cross</h2>
+          <p class="card__desc">Paste a word list or generate one from a topic, build an interlocking crossword, then share it with a link — solve, check, and reveal as you go.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://criss-cross.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="quiz" data-added="2026-07-19" data-kids="true">
+        <img class="card__thumb" src="assets/game-millionenfrage-icon.png" alt="Die Millionenfrage screenshot"
+             data-full="assets/game-millionenfrage.png" data-title="Die Millionenfrage" tabindex="0" role="button" aria-label="Enlarge Die Millionenfrage screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Die Millionenfrage</h2>
+          <p class="card__desc">German TV-style money quiz — 15 questions to a million, safety checkpoints, and four Joker lifelines.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://millionenfrage.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo local p2p" data-category="arcade" data-added="2026-07-18" data-kids="true" data-retro="true" data-original-title="Pong" data-original-url="https://en.wikipedia.org/wiki/Pong" data-original-screenshot="https://en.wikipedia.org/wiki/File:Signed_Pong_Cabinet.jpg">
+        <img class="card__thumb" src="assets/game-neon-pong-icon.png" alt="Neon Pong screenshot"
+             data-full="assets/game-neon-pong.png" data-title="Neon Pong" tabindex="0" role="button" aria-label="Enlarge Neon Pong screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Neon Pong</h2>
+          <p class="card__desc">Synthwave Pong — local 2P, vs AI, or WebRTC online P2P, with power-ups and paddle-spin physics.</p>
+          <div class="card__badges">
+            <span class="badge badge--p2p">Multiplayer · Peer2Peer</span>
+            <span class="badge badge--local">Multiplayer · Local</span>
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://neon-pong.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="puzzle" data-added="2026-07-18" data-kids="true">
+        <img class="card__thumb" src="assets/game-zen-sudoku-icon.png" alt="Zen Sudoku screenshot"
+             data-full="assets/game-zen-sudoku.png" data-title="Zen Sudoku" tabindex="0" role="button" aria-label="Enlarge Zen Sudoku screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Zen Sudoku</h2>
+          <p class="card__desc">Calm zen-paper Sudoku — 4 difficulties, notes, hints, undo/redo, dark mode.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://zen-sudoku.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo local p2p" data-category="puzzle" data-added="2026-07-18" data-kids="true">
+        <img class="card__thumb" src="assets/game-wortduell-icon.png" alt="WORTDUELL screenshot"
+             data-full="assets/game-wortduell.png" data-title="WORTDUELL" tabindex="0" role="button" aria-label="Enlarge WORTDUELL screenshot">
+        <div class="card__body">
+          <h2 class="card__title">WORTDUELL</h2>
+          <p class="card__desc">German Scrabble-style crossword duel — local 2P, vs computer, or online P2P.</p>
+          <div class="card__badges">
+            <span class="badge badge--p2p">Multiplayer · Peer2Peer</span>
+            <span class="badge badge--local">Multiplayer · Local</span>
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://wortduell.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="puzzle" data-added="2026-07-18" data-kids="true" data-retro="true" data-original-title="Bejeweled" data-original-url="https://en.wikipedia.org/wiki/Bejeweled_(video_game)" data-original-screenshot="https://en.wikipedia.org/wiki/File:Bejeweled_Deluxe_cover_art.jpg">
+        <img class="card__thumb" src="assets/game-gem-cascade-icon.png" alt="Gem Cascade screenshot"
+             data-full="assets/game-gem-cascade.png" data-title="Gem Cascade" tabindex="0" role="button" aria-label="Enlarge Gem Cascade screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Gem Cascade</h2>
+          <p class="card__desc">Bejeweled-style match-3 — swap gems, trigger cascades, and set off flame, lightning &amp; color-bomb specials.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://gem-cascade.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="arcade" data-added="2026-07-18" data-kids="true" data-retro="true" data-original-title="Pac-Man" data-original-url="https://en.wikipedia.org/wiki/Pac-Man" data-original-screenshot="https://en.wikipedia.org/wiki/File:Pac_flyer.png">
+        <img class="card__thumb" src="assets/game-maze-muncher-icon.png" alt="Maze Muncher screenshot"
+             data-full="assets/game-maze-muncher.png" data-title="Maze Muncher" tabindex="0" role="button" aria-label="Enlarge Maze Muncher screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Maze Muncher</h2>
+          <p class="card__desc">Original maze-chase arcade — pellets, power-ups, four ghosts.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://maze-muncher.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo local" data-category="arcade" data-added="2026-07-18" data-kids="true" data-retro="true" data-original-title="Nibbles (QBasic)" data-original-url="https://en.wikipedia.org/wiki/Nibbles_(video_game)" data-original-screenshot="https://en.wikipedia.org/wiki/File:Nibbles_screenshot.png">
+        <img class="card__thumb" src="assets/game-nibbles-icon.png" alt="Nibbles screenshot"
+             data-full="assets/game-nibbles.png" data-title="Nibbles" tabindex="0" role="button" aria-label="Enlarge Nibbles screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Nibbles</h2>
+          <p class="card__desc">DOS-era snake — 1-2 players, 10 wall layouts, PC-speaker sound.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+            <span class="badge badge--local">Multiplayer · Local</span>
+          </div>
+          <a class="card__play" href="https://nibbles.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="quiz" data-added="2026-07-18" data-kids="true">
+        <img class="card__thumb" src="assets/game-marquee-quiz-icon.png" alt="The Marquee screenshot"
+             data-full="assets/game-marquee-quiz.png" data-title="The Marquee" tabindex="0" role="button" aria-label="Enlarge The Marquee screenshot">
+        <div class="card__body">
+          <h2 class="card__title">The Marquee</h2>
+          <p class="card__desc">Retro-cinema movies &amp; series quiz — emoji plots, quotes, higher-or-lower, and more.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://marquee-quiz.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="quiz" data-added="2026-07-16" data-kids="true">
+        <img class="card__thumb" src="assets/game-acronym-quiz-icon.png" alt="Acronym Quiz screenshot"
+             data-full="assets/game-acronym-quiz.png" data-title="Acronym Quiz" tabindex="0" role="button" aria-label="Enlarge Acronym Quiz screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Acronym Quiz</h2>
+          <p class="card__desc">Expand tech acronyms across topics &amp; difficulties — terminal-style, bilingual EN/DE.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://acronym-quiz.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="shooter" data-added="2026-07-07">
+        <img class="card__thumb" src="assets/game-barrel-shooter-icon.png" alt="Barrel Blast screenshot"
+             data-full="assets/game-barrel-shooter.png" data-title="Barrel Blast" tabindex="0" role="button" aria-label="Enlarge Barrel Blast screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Barrel Blast</h2>
+          <p class="card__desc">3D physics shooter.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://barrel-shooter.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo local p2p" data-category="strategy" data-added="2026-07-12" data-kids="true">
+        <img class="card__thumb" src="assets/game-battleship-toys-icon.png" alt="Battleship Toys screenshot"
+             data-full="assets/game-battleship-toys.png" data-title="Battleship Toys" tabindex="0" role="button" aria-label="Enlarge Battleship Toys screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Battleship Toys</h2>
+          <p class="card__desc">Isometric naval duel — solo, 2P local or P2P.</p>
+          <div class="card__badges">
+            <span class="badge badge--p2p">Multiplayer · Peer2Peer</span>
+            <span class="badge badge--local">Multiplayer · Local</span>
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://battleship-toys.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="racing" data-added="2026-07-07" data-kids="true">
+        <img class="card__thumb" src="assets/game-beach-buggy-racer-icon.png" alt="Beach Buggy Racer screenshot"
+             data-full="assets/game-beach-buggy-racer.png" data-title="Beach Buggy Racer" tabindex="0" role="button" aria-label="Enlarge Beach Buggy Racer screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Beach Buggy Racer</h2>
+          <p class="card__desc">Isometric arcade beach racer.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://beach-buggy-racer.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="sports" data-added="2026-07-07" data-kids="true" data-retro="true" data-original-title="California Games" data-original-url="https://en.wikipedia.org/wiki/California_Games" data-original-screenshot="https://en.wikipedia.org/wiki/File:C64_California_Games.png">
+        <img class="card__thumb" src="assets/game-bmx-beach-jam-icon.png" alt="BMX Beach Jam screenshot"
+             data-full="assets/game-bmx-beach-jam.png" data-title="BMX Beach Jam" tabindex="0" role="button" aria-label="Enlarge BMX Beach Jam screenshot">
+        <div class="card__body">
+          <h2 class="card__title">BMX Beach Jam</h2>
+          <p class="card__desc">Retro 8-bit BMX trick game.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://bmx-beach-jam.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="shooter" data-added="2026-07-11" data-original-title="AirStrike 3D: Operation W.A.T." data-original-url="https://www.myabandonware.com/game/airstrike-3d-operation-w-a-t-duf" data-original-screenshot="https://www.myabandonware.com/game/airstrike-3d-operation-w-a-t-duf">
+        <img class="card__thumb" src="assets/game-dustline-icon.png" alt="Dustline screenshot"
+             data-full="assets/game-dustline.png" data-title="Dustline" tabindex="0" role="button" aria-label="Enlarge Dustline screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Dustline</h2>
+          <p class="card__desc">Top-down desert helicopter shooter.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://dustline.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="local" data-category="racing" data-added="2026-07-07" data-kids="true" data-wip="true">
+        <img class="card__thumb" src="assets/game-esel-running-icon.png" alt="Esel vs. Karotte screenshot"
+             data-full="assets/game-esel-running.png" data-title="Esel vs. Karotte" tabindex="0" role="button" aria-label="Enlarge Esel vs. Karotte screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Esel vs. Karotte</h2>
+          <p class="card__desc">Donkey race (German) — local 2-player.</p>
+          <div class="card__badges">
+            <span class="badge badge--wip">🚧 Under construction</span>
+            <span class="badge badge--local">Multiplayer · Local</span>
+          </div>
+          <a class="card__play" href="https://esel-running.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo local p2p" data-category="puzzle" data-added="2026-07-08" data-kids="true">
+        <img class="card__thumb" src="assets/game-fruit-frenzy-icon.png" alt="Fruit Frenzy screenshot"
+             data-full="assets/game-fruit-frenzy.png" data-title="Fruit Frenzy" tabindex="0" role="button" aria-label="Enlarge Fruit Frenzy screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Fruit Frenzy</h2>
+          <p class="card__desc">Suika-style fruit-merge — solo, 2P local or P2P.</p>
+          <div class="card__badges">
+            <span class="badge badge--p2p">Multiplayer · Peer2Peer</span>
+            <span class="badge badge--local">Multiplayer · Local</span>
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://fruit-frenzy.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="quiz" data-added="2026-07-13" data-kids="true">
+        <img class="card__thumb" src="assets/game-geography-quiz-icon.png" alt="Geography Quiz screenshot"
+             data-full="assets/game-geography-quiz.png" data-title="Geography Quiz" tabindex="0" role="button" aria-label="Enlarge Geography Quiz screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Geography Quiz</h2>
+          <p class="card__desc">Flags, capitals, shapes &amp; more — bilingual EN/DE geography quiz.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://geography-quiz.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="shooter" data-added="2026-07-13" data-kids="true" data-retro="true" data-original-title="Moorhuhn" data-original-url="https://en.wikipedia.org/wiki/Moorhuhn" data-original-screenshot="https://www.mobygames.com/game/203089/die-original-moorhuhnjagd/">
+        <img class="card__thumb" src="assets/game-cluck-and-load-icon.png" alt="Cluck &amp; Load screenshot"
+             data-full="assets/game-cluck-and-load.png" data-title="Cluck &amp; Load" tabindex="0" role="button" aria-label="Enlarge Cluck &amp; Load screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Cluck &amp; Load</h2>
+          <p class="card__desc">Moorhuhn-style shooting gallery — 90 seconds, shotgun or machine gun.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://cluck-and-load.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="local p2p" data-category="action" data-added="2026-07-07" data-kids="true" data-retro="true" data-original-title="Gorillas (QBasic)" data-original-url="https://en.wikipedia.org/wiki/Gorillas_(video_game)" data-original-screenshot="https://en.wikipedia.org/wiki/File:Gorillas_screenshot.png">
+        <img class="card__thumb" src="assets/game-gorillazz-icon.png" alt="Gorillazz screenshot"
+             data-full="assets/game-gorillazz.png" data-title="Gorillazz" tabindex="0" role="button" aria-label="Enlarge Gorillazz screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Gorillazz</h2>
+          <p class="card__desc">QBasic Gorillas clone — 2P local or P2P.</p>
+          <div class="card__badges">
+            <span class="badge badge--p2p">Multiplayer · Peer2Peer</span>
+            <span class="badge badge--local">Multiplayer · Local</span>
+          </div>
+          <a class="card__play" href="https://gorillazz.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo local p2p" data-category="strategy" data-added="2026-09-08" data-kids="true">
+        <img class="card__thumb" src="assets/game-huusli-jagd-icon.png" alt="Hüüsli-Jagd screenshot"
+             data-full="assets/game-huusli-jagd.png" data-title="Hüüsli-Jagd" tabindex="0" role="button" aria-label="Enlarge Hüüsli-Jagd screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Hüüsli-Jagd</h2>
+          <p class="card__desc">Swiss mini-Monopoly (Zürich, Basel, Frick, Sursee) — solo vs AI, local or P2P, done in 30 min.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+            <span class="badge badge--local">Multiplayer · Local</span>
+            <span class="badge badge--p2p">Multiplayer · Peer2Peer</span>
+          </div>
+          <a class="card__play" href="https://huusli-jagd.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo local p2p" data-category="sports" data-added="2026-07-11" data-original-title="Panza Kick Boxing" data-original-url="https://en.wikipedia.org/wiki/Panza_Kick_Boxing" data-original-screenshot="https://en.wikipedia.org/wiki/File:PanzaKickBoxing_cover.png">
+        <img class="card__thumb" src="assets/game-kick-fury-icon.png" alt="Kick Fury screenshot"
+             data-full="assets/game-kick-fury.png" data-title="Kick Fury" tabindex="0" role="button" aria-label="Enlarge Kick Fury screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Kick Fury</h2>
+          <p class="card__desc">Retro Amiga-style kickboxing — 1P vs CPU, local or P2P.</p>
+          <div class="card__badges">
+            <span class="badge badge--p2p">Multiplayer · Peer2Peer</span>
+            <span class="badge badge--local">Multiplayer · Local</span>
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://kick-fury.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="arcade" data-added="2026-07-12" data-kids="true" data-retro="true" data-original-title="Lunar Lander (1979)" data-original-url="https://en.wikipedia.org/wiki/Lunar_Lander_(1979_video_game)" data-original-screenshot="https://en.wikipedia.org/wiki/File:Lunar_Lander.png">
+        <img class="card__thumb" src="assets/game-moon-lander-icon.png" alt="Moon Lander screenshot"
+             data-full="assets/game-moon-lander.png" data-title="Moon Lander" tabindex="0" role="button" aria-label="Enlarge Moon Lander screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Moon Lander</h2>
+          <p class="card__desc">Classic lunar-lander — touch down within limits.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://moon-lander.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo local p2p" data-category="strategy" data-added="2026-07-07" data-retro="true" data-original-title="The North &amp; South" data-original-url="https://en.wikipedia.org/wiki/North_%26_South_(video_game)" data-original-screenshot="https://en.wikipedia.org/wiki/File:North_%26_South_Coverart.png">
+        <img class="card__thumb" src="assets/game-n-s-clone-icon.png" alt="North &amp; South Clone screenshot"
+             data-full="assets/game-n-s-clone.png" data-title="North &amp; South Clone" tabindex="0" role="button" aria-label="Enlarge North &amp; South Clone screenshot">
+        <div class="card__body">
+          <h2 class="card__title">North &amp; South Clone</h2>
+          <p class="card__desc">Civil War strategy battle — solo, 2P local or P2P.</p>
+          <div class="card__badges">
+            <span class="badge badge--p2p">Multiplayer · Peer2Peer</span>
+            <span class="badge badge--local">Multiplayer · Local</span>
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://n-s-clone.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="puzzle" data-added="2026-07-12" data-kids="true" data-original-title="Lemmings" data-original-url="https://en.wikipedia.org/wiki/Lemmings_(video_game)" data-original-screenshot="https://en.wikipedia.org/wiki/File:Amiga_Lemmings.png">
+        <img class="card__thumb" src="assets/game-plod-icon.png" alt="PLOD screenshot"
+             data-full="assets/game-plod.png" data-title="PLOD" tabindex="0" role="button" aria-label="Enlarge PLOD screenshot">
+        <div class="card__body">
+          <h2 class="card__title">PLOD</h2>
+          <p class="card__desc">Lemmings-style — guide the plodders home.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://plod.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="action" data-added="2026-07-12" data-original-title="Wings of Fury" data-original-url="https://en.wikipedia.org/wiki/Wings_of_Fury" data-original-screenshot="https://en.wikipedia.org/wiki/File:Wings_of_Fury_Coverart.png">
+        <img class="card__thumb" src="assets/game-sky-fury-icon.png" alt="Sky Fury screenshot"
+             data-full="assets/game-sky-fury.png" data-title="Sky Fury" tabindex="0" role="button" aria-label="Enlarge Sky Fury screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Sky Fury</h2>
+          <p class="card__desc">WWII carrier-aviation action — launch, strafe, land, repeat.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://sky-fury.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="shooter" data-added="2026-07-07" data-kids="true" data-retro="true" data-original-title="Space Invaders" data-original-url="https://en.wikipedia.org/wiki/Space_Invaders" data-original-screenshot="https://en.wikipedia.org/wiki/File:Space_Invaders_flyer,_1978.jpg">
+        <img class="card__thumb" src="assets/game-space-invaders-icon.png" alt="Space Invaders screenshot"
+             data-full="assets/game-space-invaders.png" data-title="Space Invaders" tabindex="0" role="button" aria-label="Enlarge Space Invaders screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Space Invaders</h2>
+          <p class="card__desc">Retro arcade shooter clone.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://space-invaders.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="racing" data-added="2026-07-07" data-kids="true">
+        <img class="card__thumb" src="assets/game-splashdown-icon.png" alt="Splashdown screenshot"
+             data-full="assets/game-splashdown.png" data-title="Splashdown" tabindex="0" role="button" aria-label="Enlarge Splashdown screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Splashdown</h2>
+          <p class="card__desc">Endless waterslide racer.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://splashdown.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="local p2p" data-category="puzzle" data-added="2026-07-07" data-kids="true" data-original-title="Tetris for Windows" data-original-url="https://www.apfeltalk.de/magazin/news/microsoft-tetris-fuer-windows-3-11-direkt-im-browser-spielen/" data-original-screenshot="https://classicreload.com/win3x-tetris-for-windows.html">
+        <img class="card__thumb" src="assets/game-stack-duel-icon.png" alt="Stack Duel screenshot"
+             data-full="assets/game-stack-duel.png" data-title="Stack Duel" tabindex="0" role="button" aria-label="Enlarge Stack Duel screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Stack Duel</h2>
+          <p class="card__desc">Two-player Tetris battle — P2P online or local.</p>
+          <div class="card__badges">
+            <span class="badge badge--p2p">Multiplayer · Peer2Peer</span>
+            <span class="badge badge--local">Multiplayer · Local</span>
+          </div>
+          <a class="card__play" href="https://stack-duel.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="local p2p" data-category="action" data-added="2026-07-07" data-kids="true">
+        <img class="card__thumb" src="assets/game-tank-toys-icon.png" alt="Tank Toys screenshot"
+             data-full="assets/game-tank-toys.png" data-title="Tank Toys" tabindex="0" role="button" aria-label="Enlarge Tank Toys screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Tank Toys</h2>
+          <p class="card__desc">Isometric toy-tank battle — P2P online or local.</p>
+          <div class="card__badges">
+            <span class="badge badge--p2p">Multiplayer · Peer2Peer</span>
+            <span class="badge badge--local">Multiplayer · Local</span>
+          </div>
+          <a class="card__play" href="https://tank-toys.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo p2p" data-category="card" data-added="2026-07-07" data-kids="true">
+        <img class="card__thumb" src="assets/game-tschau-sepp-icon.png" alt="Tschau Sepp screenshot"
+             data-full="assets/game-tschau-sepp.png" data-title="Tschau Sepp" tabindex="0" role="button" aria-label="Enlarge Tschau Sepp screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Tschau Sepp</h2>
+          <p class="card__desc">Swiss Jass card game — solo vs AI or P2P online.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+            <span class="badge badge--p2p">Multiplayer · Peer2Peer</span>
+          </div>
+          <a class="card__play" href="https://tschau-sepp.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+      <article class="card" data-modes="solo" data-category="sandbox" data-added="2026-07-12" data-kids="true">
+        <img class="card__thumb" src="assets/game-voxel-sandbox-icon.png" alt="Voxel Sandbox screenshot"
+             data-full="assets/game-voxel-sandbox.png" data-title="Voxel Sandbox" tabindex="0" role="button" aria-label="Enlarge Voxel Sandbox screenshot">
+        <div class="card__body">
+          <h2 class="card__title">Voxel Sandbox</h2>
+          <p class="card__desc">Minecraft-style creative voxel builder.</p>
+          <div class="card__badges">
+            <span class="badge badge--solo">Solo</span>
+          </div>
+          <a class="card__play" href="https://voxel-sandbox.freax.games/" target="_blank" rel="noopener">▶ Play</a>
+        </div>
+      </article>
+
+    </section>
+  </main>
+
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Screenshot">
+    <button class="lightbox__close" type="button" aria-label="Close">&times;</button>
+    <img class="lightbox__img" src="" alt="">
+    <div class="lightbox__caption"></div>
+  </div>
+
+  <script src="lightbox.js"></script>
+  <script src="filter.js"></script>
 </body>
 </html>
