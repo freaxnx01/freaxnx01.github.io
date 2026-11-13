@@ -11,8 +11,8 @@ Format:
 
 ## Physics engines
 
-- [crashcat](https://github.com/isaac-mason/crashcat) — JS physics engine built for games, simulations and creative websites. License: MIT. Used in: game-kit-racer, game-rhyflitzer
-- [cannon-es](https://github.com/pmndrs/cannon-es) — lightweight 3D rigid-body physics, pairs well with three.js. License: MIT. Used in: game-barrel-shooter
+- [crashcat](https://github.com/isaac-mason/crashcat) — JS physics engine built for games, simulations and creative websites. License: MIT. Used in: game-barrel-shooter, game-kit-racer, game-rhyflitzer
+- [cannon-es](https://github.com/pmndrs/cannon-es) — lightweight 3D rigid-body physics, pairs well with three.js. License: MIT. Used in: - (formerly game-barrel-shooter, replaced by crashcat 2026-10-23)
 - [Bullet3](https://github.com/bulletphysics/bullet3) / [ammo.js](https://github.com/kripken/ammo.js) — mature C++ rigid-body physics, in the browser as the WebAssembly port ammo.js; used by the racing game awards.racing. License: zlib. Used in: -
 
 ## Rendering / game frameworks
