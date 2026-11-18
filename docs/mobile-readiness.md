@@ -18,7 +18,7 @@ Legend: touch `yes` = dedicated touch controls, `tap` = click-only UI that works
 | [Kit Racer](https://kit-racer.freax.games/) | mobile-ready | yes | no | no | no |
 | [Maze Muncher](https://maze-muncher.freax.games/) | mobile-ready | yes | no | no | no |
 | [Nibbles](https://nibbles.freax.games/) | mobile-ready | yes | no | no | no |
-| [Rhyflitzer](https://rhyflitzer.ch/) | mobile-ready | yes | yes | yes | no |
+| [Rhyflitzer](https://rhyflitzer.ch/) | mobile-ready | yes | yes | yes | yes |
 | [Toepferscheibe](https://toepferscheibe.freax.games/) | mobile-ready | yes | no | no | yes |
 | [Acronym Quiz](https://acronym-quiz.freax.games/) | mobile candidate | tap | no | no | no |
 | [Beach Buggy Racer](https://beach-buggy-racer.freax.games/) | mobile candidate | no | no | no | no |
@@ -138,11 +138,11 @@ _mobile-ready._ Swipe steering via touchstart/touchmove on the canvas.
 
 ### Rhyflitzer
 
-_mobile-ready._ Touch controls (#535). Manifest, icons and reload button landed 2026-11-18 (game-rhyflitzer#1076, PR#1079); iPhone hint in progress (game-rhyflitzer#1080).
+_mobile-ready._ Touch controls (#535). Manifest, icons and reload button landed 2026-11-18 (game-rhyflitzer#1076, PR#1079); iPhone hint landed 2026-11-18 (game-rhyflitzer#1080, PR#1081).
 
 - [x] Make steering/UI mobile-ready
 - [x] Add what's needed for "App installieren" (manifest, 192/512 + maskable icons, apple-touch-icon, theme-color)
-- [ ] iPhone hint for adding to the home screen ("Teilen → Zum Home-Bildschirm") — game-rhyflitzer#1080
+- [x] iPhone hint for adding to the home screen ("Teilen → Zum Home-Bildschirm") — game-rhyflitzer#1080
 - [x] Ability to reload when in fullscreen / installed app
 
 ### Toepferscheibe
@@ -394,7 +394,7 @@ Local `game-*` repos without a hub card: `game-kontrollgruppe` (no playable code
 Reference implementations:
 
 - **game-barrel-shooter**: mobile bar and orbit pad (`#mob-bar`, `#cam-pad`), reload button `#reload-btn` (⟳) plus `.hint-reload`, `manifest.webmanifest`, `icons/icon-192.png` and `icon-512.png`, `theme-color`.
-- **game-rhyflitzer**: touch controls (#535); manifest, icons and reload button (game-rhyflitzer#1076, PR#1079); iPhone home-screen hint game-rhyflitzer#1080.
+- **game-rhyflitzer**: touch controls (#535); manifest, icons and reload button (game-rhyflitzer#1076, PR#1079); iPhone home-screen hint (game-rhyflitzer#1080, PR#1081: `iosinstall.js`, `shouldShowIosHint`).
 
 Platform notes:
 
