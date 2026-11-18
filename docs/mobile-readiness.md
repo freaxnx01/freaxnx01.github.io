@@ -8,18 +8,20 @@ Source of truth is the hub list (`index.html`, 45 games: 43 on freax.games, rhyf
 
 Legend: touch `yes` = dedicated touch controls, `tap` = click-only UI that works by tapping, `no` = keyboard/mouse only. Manifest/reload/iOS hint are `yes` only when found in the code.
 
+**A game is mobile-ready only when all four points below are met**: touch steering/UI, installable (manifest, 192/512 + maskable icons, apple-touch-icon, theme-color), iPhone home-screen hint, reload in fullscreen. Until then it stays a mobile candidate, even if touch already works.
+
 | Game | Status | Touch | Manifest | Reload | iOS hint |
 |---|---|---|---|---|---|
-| [Barrel Shooter](https://barrel-shooter.freax.games/) | mobile-ready | yes | yes | yes | no |
-| [Brickfall](https://brickfall.freax.games/) | mobile-ready | yes | no | no | no |
-| [Cluck And Load](https://cluck-and-load.freax.games/) | mobile-ready | yes | no | no | no |
-| [Fruit Frenzy](https://fruit-frenzy.freax.games/) | mobile-ready | yes | no | no | no |
-| [Gem Cascade](https://gem-cascade.freax.games/) | mobile-ready | yes | no | no | no |
-| [Kit Racer](https://kit-racer.freax.games/) | mobile-ready | yes | no | no | no |
-| [Maze Muncher](https://maze-muncher.freax.games/) | mobile-ready | yes | no | no | no |
-| [Nibbles](https://nibbles.freax.games/) | mobile-ready | yes | no | no | no |
+| [Barrel Shooter](https://barrel-shooter.freax.games/) | mobile candidate | yes | yes | yes | no |
+| [Brickfall](https://brickfall.freax.games/) | mobile candidate | yes | no | no | no |
+| [Cluck And Load](https://cluck-and-load.freax.games/) | mobile candidate | yes | no | no | no |
+| [Fruit Frenzy](https://fruit-frenzy.freax.games/) | mobile candidate | yes | no | no | no |
+| [Gem Cascade](https://gem-cascade.freax.games/) | mobile candidate | yes | no | no | no |
+| [Kit Racer](https://kit-racer.freax.games/) | mobile candidate | yes | no | no | no |
+| [Maze Muncher](https://maze-muncher.freax.games/) | mobile candidate | yes | no | no | no |
+| [Nibbles](https://nibbles.freax.games/) | mobile candidate | yes | no | no | no |
 | [Rhyflitzer](https://rhyflitzer.ch/) | mobile-ready | yes | yes | yes | yes |
-| [Toepferscheibe](https://toepferscheibe.freax.games/) | mobile-ready | yes | no | no | yes |
+| [Toepferscheibe](https://toepferscheibe.freax.games/) | mobile candidate | yes | no | no | yes |
 | [Acronym Quiz](https://acronym-quiz.freax.games/) | mobile candidate | tap | no | no | no |
 | [Beach Buggy Racer](https://beach-buggy-racer.freax.games/) | mobile candidate | no | no | no | no |
 | [Bmx Beach Jam](https://bmx-beach-jam.freax.games/) | mobile candidate | no | no | no | no |
@@ -56,17 +58,17 @@ Legend: touch `yes` = dedicated touch controls, `tap` = click-only UI that works
 | [Voxel Sandbox](https://voxel-sandbox.freax.games/) | not a candidate | no | no | no | no |
 | Dogwash (external, julia-hase) | unclear | ? | ? | ? | ? |
 
-Counts: 10 mobile-ready, 24 mobile candidate, 10 not a candidate, plus Dogwash (external repo, not inspected).
+Counts: 1 mobile-ready, 33 mobile candidate, 10 not a candidate, plus Dogwash (external repo, not inspected).
 
 On the hub, every **mobile-ready** game's card carries `data-mobile="true"` in `index.html`: it gets the 📱 MOBILE tag and shows up under the „📱 Mobile only“ filter. When a game becomes mobile-ready, add the attribute to its card.
 
 ## Todo per game
 
-Only mobile-ready and candidate games. Item 1 is checked once steering/UI works on touch (code level, not phone-tested); the other three are checked only when found in the code.
+Only mobile-ready and candidate games; the candidates with working touch come first. Item 1 is checked once steering/UI works on touch (code level, not phone-tested); the other three are checked only when found in the code.
 
 ### Barrel Shooter
 
-_mobile-ready._ Reference: touch pad, mobile bar, reload button. No iOS hint, no maskable icon.
+_mobile candidate (touch works)._ Reference: touch pad, mobile bar, reload button. No iOS hint, no maskable icon.
 
 - [x] Make steering/UI mobile-ready
 - [ ] Add what's needed for "App installieren" (manifest, 192/512 + maskable icons, apple-touch-icon, theme-color)
@@ -75,7 +77,7 @@ _mobile-ready._ Reference: touch pad, mobile bar, reload button. No iOS hint, no
 
 ### Brickfall
 
-_mobile-ready._ Paddle follows touchmove; text hints still say mouse/keys.
+_mobile candidate (touch works)._ Paddle follows touchmove; text hints still say mouse/keys.
 
 - [x] Make steering/UI mobile-ready
 - [ ] Add what's needed for "App installieren" (manifest, 192/512 + maskable icons, apple-touch-icon, theme-color)
@@ -84,7 +86,7 @@ _mobile-ready._ Paddle follows touchmove; text hints still say mouse/keys.
 
 ### Cluck And Load
 
-_mobile-ready._ Moorhuhn-style tap to shoot (touchstart/touchmove on the canvas); machine-gun hold fire and weapon switching may be awkward. Phone test needed.
+_mobile candidate (touch works)._ Moorhuhn-style tap to shoot (touchstart/touchmove on the canvas); machine-gun hold fire and weapon switching may be awkward. Phone test needed.
 
 - [x] Make steering/UI mobile-ready
 - [ ] Add what's needed for "App installieren" (manifest, 192/512 + maskable icons, apple-touch-icon, theme-color)
@@ -93,7 +95,7 @@ _mobile-ready._ Moorhuhn-style tap to shoot (touchstart/touchmove on the canvas)
 
 ### Fruit Frenzy
 
-_mobile-ready._ Pointer-drag to aim, tap to drop; canvas scales to viewport.
+_mobile candidate (touch works)._ Pointer-drag to aim, tap to drop; canvas scales to viewport.
 
 - [x] Make steering/UI mobile-ready
 - [ ] Add what's needed for "App installieren" (manifest, 192/512 + maskable icons, apple-touch-icon, theme-color)
@@ -102,7 +104,7 @@ _mobile-ready._ Pointer-drag to aim, tap to drop; canvas scales to viewport.
 
 ### Gem Cascade
 
-_mobile-ready._ Match-3 with pointer down/move/up swipes on the canvas.
+_mobile candidate (touch works)._ Match-3 with pointer down/move/up swipes on the canvas.
 
 - [x] Make steering/UI mobile-ready
 - [ ] Add what's needed for "App installieren" (manifest, 192/512 + maskable icons, apple-touch-icon, theme-color)
@@ -111,7 +113,7 @@ _mobile-ready._ Match-3 with pointer down/move/up swipes on the canvas.
 
 ### Kit Racer
 
-_mobile-ready._ Controls.js adds on-screen touch controls when `ontouchstart` exists. Phone test needed.
+_mobile candidate (touch works)._ Controls.js adds on-screen touch controls when `ontouchstart` exists. Phone test needed.
 
 - [x] Make steering/UI mobile-ready
 - [ ] Add what's needed for "App installieren" (manifest, 192/512 + maskable icons, apple-touch-icon, theme-color)
@@ -120,7 +122,7 @@ _mobile-ready._ Controls.js adds on-screen touch controls when `ontouchstart` ex
 
 ### Maze Muncher
 
-_mobile-ready._ Shows an on-screen touch control when `(pointer: coarse)`. No viewport meta in the template.
+_mobile candidate (touch works)._ Shows an on-screen touch control when `(pointer: coarse)`. No viewport meta in the template.
 
 - [x] Make steering/UI mobile-ready
 - [ ] Add what's needed for "App installieren" (manifest, 192/512 + maskable icons, apple-touch-icon, theme-color)
@@ -129,7 +131,7 @@ _mobile-ready._ Shows an on-screen touch control when `(pointer: coarse)`. No vi
 
 ### Nibbles
 
-_mobile-ready._ Swipe steering via touchstart/touchmove on the canvas.
+_mobile candidate (touch works)._ Swipe steering via touchstart/touchmove on the canvas.
 
 - [x] Make steering/UI mobile-ready
 - [ ] Add what's needed for "App installieren" (manifest, 192/512 + maskable icons, apple-touch-icon, theme-color)
@@ -147,7 +149,7 @@ _mobile-ready._ Touch controls (#535). Manifest, icons and reload button landed 
 
 ### Toepferscheibe
 
-_mobile-ready._ Built for an iPad (finger shaping); has an iOS home-screen hint text. No manifest or reload button.
+_mobile candidate (touch works)._ Built for an iPad (finger shaping); has an iOS home-screen hint text. No manifest or reload button.
 
 - [x] Make steering/UI mobile-ready
 - [ ] Add what's needed for "App installieren" (manifest, 192/512 + maskable icons, apple-touch-icon, theme-color)
