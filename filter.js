@@ -13,6 +13,7 @@
   var count = panel.querySelector(".hub__count");
   var searchInput = document.getElementById("game-search");
   var kidsToggle = document.getElementById("kids-toggle");
+  var mobileToggle = document.getElementById("mobile-toggle");
   var retroToggle = document.getElementById("retro-toggle");
   var inspiredToggle = document.getElementById("inspired-toggle");
   var randomBtn = document.getElementById("random-game-btn");
@@ -23,6 +24,7 @@
   var category = "all";
   var search = "";
   var kidsOnly = false;
+  var mobileOnly = false;
   var retroOnly = false;
   var inspiredOnly = false;
 
@@ -52,6 +54,11 @@
     return !kidsOnly || cardKids === true;
   }
 
+  // Does a card satisfy the active Mobile-only filter?
+  function matchesMobile(cardMobile) {
+    return !mobileOnly || cardMobile === true;
+  }
+
   // Does a card satisfy the active Retro/Clones-only filter?
   function matchesRetro(cardRetro) {
     return !retroOnly || cardRetro === true;
@@ -64,10 +71,11 @@
 
   // WIP games are hidden under every other primary mode and shown only
   // when "Under construction" itself is the active filter.
-  function matches(modes, cardCategory, title, cardKids, cardWip, cardRetro, cardInspired) {
-    if (primary === "wip") return cardWip && matchesCategory(cardCategory) && matchesSearch(title) && matchesKids(cardKids) && matchesRetro(cardRetro) && matchesInspired(cardInspired);
+  function matches(modes, cardCategory, title, cardKids, cardWip, cardRetro, cardInspired, cardMobile) {
+    var common = matchesCategory(cardCategory) && matchesSearch(title) && matchesKids(cardKids) && matchesMobile(cardMobile) && matchesRetro(cardRetro) && matchesInspired(cardInspired);
+    if (primary === "wip") return cardWip && common;
     if (cardWip) return false;
-    return matchesMode(modes) && matchesCategory(cardCategory) && matchesSearch(title) && matchesKids(cardKids) && matchesRetro(cardRetro) && matchesInspired(cardInspired);
+    return matchesMode(modes) && common;
   }
 
   function apply() {
@@ -81,7 +89,8 @@
       var cardWip = card.hasAttribute("data-wip");
       var cardRetro = card.hasAttribute("data-retro");
       var cardInspired = card.hasAttribute("data-original-title");
-      var show = matches(modes, cardCategory, title, cardKids, cardWip, cardRetro, cardInspired);
+      var cardMobile = card.hasAttribute("data-mobile");
+      var show = matches(modes, cardCategory, title, cardKids, cardWip, cardRetro, cardInspired, cardMobile);
       if (show) {
         visible++;
         card.classList.remove("card--hidden");
@@ -177,6 +186,15 @@
     });
   }
 
+  if (mobileToggle) {
+    mobileToggle.addEventListener("click", function () {
+      mobileOnly = !mobileOnly;
+      mobileToggle.classList.toggle("is-active", mobileOnly);
+      mobileToggle.setAttribute("aria-pressed", mobileOnly ? "true" : "false");
+      apply();
+    });
+  }
+
   if (retroToggle) {
     retroToggle.addEventListener("click", function () {
       retroOnly = !retroOnly;
@@ -266,6 +284,20 @@
     });
   }
   markNewBadges();
+
+  // Mark cards flagged data-mobile (status "mobile-ready" in
+  // docs/mobile-readiness.md) with a MOBILE tag, top right on the thumbnail.
+  function markMobileBadges() {
+    cards.forEach(function (card) {
+      if (!card.hasAttribute("data-mobile")) return;
+      if (card.querySelector(".badge--mobile")) return;
+      var badge = document.createElement("span");
+      badge.className = "badge badge--mobile";
+      badge.textContent = "📱 MOBILE";
+      card.insertBefore(badge, card.firstChild);
+    });
+  }
+  markMobileBadges();
 
   if (searchInput) {
     document.addEventListener("keydown", function (e) {
