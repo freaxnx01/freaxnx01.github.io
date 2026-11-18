@@ -23,8 +23,10 @@ Every card also gets a short path `freax.games/<name>/`, a redirect stub generat
 `python3 scripts/make_short_links.py`. Rerun it after adding or removing a card and
 commit the stubs with the card.
 
-Cards of mobile-ready games (see `docs/mobile-readiness.md`) carry `data-mobile="true"`:
-`filter.js` adds the 📱 MOBILE tag and the „📱 Mobile only“ filter uses it.
+Cards of mobile-ready games carry `data-mobile="true"`:
+`filter.js` adds the 📱 MOBILE tag and the „📱 Mobile only“ filter uses it. A game is
+mobile-ready only when all four points in `docs/mobile-readiness.md` are met (touch,
+installable, iPhone hint, reload); touch alone is not enough.
 
 ## YouTube
 
