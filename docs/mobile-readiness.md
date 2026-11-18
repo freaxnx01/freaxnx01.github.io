@@ -58,6 +58,8 @@ Legend: touch `yes` = dedicated touch controls, `tap` = click-only UI that works
 
 Counts: 10 mobile-ready, 24 mobile candidate, 10 not a candidate, plus Dogwash (external repo, not inspected).
 
+On the hub, every **mobile-ready** game's card carries `data-mobile="true"` in `index.html`: it gets the 📱 MOBILE tag and shows up under the „📱 Mobile only“ filter. When a game becomes mobile-ready, add the attribute to its card.
+
 ## Todo per game
 
 Only mobile-ready and candidate games. Item 1 is checked once steering/UI works on touch (code level, not phone-tested); the other three are checked only when found in the code.
