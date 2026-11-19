@@ -348,6 +348,48 @@ body {
 }
 .card__play:hover { filter: brightness(1.1); }
 
+/* Featured: the cards marked data-featured, large, above the filters */
+.featured { margin: 0 0 2.5rem; }
+.featured[hidden] { display: none; }
+.featured__title {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 0.9rem;
+}
+.featured__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.25rem;
+}
+.card--featured {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent), 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+.card--featured .card__title { font-size: 1.35rem; }
+.card--featured .card__desc { font-size: 0.95rem; }
+.card--featured .card__play {
+  align-self: stretch;
+  text-align: center;
+  font-size: 1.05rem;
+  padding: 0.75rem 1rem;
+}
+/* Phones: one swipeable row instead of three screens of stacked cards */
+@media (max-width: 700px) {
+  .featured__grid {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 82%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 0.5rem;
+  }
+  .card--featured { scroll-snap-align: start; }
+  .card--featured:hover { transform: none; }
+}
+
 /* Lightbox */
 .lightbox {
   position: fixed;
