@@ -27,6 +27,12 @@
       <p>A handful of finished browser games — card games, tank battles, physics shooters and retro clones. Click a screenshot to enlarge, or hit Play to jump straight in.</p>
     </header>
 
+    <!-- Featured: filled by featured.js from the cards marked data-featured="1|2|3" (order) -->
+    <section class="featured" id="featured" aria-labelledby="featured-title" hidden>
+      <h2 class="featured__title" id="featured-title">★ Featured</h2>
+      <div class="featured__grid"></div>
+    </section>
+
     <div class="hub__filters" data-filters>
       <div class="filter-row filter-row--search">
         <input type="search" id="game-search" class="search-input" placeholder="Search games…" aria-label="Search games by name">
@@ -87,7 +93,7 @@
         </div>
       </article>
 
-      <article class="card" data-modes="solo" data-category="racing" data-added="2026-09-30" data-kids="true" data-retro="true" data-original-title="Midtown Madness" data-original-url="https://en.wikipedia.org/wiki/Midtown_Madness" data-original-screenshot="https://en.wikipedia.org/wiki/File:Midtown_madness_screenshot.jpg" data-mobile="true">
+      <article class="card" data-modes="solo" data-category="racing" data-added="2026-09-30" data-kids="true" data-retro="true" data-original-title="Midtown Madness" data-original-url="https://en.wikipedia.org/wiki/Midtown_Madness" data-original-screenshot="https://en.wikipedia.org/wiki/File:Midtown_madness_screenshot.jpg" data-mobile="true" data-featured="1">
         <img class="card__thumb" src="assets/game-rhyflitzer-icon.png" alt="Rhyflitzer – Map Madness screenshot"
              data-full="assets/game-rhyflitzer.png" data-title="Rhyflitzer – Map Madness" tabindex="0" role="button" aria-label="Enlarge Rhyflitzer – Map Madness screenshot">
         <div class="card__body">
@@ -378,7 +384,7 @@
         </div>
       </article>
 
-      <article class="card" data-modes="solo" data-category="shooter" data-added="2026-07-07" data-mobile="true">
+      <article class="card" data-modes="solo" data-category="shooter" data-added="2026-07-07" data-mobile="true" data-featured="2">
         <img class="card__thumb" src="assets/game-barrel-shooter-icon.png" alt="Barrel Blast screenshot"
              data-full="assets/game-barrel-shooter.png" data-title="Barrel Blast" tabindex="0" role="button" aria-label="Enlarge Barrel Blast screenshot">
         <div class="card__body">
@@ -652,7 +658,7 @@
         </div>
       </article>
 
-      <article class="card" data-modes="solo p2p" data-category="card" data-added="2026-07-07" data-kids="true">
+      <article class="card" data-modes="solo p2p" data-category="card" data-added="2026-07-07" data-kids="true" data-featured="3">
         <img class="card__thumb" src="assets/game-tschau-sepp-icon.png" alt="Tschau Sepp screenshot"
              data-full="assets/game-tschau-sepp.png" data-title="Tschau Sepp" tabindex="0" role="button" aria-label="Enlarge Tschau Sepp screenshot">
         <div class="card__body">
@@ -688,6 +694,7 @@
     <div class="lightbox__caption"></div>
   </div>
 
+  <script src="featured.js"></script>
   <script src="lightbox.js"></script>
   <script src="filter.js"></script>
 </body>

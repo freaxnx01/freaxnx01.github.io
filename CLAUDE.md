@@ -23,6 +23,10 @@ Every card also gets a short path `freax.games/<name>/`, a redirect stub generat
 `python3 scripts/make_short_links.py`. Rerun it after adding or removing a card and
 commit the stubs with the card.
 
+The **Featured** row above the filters shows copies of the cards marked
+`data-featured="1|2|3"` (the number is the order); `featured.js` builds it, and it
+hides while a search or filter is active. Change the picks by moving the attribute.
+
 Cards of mobile-ready games carry `data-mobile="true"`:
 `filter.js` adds the 📱 MOBILE tag and the „📱 Mobile only“ filter uses it. A game is
 mobile-ready only when all four points in `docs/mobile-readiness.md` are met (touch,

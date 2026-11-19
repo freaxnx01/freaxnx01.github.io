@@ -17,6 +17,9 @@
   var retroToggle = document.getElementById("retro-toggle");
   var inspiredToggle = document.getElementById("inspired-toggle");
   var randomBtn = document.getElementById("random-game-btn");
+  var featured = document.getElementById("featured");
+  // Grid cards plus their Featured copies: both get the NEW/MOBILE tags.
+  var taggedCards = Array.prototype.slice.call(document.querySelectorAll(".card"));
 
   // Current selection. primary: all | solo | mp. sub applies only when primary === "mp".
   var primary = "all";
@@ -111,6 +114,11 @@
     }
     if (randomBtn) {
       randomBtn.disabled = visible === 0;
+    }
+    // Featured shows only on the unfiltered view, so search results start at the top.
+    if (featured && featured.querySelector(".card")) {
+      featured.hidden = primary !== "all" || category !== "all" || search !== "" ||
+        kidsOnly || mobileOnly || retroOnly || inspiredOnly;
     }
   }
 
@@ -269,7 +277,7 @@
   var NEW_WINDOW_DAYS = 14;
   function markNewBadges() {
     var now = Date.now();
-    cards.forEach(function (card) {
+    taggedCards.forEach(function (card) {
       var added = card.getAttribute("data-added");
       if (!added) return;
       var addedTime = new Date(added + "T00:00:00Z").getTime();
@@ -288,7 +296,7 @@
   // Mark cards flagged data-mobile (status "mobile-ready" in
   // docs/mobile-readiness.md) with a MOBILE tag, top right on the thumbnail.
   function markMobileBadges() {
-    cards.forEach(function (card) {
+    taggedCards.forEach(function (card) {
       if (!card.hasAttribute("data-mobile")) return;
       if (card.querySelector(".badge--mobile")) return;
       var badge = document.createElement("span");
