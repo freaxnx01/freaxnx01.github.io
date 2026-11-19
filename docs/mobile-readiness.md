@@ -12,7 +12,7 @@ Legend: touch `yes` = dedicated touch controls, `tap` = click-only UI that works
 
 | Game | Status | Touch | Manifest | Reload | iOS hint |
 |---|---|---|---|---|---|
-| [Barrel Shooter](https://barrel-shooter.freax.games/) | mobile candidate | yes | yes | yes | no |
+| [Barrel Shooter](https://barrel-shooter.freax.games/) | mobile-ready | yes | yes | yes | yes |
 | [Brickfall](https://brickfall.freax.games/) | mobile candidate | yes | no | no | no |
 | [Cluck And Load](https://cluck-and-load.freax.games/) | mobile candidate | yes | no | no | no |
 | [Fruit Frenzy](https://fruit-frenzy.freax.games/) | mobile candidate | yes | no | no | no |
@@ -58,7 +58,7 @@ Legend: touch `yes` = dedicated touch controls, `tap` = click-only UI that works
 | [Voxel Sandbox](https://voxel-sandbox.freax.games/) | not a candidate | no | no | no | no |
 | Dogwash (external, julia-hase) | unclear | ? | ? | ? | ? |
 
-Counts: 1 mobile-ready, 33 mobile candidate, 10 not a candidate, plus Dogwash (external repo, not inspected).
+Counts: 2 mobile-ready, 32 mobile candidate, 10 not a candidate, plus Dogwash (external repo, not inspected).
 
 On the hub, every **mobile-ready** game's card carries `data-mobile="true"` in `index.html`: it gets the 📱 MOBILE tag and shows up under the „📱 Mobile only“ filter. When a game becomes mobile-ready, add the attribute to its card.
 
@@ -68,11 +68,11 @@ Only mobile-ready and candidate games; the candidates with working touch come fi
 
 ### Barrel Shooter
 
-_mobile candidate (touch works)._ Reference: touch pad, mobile bar, reload button. No iOS hint, no maskable icon.
+_mobile-ready._ Touch pad, mobile bar, reload button (game-barrel-shooter#46), manifest with maskable icon and iPhone hint (game-barrel-shooter#50, PR#53).
 
 - [x] Make steering/UI mobile-ready
-- [ ] Add what's needed for "App installieren" (manifest, 192/512 + maskable icons, apple-touch-icon, theme-color)
-- [ ] iPhone hint for adding to the home screen ("Teilen → Zum Home-Bildschirm") — game-barrel-shooter#50
+- [x] Add what's needed for "App installieren" (manifest, 192/512 + maskable icons, apple-touch-icon, theme-color)
+- [x] iPhone hint for adding to the home screen ("Teilen → Zum Home-Bildschirm") — game-barrel-shooter#50
 - [x] Ability to reload when in fullscreen / installed app
 
 ### Brickfall
