@@ -31,14 +31,62 @@ body {
 
 .hub__header { margin-bottom: 2.5rem; }
 
-.hub__header h1 {
-  font-family: var(--mono);
-  font-size: clamp(1.8rem, 5vw, 2.8rem);
-  letter-spacing: 0.02em;
-  margin: 0 0 0.5rem;
+.hub__brandbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+  margin: 0 0 1rem;
 }
 
-.hub__header h1 .accent { color: var(--accent); }
+.hub__brand {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.25rem;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.hub__logo { display: block; line-height: 0; }
+
+.hub__logo img {
+  display: block;
+  height: clamp(40px, 6vw, 56px);
+  width: auto;
+}
+
+.hub__tagline {
+  font-family: var(--mono);
+  font-size: clamp(0.85rem, 2vw, 1rem);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--text-dim);
+}
+
+.hub__yt {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-card);
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.hub__yt svg { color: #ff3b3b; }
+
+.hub__yt:hover,
+.hub__yt:focus-visible {
+  border-color: #ff3b3b;
+  background: var(--bg-card-hover);
+}
 
 .hub__header p {
   color: var(--text-dim);
